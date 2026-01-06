@@ -1,0 +1,19 @@
+# Keshet React Client
+
+Minimal Vite + React front end that connects to the Laravel API (`server`) and renders the department landing screen shown in the mock.
+
+## Getting started
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Set the API base URL in `.env`:
+
+```
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+Then open the URL Vite prints (default `http://localhost:5173`).
