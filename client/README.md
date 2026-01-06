@@ -12,7 +12,7 @@ npm run dev
 
 Add the provided logo as `client/public/logo.png` (replace the placeholder).  
 
-Set the API base URL in `.env`:
+Set the API base URL in `.env` (production default is `https://qclient.iqdesk.xyz/server/api`):
 
 ```
 VITE_API_BASE_URL=http://localhost:8000/api
