@@ -63,6 +63,21 @@ body {
   color: #4a4a4a;
 }
 
+.branch-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  margin-bottom: 10px;
+  color: #666;
+  font-size: 15px;
+}
+
+.branch-name {
+  font-weight: 600;
+  color: #303030;
+}
+
 .search-wrapper {
   background: #fbfbfb;
   border-radius: 4px;
@@ -83,6 +98,17 @@ body {
 
 .search-input::placeholder {
   color: #b0b0b0;
+}
+
+.helper-text {
+  margin: 8px 2px 0;
+  text-align: right;
+  color: #777;
+  font-size: 14px;
+}
+
+.helper-text.error-text {
+  color: #b13030;
 }
 
 .list-card {
