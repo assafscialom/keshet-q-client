@@ -25,7 +25,8 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    // Send admins to Voyager dashboard after login
+    protected $redirectTo = '/admin';
 
     /**
      * Create a new controller instance.
