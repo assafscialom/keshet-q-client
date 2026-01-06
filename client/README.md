@@ -10,6 +10,8 @@ npm install
 npm run dev
 ```
 
+Add the provided logo as `client/public/logo.png` (replace the placeholder).  
+
 Set the API base URL in `.env`:
 
 ```

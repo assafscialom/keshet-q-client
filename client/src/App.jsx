@@ -31,7 +31,7 @@ export default function App() {
     <div className="page">
       <header className="hero-card">
         <div className="hero-logo">
-          <div className="logo-placeholder">לוגו</div>
+          <img src="/logo.png" alt="Keshet Taamim" className="logo-img" />
         </div>
         <div className="hero-content">
           <h1 className="hero-title">מחלקה</h1>
