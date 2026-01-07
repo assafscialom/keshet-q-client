@@ -894,35 +894,45 @@ input {
     linear-gradient(
       90deg,
       #111 0,
-      #111 4px,
-      transparent 4px,
-      transparent 7px,
-      #111 7px,
-      #111 9px,
-      transparent 9px,
-      transparent 12px,
+      #111 3px,
+      transparent 3px,
+      transparent 6px,
+      #111 6px,
+      #111 8px,
+      transparent 8px,
+      transparent 11px,
+      #111 11px,
       #111 12px,
-      #111 13px,
-      transparent 13px,
-      transparent 16px,
-      #111 16px,
-      #111 18px,
-      transparent 18px,
-      transparent 21px,
-      #111 21px,
-      #111 23px,
-      transparent 23px,
-      transparent 26px,
-      #111 26px,
-      #111 29px,
-      transparent 29px,
-      transparent 32px,
-      #111 32px,
+      transparent 12px,
+      transparent 15px,
+      #111 15px,
+      #111 17px,
+      transparent 17px,
+      transparent 20px,
+      #111 20px,
+      #111 22px,
+      transparent 22px,
+      transparent 25px,
+      #111 25px,
+      #111 28px,
+      transparent 28px,
+      transparent 31px,
+      #111 31px,
       #111 34px,
       transparent 34px
     ),
     #fff;
   cursor: pointer;
+}
+
+.barcode-button::after {
+  content: "228";
+  display: block;
+  margin-top: 18px;
+  font-size: 8px;
+  font-weight: 700;
+  color: #111;
+  text-align: center;
 }
 
 .cashier-search input {

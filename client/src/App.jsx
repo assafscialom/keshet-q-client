@@ -650,6 +650,7 @@ export default function App() {
               </button>
             </div>
             <div className="barcode-label">סריקת ברקוד</div>
+            <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
             <div className="search-results">
               {productResults.map((product) => (
                 <div key={product.product_id} className="search-result-card">
@@ -1119,7 +1120,7 @@ export default function App() {
                 🔍
               </button>
             </div>
-            <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
+            <div className="cashier-hint">חיפוש הזמנה</div>
           </aside>
         </div>
       </div>
