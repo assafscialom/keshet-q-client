@@ -625,7 +625,7 @@ export default function App() {
         <div className="cashier-shell">
           <aside className="cashier-side">
             <div className="cashier-logo">
-              <img src="/logo.png" alt="Keshet Taamim" />
+              <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
             <div className="cashier-search">
               <button
@@ -820,7 +820,7 @@ export default function App() {
               </div>
               <div className="modal-body">
                 <div className="receipt-logo">
-                  <img src="/logo.png" alt="Keshet Taamim" />
+                  <img src="/keshet.png" alt="Keshet Taamim" />
                 </div>
                 <div className="receipt-number">№{receiptNumber}</div>
                 <div className="receipt-subtitle">
@@ -904,7 +904,7 @@ export default function App() {
           </section>
           <aside className="cashier-side sorter-side">
             <div className="cashier-logo">
-              <img src="/logo.png" alt="Keshet Taamim" />
+              <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
             <div className="sorter-pill">סדר פריטים</div>
             {sorterLoading && <div className="helper-text">טוען הזמנות...</div>}
@@ -941,7 +941,7 @@ export default function App() {
             </button>
           )}
           <div className="board-logo">
-            <img src="/logo.png" alt="Keshet Taamim" />
+            <img src="/keshet.png" alt="Keshet Taamim" />
           </div>
           <h1 className="board-title">מחלקה</h1>
         </header>
@@ -1101,7 +1101,7 @@ export default function App() {
           </section>
           <aside className="cashier-side">
             <div className="cashier-logo">
-              <img src="/logo.png" alt="Keshet Taamim" />
+              <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
             <div className="cashier-search">
               <input
@@ -1124,7 +1124,7 @@ export default function App() {
     <div className="page">
       <header className="hero-card">
         <div className="hero-logo">
-          <img src="/logo.png" alt="Keshet Taamim" className="logo-img" />
+          <img src="/keshet.png" alt="Keshet Taamim" className="logo-img" />
         </div>
         <div className="hero-content">
           <h1 className="hero-title">מחלקה</h1>
