@@ -548,7 +548,9 @@ export default function App() {
       const response = await apiClient.get(
         `https://qserver.keshet-teamim.co.il/api/products/${productId}/cut-types`,
       );
-      setCutTypeOptionsByProductId((prev) => ({ ...prev, [productId]: response?.data ?? [] }));
+      const raw = response?.data ?? [];
+      const normalized = Array.isArray(raw) ? raw : raw?.data ?? [];
+      setCutTypeOptionsByProductId((prev) => ({ ...prev, [productId]: normalized }));
     } catch (err) {
       console.error('Failed to load cut types', err);
       setCutTypeErrorByProductId((prev) => ({
