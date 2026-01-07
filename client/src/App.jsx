@@ -16,9 +16,15 @@ const isCashierRoute = (pathname) => pathname.startsWith('/cashier');
 const isCashierNewRoute = (pathname) => pathname.startsWith('/cashier-new');
 const isSorterRoute = (pathname) => pathname.startsWith('/sorter');
 const isBoardRoute = (pathname) => pathname.startsWith('/board/branch/');
+const isBoardOrdersRoute = (pathname) => pathname.includes('/board/branch/') && pathname.includes('/department/');
 
 const findBoardBranchId = (pathname) => {
   const match = pathname.match(/board\/branch\/(\d+)/i);
+  return match ? match[1] : null;
+};
+
+const findBoardDepartmentId = (pathname) => {
+  const match = pathname.match(/department\/(\d+)/i);
   return match ? match[1] : null;
 };
 
@@ -83,6 +89,7 @@ export default function App() {
 
   const branchId = useMemo(() => findBranchId(route), [route]);
   const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
+  const boardRouteDepartmentId = useMemo(() => findBoardDepartmentId(route), [route]);
   const cashierDepartmentId = selectedDepartmentId || getStoredDepartmentId();
   const cashierBranchId = branchId || getStoredBranchId();
 
@@ -235,6 +242,13 @@ export default function App() {
     };
   }, [boardBranchId, route]);
 
+  useEffect(() => {
+    if (!isBoardOrdersRoute(route)) return;
+    if (!boardRouteDepartmentId) return;
+    setBoardDepartmentId(Number(boardRouteDepartmentId));
+    handleBoardShowOrders(Number(boardRouteDepartmentId), true);
+  }, [boardRouteDepartmentId, route]);
+
   const fetchSorterOrders = async (cancelSignal) => {
     setSorterLoading(true);
     setSorterError('');
@@ -312,17 +326,20 @@ export default function App() {
     }
   };
 
-  const handleBoardShowOrders = async () => {
-    if (!boardDepartmentId) return;
+  const handleBoardShowOrders = async (departmentId = boardDepartmentId, skipNav = false) => {
+    if (!departmentId) return;
+    if (!skipNav) {
+      navigate(`/board/branch/${boardBranchId}/department/${departmentId}`);
+    }
     setBoardLoading(true);
     setBoardError('');
 
     try {
       const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/lists/all/${boardDepartmentId}`,
+        `https://qserver.keshet-teamim.co.il/api/orders/lists/all/${departmentId}`,
       );
       const data = response?.data ?? {};
-      const entry = data[boardDepartmentId] ?? data[String(boardDepartmentId)] ?? {};
+      const entry = data[departmentId] ?? data[String(departmentId)] ?? {};
       setBoardOrders({
         progress: entry.progress ?? [],
         done: entry.done ?? [],
@@ -898,44 +915,55 @@ export default function App() {
   }
 
   if (isBoardRoute(route)) {
+    const showOrdersOnly = isBoardOrdersRoute(route);
+    const activeDepartmentId = showOrdersOnly ? boardRouteDepartmentId : boardDepartmentId;
     return (
       <div className="board-page">
         <header className="board-header">
+          {showOrdersOnly && (
+            <button type="button" className="back-button" onClick={() => navigate(`/board/branch/${boardBranchId}`)}>
+              ↩
+            </button>
+          )}
           <div className="board-logo">
             <img src="/logo.png" alt="Keshet Taamim" />
           </div>
           <h1 className="board-title">מחלקה</h1>
         </header>
         <div className="board-shell">
-          <section className="board-card">
-            <div className="board-search">
-              <input placeholder="חיפוש" />
-            </div>
-            <div className="board-list">
-              {boardLoading && <div className="helper-text">טוען מחלקות...</div>}
-              {boardError && <div className="helper-text error-text">{boardError}</div>}
-              {!boardLoading &&
-                !boardError &&
-                boardDepartments.map((dept) => (
-                  <button
-                    key={dept.id}
-                    type="button"
-                    className={`board-row${boardDepartmentId === dept.id ? ' selected' : ''}`}
-                    onClick={() => setBoardDepartmentId(dept.id)}
-                  >
-                    {dept.name}
-                  </button>
-                ))}
-            </div>
-          </section>
-          <button
-            type="button"
-            className="board-action"
-            onClick={handleBoardShowOrders}
-            disabled={!boardDepartmentId || boardLoading}
-          >
-            צג הזמנות
-          </button>
+          {!showOrdersOnly && (
+            <>
+              <section className="board-card">
+                <div className="board-search">
+                  <input placeholder="חיפוש" />
+                </div>
+                <div className="board-list">
+                  {boardLoading && <div className="helper-text">טוען מחלקות...</div>}
+                  {boardError && <div className="helper-text error-text">{boardError}</div>}
+                  {!boardLoading &&
+                    !boardError &&
+                    boardDepartments.map((dept) => (
+                      <button
+                        key={dept.id}
+                        type="button"
+                        className={`board-row${boardDepartmentId === dept.id ? ' selected' : ''}`}
+                        onClick={() => setBoardDepartmentId(dept.id)}
+                      >
+                        {dept.name}
+                      </button>
+                    ))}
+                </div>
+              </section>
+              <button
+                type="button"
+                className="board-action"
+                onClick={handleBoardShowOrders}
+                disabled={!boardDepartmentId || boardLoading}
+              >
+                צג הזמנות
+              </button>
+            </>
+          )}
           <section className="board-orders">
             <div className="board-column wide">
               <div className="board-column-title">בתהליך</div>
