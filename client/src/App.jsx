@@ -14,6 +14,7 @@ const findBranchId = (pathname) => {
 
 const isCashierRoute = (pathname) => pathname.startsWith('/cashier');
 const isCashierNewRoute = (pathname) => pathname.startsWith('/cashier-new');
+const isSorterRoute = (pathname) => pathname.startsWith('/sorter');
 
 const getStoredDepartmentId = () => {
   if (typeof window === 'undefined') return null;
@@ -50,6 +51,16 @@ export default function App() {
   const [receiptNumber, setReceiptNumber] = useState(1);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [openQuantityForId, setOpenQuantityForId] = useState(null);
+  const [sorterOrders, setSorterOrders] = useState([]);
+  const [sorterLoading, setSorterLoading] = useState(false);
+  const [sorterError, setSorterError] = useState('');
+  const [sorterSelectedOrderId, setSorterSelectedOrderId] = useState(null);
+  const [sorterItems, setSorterItems] = useState([]);
+  const [sorterItemsLoading, setSorterItemsLoading] = useState(false);
+  const [sorterItemsError, setSorterItemsError] = useState('');
+  const [sorterUpdateLoading, setSorterUpdateLoading] = useState(false);
+  const [sorterUpdateError, setSorterUpdateError] = useState('');
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
@@ -72,7 +83,7 @@ export default function App() {
   }, [route]);
 
   useEffect(() => {
-    if (isCashierRoute(route) || isCashierNewRoute(route)) return;
+    if (isCashierRoute(route) || isCashierNewRoute(route) || isSorterRoute(route)) return;
     if (!branchId) {
       setError('Branch id is missing from the URL.');
       return;
@@ -162,6 +173,83 @@ export default function App() {
     };
   }, [cashierDepartmentId, route]);
 
+  const fetchSorterOrders = async (cancelSignal) => {
+    setSorterLoading(true);
+    setSorterError('');
+
+    try {
+      const response = await apiClient.get(
+        `https://qserver.keshet-teamim.co.il/api/orders/lists/progress/${cashierDepartmentId}`,
+      );
+      if (cancelSignal?.cancelled) return;
+      setSorterOrders(response?.data ?? []);
+    } catch (err) {
+      if (cancelSignal?.cancelled) return;
+      console.error('Failed to load sorter orders', err);
+      setSorterError('Failed to load orders. Please try again.');
+    } finally {
+      if (!cancelSignal?.cancelled) {
+        setSorterLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isSorterRoute(route)) return;
+    if (!cashierDepartmentId) {
+      setSorterOrders([]);
+      setSorterSelectedOrderId(null);
+      setSorterItems([]);
+      return;
+    }
+
+    const cancelSignal = { cancelled: false };
+    fetchSorterOrders(cancelSignal);
+    const intervalId = window.setInterval(() => fetchSorterOrders(cancelSignal), 10000);
+    return () => {
+      cancelSignal.cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [cashierDepartmentId, route]);
+
+  const handleSorterOrderClick = async (orderId) => {
+    setSorterSelectedOrderId(orderId);
+    setSorterItems([]);
+    setSorterItemsLoading(true);
+    setSorterItemsError('');
+
+    try {
+      const response = await apiClient.get(
+        `https://qserver.keshet-teamim.co.il/api/orders/${orderId}/products`,
+      );
+      setSorterItems(response?.data?.products ?? []);
+    } catch (err) {
+      console.error('Failed to load sorter order items', err);
+      setSorterItemsError('Failed to load order items. Please try again.');
+    } finally {
+      setSorterItemsLoading(false);
+    }
+  };
+
+  const handleSorterCollected = async () => {
+    if (!sorterSelectedOrderId) return;
+    setSorterUpdateLoading(true);
+    setSorterUpdateError('');
+
+    try {
+      await apiClient.patch(
+        `https://qserver.keshet-teamim.co.il/api/orders/${sorterSelectedOrderId}`,
+        { status_id: 2 },
+      );
+      await fetchSorterOrders();
+    } catch (err) {
+      console.error('Failed to update order status', err);
+      setSorterUpdateError('Failed to update order. Please try again.');
+    } finally {
+      setSorterUpdateLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
     if (!cashierBranchId || !cashierDepartmentId) {
@@ -240,6 +328,12 @@ export default function App() {
     setRoute(nextPath);
   };
 
+  const navigateHome = () => {
+    const storedBranchId = getStoredBranchId();
+    const homePath = storedBranchId ? `/branch/${storedBranchId}` : '/';
+    navigate(homePath);
+  };
+
   const handleDepartmentSelect = (departmentId) => {
     setSelectedDepartmentId(departmentId);
     window.localStorage.setItem('selectedDepartmentId', departmentId);
@@ -252,22 +346,12 @@ export default function App() {
       navigate('/cashier');
       return;
     }
-    if (shortcutId !== 'sorter') return;
-
-    setOrdersLoading(true);
-    setOrdersError('');
-
-    try {
-      const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/lists/archive/${selectedDepartmentId}`,
-      );
-      console.log('Archive orders response', response?.data);
-    } catch (err) {
-      console.error('Failed to load archive orders', err);
-      setOrdersError('Failed to load archive orders. Please try again.');
-    } finally {
-      setOrdersLoading(false);
+    if (shortcutId === 'sorter') {
+      navigate('/sorter');
+      return;
     }
+
+    return;
   };
 
   const filtered = useMemo(() => {
@@ -330,6 +414,11 @@ export default function App() {
     setOrderItems((prev) => prev.filter((item) => item.product_id !== productId));
   };
 
+  const handlePresetQuantity = (productId, value) => {
+    handleQuantityChange(productId, String(value));
+    setOpenQuantityForId(null);
+  };
+
   const handleCreateOrder = async () => {
     if (!customerName.trim() || orderItems.length === 0 || !cashierDepartmentId) return;
     setCreateLoading(true);
@@ -369,7 +458,7 @@ export default function App() {
 
   const handleReceiptClose = () => {
     setShowReceipt(false);
-    navigate('/');
+    navigateHome();
   };
 
   const handleReceiptPrint = () => {
@@ -384,7 +473,7 @@ export default function App() {
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate('/')}
+            onClick={navigateHome}
             aria-label="Back"
           >
             ↩
@@ -467,16 +556,33 @@ export default function App() {
                           />
                         </div>
                         <div>
-                          <input
-                            className="order-qty-input"
-                            type="text"
-                            list="qty-options"
-                            inputMode="numeric"
-                            value={product.quantity || 1}
-                            onChange={(event) =>
-                              handleQuantityChange(product.product_id, event.target.value)
-                            }
-                          />
+                          <div className="order-qty-wrapper">
+                            <input
+                              className="order-qty-input"
+                              type="text"
+                              inputMode="numeric"
+                              value={product.quantity || 1}
+                              onChange={(event) =>
+                                handleQuantityChange(product.product_id, event.target.value)
+                              }
+                              onFocus={() => setOpenQuantityForId(product.product_id)}
+                              onClick={() => setOpenQuantityForId(product.product_id)}
+                            />
+                            {openQuantityForId === product.product_id && (
+                              <div className="order-qty-popover">
+                                {[100, 150, 200, 250, 300, 350, 400].map((qty) => (
+                                  <button
+                                    key={qty}
+                                    type="button"
+                                    className="order-qty-option"
+                                    onClick={() => handlePresetQuantity(product.product_id, qty)}
+                                  >
+                                    {qty}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div>{product.metric_type || '-'}</div>
                         <div>
@@ -495,15 +601,6 @@ export default function App() {
                 )}
               </div>
             </div>
-            <datalist id="qty-options">
-              <option value="100" />
-              <option value="150" />
-              <option value="200" />
-              <option value="250" />
-              <option value="300" />
-              <option value="350" />
-              <option value="400" />
-            </datalist>
             <div className="order-actions">
               <button
                 type="button"
@@ -576,6 +673,87 @@ export default function App() {
     );
   }
 
+  if (isSorterRoute(route)) {
+    return (
+      <div className="sorter-page">
+        <header className="cashier-header">
+          <button type="button" className="back-button" onClick={navigateHome} aria-label="Back">
+            ↩
+          </button>
+          <h1 className="cashier-title">סדר פריטים</h1>
+        </header>
+        <div className="cashier-shell">
+          <section className="cashier-main sorter-main">
+            <div className="order-table">
+              <div className="order-table-header">
+                <div>№</div>
+                <div>מקליט</div>
+                <div>שם</div>
+                <div>הערה</div>
+                <div>כמות</div>
+                <div>מדדים</div>
+                <div />
+              </div>
+              <div className="order-table-body">
+                {sorterItemsLoading && <div className="helper-text">טוען פריטים...</div>}
+                {sorterItemsError && <div className="helper-text error-text">{sorterItemsError}</div>}
+                {!sorterItemsLoading && !sorterItemsError && sorterItems.length === 0 && (
+                  <div className="helper-text">אין פריטים להצגה</div>
+                )}
+                {!sorterItemsLoading &&
+                  !sorterItemsError &&
+                  sorterItems.map((item, index) => (
+                    <div key={item.id || index} className="order-table-row">
+                      <div>{index + 1}</div>
+                      <div>{item.product_name?.sku || '-'}</div>
+                      <div>{item.product_name?.name || '-'}</div>
+                      <div>{item.comment || '-'}</div>
+                      <div>{item.quantity_in_order ?? '-'}</div>
+                      <div>{item.product_name?.metric_id || '-'}</div>
+                      <div />
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div className="sorter-actions">
+              <button
+                type="button"
+                className="sorter-collected-button"
+                onClick={handleSorterCollected}
+                disabled={!sorterSelectedOrderId || sorterUpdateLoading}
+              >
+                {sorterUpdateLoading ? 'מעדכן...' : 'נאסף'}
+              </button>
+              {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
+            </div>
+          </section>
+          <aside className="cashier-side sorter-side">
+            <div className="cashier-logo">
+              <img src="/logo.png" alt="Keshet Taamim" />
+            </div>
+            <div className="sorter-pill">סדר פריטים</div>
+            {sorterLoading && <div className="helper-text">טוען הזמנות...</div>}
+            {sorterError && <div className="helper-text error-text">{sorterError}</div>}
+            {!sorterLoading && !sorterError && (
+              <div className="sorter-list">
+                {sorterOrders.map((order) => (
+                  <button
+                    key={order.id}
+                    type="button"
+                    className="sorter-card"
+                    onClick={() => handleSorterOrderClick(order.id)}
+                  >
+                    #{order.order_number ?? order.id}
+                  </button>
+                ))}
+              </div>
+            )}
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
   if (isCashierRoute(route)) {
     const hasOrders = cashierOrders.length > 0;
     return (
@@ -584,7 +762,7 @@ export default function App() {
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate('/')}
+            onClick={navigateHome}
             aria-label="Back"
           >
             ↩
