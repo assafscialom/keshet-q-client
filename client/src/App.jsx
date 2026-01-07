@@ -36,7 +36,10 @@ export default function App() {
   const [cashierOrders, setCashierOrders] = useState([]);
   const [cashierLoading, setCashierLoading] = useState(false);
   const [cashierError, setCashierError] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [orderItemsById, setOrderItemsById] = useState({});
+  const [orderItemsLoadingById, setOrderItemsLoadingById] = useState({});
+  const [orderItemsErrorById, setOrderItemsErrorById] = useState({});
   const [productQuery, setProductQuery] = useState('');
   const [productResults, setProductResults] = useState([]);
   const [productLoading, setProductLoading] = useState(false);
@@ -123,7 +126,7 @@ export default function App() {
     if (!isCashierRoute(route)) return;
     if (!cashierDepartmentId) {
       setCashierOrders([]);
-      setSelectedOrder(null);
+      setExpandedOrderId(null);
       return;
     }
 
@@ -140,7 +143,7 @@ export default function App() {
         const data = response?.data?.data ?? [];
         setCashierOrders(data);
         if (data.length === 0) {
-          setSelectedOrder(null);
+          setExpandedOrderId(null);
         }
       } catch (err) {
         if (cancelled) return;
@@ -202,13 +205,34 @@ export default function App() {
     };
   }, [cashierBranchId, cashierDepartmentId, productQuery, route]);
 
-  const mockOrderItems = [
-    { id: 1, name: 'בקליק קבב בוקבינה', code: '201#', note: 'אין תגובה' },
-    { id: 2, name: 'סלמי מילאנו פרוס', code: '203#', note: 'אין תגובה' },
-    { id: 3, name: 'סרדליקה סבינה/סוסיסק', code: '206#', note: 'אין תגובה' },
-    { id: 4, name: 'פיין סלמי', code: '207#', note: 'אין תגובה' },
-    { id: 5, name: 'לשון דליבני', code: '208#', note: 'אין תגובה' },
-  ];
+  const toggleOrder = async (orderId) => {
+    if (expandedOrderId === orderId) {
+      setExpandedOrderId(null);
+      return;
+    }
+
+    setExpandedOrderId(orderId);
+    if (orderItemsById[orderId]) return;
+
+    setOrderItemsLoadingById((prev) => ({ ...prev, [orderId]: true }));
+    setOrderItemsErrorById((prev) => ({ ...prev, [orderId]: '' }));
+
+    try {
+      const response = await apiClient.get(
+        `https://qserver.keshet-teamim.co.il/api/orders/${orderId}/products`,
+      );
+      const products = response?.data?.products ?? [];
+      setOrderItemsById((prev) => ({ ...prev, [orderId]: products }));
+    } catch (err) {
+      console.error('Failed to load order items', err);
+      setOrderItemsErrorById((prev) => ({
+        ...prev,
+        [orderId]: 'Failed to load order items. Please try again.',
+      }));
+    } finally {
+      setOrderItemsLoadingById((prev) => ({ ...prev, [orderId]: false }));
+    }
+  };
 
   const navigate = (nextPath) => {
     if (nextPath === route) return;
@@ -539,50 +563,69 @@ export default function App() {
             <div className="cashier-main-content">
               {cashierLoading && <div className="helper-text">טוען הזמנות...</div>}
               {cashierError && <div className="helper-text error-text">{cashierError}</div>}
-              {!cashierLoading && !cashierError && !selectedOrder && hasOrders && (
+              {!cashierLoading && !cashierError && hasOrders && (
                 <div className="order-list">
                   {cashierOrders.map((order) => (
-                    <button
-                      key={order.id}
-                      type="button"
-                      className="order-card"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <div className="order-cancel">✕</div>
-                      <div className="order-number">
-                        #{order.order_number ?? order.id}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {!cashierLoading && !cashierError && selectedOrder && (
-                <div className="order-detail">
-                  <div className="order-detail-header">
-                    <div className="order-detail-title">
-                      הזמנה #{selectedOrder.order_number ?? selectedOrder.id}
-                    </div>
-                    <button
-                      type="button"
-                      className="order-detail-close"
-                      onClick={() => setSelectedOrder(null)}
-                    >
-                      סגירה / Закрыть
-                    </button>
-                  </div>
-                  <div className="order-detail-list">
-                    {mockOrderItems.map((item) => (
-                      <div key={item.id} className="order-detail-row">
-                        <div className="order-qty">{item.id}</div>
-                        <div className="order-item">
-                          <div className="order-item-title">
-                            {item.name} {item.code}
-                          </div>
-                          <div className="order-item-note">{item.note}</div>
+                    <div key={order.id} className="order-item">
+                      <button
+                        type="button"
+                        className="order-card"
+                        onClick={() => toggleOrder(order.id)}
+                      >
+                        <div className="order-cancel">✕</div>
+                        <div className="order-number">
+                          #{order.order_number ?? order.id}
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      </button>
+                      {expandedOrderId === order.id && (
+                        <div className="order-detail">
+                          <div className="order-detail-header">
+                            <div className="order-detail-title">
+                              הזמנה #{order.order_number ?? order.id}
+                            </div>
+                            <button
+                              type="button"
+                              className="order-detail-close"
+                              onClick={() => setExpandedOrderId(null)}
+                            >
+                              סגירה / Закрыть
+                            </button>
+                          </div>
+                          <div className="order-detail-list">
+                            {orderItemsLoadingById[order.id] && (
+                              <div className="helper-text">טוען פריטים...</div>
+                            )}
+                            {orderItemsErrorById[order.id] && (
+                              <div className="helper-text error-text">
+                                {orderItemsErrorById[order.id]}
+                              </div>
+                            )}
+                            {!orderItemsLoadingById[order.id] &&
+                              !orderItemsErrorById[order.id] &&
+                              (orderItemsById[order.id] || []).length === 0 && (
+                                <div className="helper-text">אין פריטים להצגה</div>
+                              )}
+                            {!orderItemsLoadingById[order.id] &&
+                              !orderItemsErrorById[order.id] &&
+                              (orderItemsById[order.id] || []).map((item, index) => (
+                                <div key={item.id || index} className="order-detail-row">
+                                  <div className="order-qty">{index + 1}</div>
+                                  <div className="order-item">
+                                    <div className="order-item-title">
+                                      {item.product_name?.name || item.product_name} #
+                                      {item.product_name?.sku}
+                                    </div>
+                                    <div className="order-item-note">
+                                      {item.comment || 'אין תגובה'}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
               {!cashierLoading && !cashierError && !hasOrders && (
