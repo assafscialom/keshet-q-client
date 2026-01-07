@@ -1177,4 +1177,37 @@ input {
     grid-template-columns: 32px 70px 1fr 1fr 110px 70px 50px 40px;
     font-size: 12px;
   }
+
+  .cashier-main-flat .order-table-header {
+    display: none;
+  }
+
+  .cashier-main-flat .order-table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .cashier-main-flat .order-table-row > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cashier-main-flat .order-table-row > div::before {
+    content: attr(data-label);
+    color: #888;
+    font-weight: 600;
+  }
+
+  .cashier-main-flat .order-qty-wrapper,
+  .cashier-main-flat .order-note-input,
+  .cashier-main-flat .order-cut-type-select {
+    width: 100%;
+  }
+
+  .cashier-main-flat .order-remove-button {
+    margin-inline-start: auto;
+  }
 }

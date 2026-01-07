@@ -692,10 +692,10 @@ export default function App() {
                     )}
                     {orderItems.map((product, index) => (
                       <div key={`${product.product_id}-${index}`} className="order-table-row">
-                        <div>{index + 1}</div>
-                        <div>{product.product_sku || '-'}</div>
-                        <div>{product.product_name}</div>
-                        <div>
+                        <div data-label="№">{index + 1}</div>
+                        <div data-label="מקליט">{product.product_sku || '-'}</div>
+                        <div data-label="שם">{product.product_name}</div>
+                        <div data-label="הערה">
                           <textarea
                             className="order-note-input"
                             value={product.note || ''}
@@ -705,7 +705,7 @@ export default function App() {
                             placeholder="הערה"
                           />
                         </div>
-                        <div>
+                        <div data-label="אופן חיתוך">
                           <select
                             className="order-cut-type-select"
                             value={product.cut_type_id || ''}
@@ -726,7 +726,7 @@ export default function App() {
                             </div>
                           )}
                         </div>
-                        <div>
+                        <div data-label="כמות">
                           <div className="order-qty-wrapper">
                             <input
                               className="order-qty-input"
@@ -763,8 +763,8 @@ export default function App() {
                             )}
                           </div>
                         </div>
-                        <div>{product.metric_type || '-'}</div>
-                        <div>
+                        <div data-label="מדדים">{product.metric_type || '-'}</div>
+                        <div data-label="פעולות">
                           <button
                             type="button"
                             className="order-remove-button"
