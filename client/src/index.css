@@ -947,6 +947,13 @@ input {
   font-size: 16px;
 }
 
+.barcode-label {
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .search-results {
   display: flex;
   flex-direction: column;

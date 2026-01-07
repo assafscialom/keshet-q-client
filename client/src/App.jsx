@@ -1104,15 +1104,23 @@ export default function App() {
               <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
             <div className="cashier-search">
+              <button
+                type="button"
+                className="barcode-button"
+                onClick={() => productSearchRef.current?.focus()}
+                aria-label="Barcode scan"
+              />
               <input
                 placeholder="נא להכניס מספר הזמנה לחיפוש"
                 value={cashierSearch}
                 onChange={(event) => setCashierSearch(event.target.value)}
+                ref={productSearchRef}
               />
               <button type="button" aria-label="Search">
                 🔍
               </button>
             </div>
+            <div className="barcode-label">סריקת ברקוד</div>
             <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
           </aside>
         </div>
