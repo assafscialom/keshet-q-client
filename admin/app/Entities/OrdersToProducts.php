@@ -16,9 +16,15 @@ class OrdersToProducts extends Model
         "order_id",
         "quantity_in_order",
         "comment",
+        "cut_type_id",
     ];
 
     public function product_name(){
         return $this->hasOne(Products::class,'id','product_id');
+    }
+
+    public function cutType()
+    {
+        return $this->hasOne(CutTypes::class, 'id', 'cut_type_id');
     }
 }

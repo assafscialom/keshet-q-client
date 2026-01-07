@@ -31,6 +31,7 @@ class CreateOrder extends FormRequest
             "products.*.product_id"=>"required",
             "products.*.quantity"=>"required",
             "products.*.comment"=>"max:254",
+            "products.*.cut_type_id"=>"nullable|integer|exists:cut_types,id",
             "customer_name"=>"max:254",
         ];
     }

@@ -66,7 +66,17 @@ class OrdersController extends Controller
             if (isset($product['comment'])) {
                 $comment = $product['comment'];
             }
-            OrdersToProducts::create(["order_id" => $order->id, 'product_id' => $product['product_id'], "comment" => $comment, "quantity_in_order" => $product['quantity']]);
+            $cutTypeId = null;
+            if (isset($product['cut_type_id'])) {
+                $cutTypeId = $product['cut_type_id'];
+            }
+            OrdersToProducts::create([
+                "order_id" => $order->id,
+                'product_id' => $product['product_id'],
+                "comment" => $comment,
+                "quantity_in_order" => $product['quantity'],
+                "cut_type_id" => $cutTypeId
+            ]);
         }
 
 //        try {

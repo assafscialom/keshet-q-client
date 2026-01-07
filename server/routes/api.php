@@ -50,6 +50,15 @@ $api->version('v1', function($api){
         $api->group(['prefix' => 'products'], function ($api) {
             $api->get('/{branch_id}/{department_id}', 'Api\Products\ProductsController@show');
             $api->get('search/{branch_id}/{department_id}', 'Api\Products\ProductsController@search');
+            $api->get('{product_id}/cut-types', 'Api\Products\ProductsController@cutTypes');
+            $api->post('{product_id}/cut-types', 'Api\Products\ProductsController@syncCutTypes');
+        });
+
+        $api->group(['prefix' => 'cut-types'], function ($api) {
+            $api->get('/', 'Api\Products\CutTypesController@index');
+            $api->post('/', 'Api\Products\CutTypesController@store');
+            $api->patch('/{id}', 'Api\Products\CutTypesController@update');
+            $api->delete('/{id}', 'Api\Products\CutTypesController@destroy');
         });
 
 
@@ -92,6 +101,5 @@ $api->version('v1', function($api){
     });
 
 });
-
 
 

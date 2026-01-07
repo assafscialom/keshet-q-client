@@ -21,4 +21,9 @@ class Products extends Model
         "branch_id",
         "metric_id"
     ];
+
+    public function cutTypes()
+    {
+        return $this->belongsToMany(CutTypes::class, 'product_cut_types', 'product_id', 'cut_type_id');
+    }
 }

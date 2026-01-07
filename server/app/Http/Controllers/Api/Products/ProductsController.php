@@ -93,4 +93,24 @@ class ProductsController extends Controller
             ->get();
         return $this->collection($data, new ProductsTransformer);
     }
+
+    public function cutTypes($product_id)
+    {
+        $product = $this->model->with('cutTypes')->findOrFail($product_id);
+        return response()->json($product->cutTypes);
+    }
+
+    public function syncCutTypes(Request $request, $product_id)
+    {
+        $request->validate([
+            'cut_type_ids' => 'array',
+            'cut_type_ids.*' => 'integer',
+        ]);
+
+        $product = $this->model->findOrFail($product_id);
+        $cutTypeIds = $request->input('cut_type_ids', []);
+        $product->cutTypes()->sync($cutTypeIds);
+
+        return response()->json($product->cutTypes);
+    }
 }

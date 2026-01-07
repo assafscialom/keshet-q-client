@@ -59,6 +59,9 @@ export default function App() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [openQuantityForId, setOpenQuantityForId] = useState(null);
+  const [cutTypeOptionsByProductId, setCutTypeOptionsByProductId] = useState({});
+  const [cutTypeLoadingByProductId, setCutTypeLoadingByProductId] = useState({});
+  const [cutTypeErrorByProductId, setCutTypeErrorByProductId] = useState({});
   const [sorterOrders, setSorterOrders] = useState([]);
   const [sorterLoading, setSorterLoading] = useState(false);
   const [sorterError, setSorterError] = useState('');
@@ -444,6 +447,7 @@ export default function App() {
   }, [departments, query]);
 
   const handleAddProduct = (product) => {
+    fetchCutTypes(product.product_id);
     setOrderItems((prev) => {
       const existing = prev.find((item) => item.product_id === product.product_id);
       if (existing) {
@@ -459,6 +463,7 @@ export default function App() {
           ...product,
           quantity: 1,
           note: '',
+          cut_type_id: null,
         },
       ];
     });
@@ -496,6 +501,35 @@ export default function App() {
     setOrderItems((prev) => prev.filter((item) => item.product_id !== productId));
   };
 
+  const handleCutTypeChange = (productId, value) => {
+    setOrderItems((prev) =>
+      prev.map((item) =>
+        item.product_id === productId ? { ...item, cut_type_id: value || null } : item,
+      ),
+    );
+  };
+
+  const fetchCutTypes = async (productId) => {
+    if (cutTypeOptionsByProductId[productId] || cutTypeLoadingByProductId[productId]) return;
+    setCutTypeLoadingByProductId((prev) => ({ ...prev, [productId]: true }));
+    setCutTypeErrorByProductId((prev) => ({ ...prev, [productId]: '' }));
+
+    try {
+      const response = await apiClient.get(
+        `https://qserver.keshet-teamim.co.il/api/products/${productId}/cut-types`,
+      );
+      setCutTypeOptionsByProductId((prev) => ({ ...prev, [productId]: response?.data ?? [] }));
+    } catch (err) {
+      console.error('Failed to load cut types', err);
+      setCutTypeErrorByProductId((prev) => ({
+        ...prev,
+        [productId]: 'Failed to load cut types.',
+      }));
+    } finally {
+      setCutTypeLoadingByProductId((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
   const handlePresetQuantity = (productId, value) => {
     handleQuantityChange(productId, String(value));
     setOpenQuantityForId(null);
@@ -516,6 +550,7 @@ export default function App() {
         product_name: item.product_name,
         product_sku: item.product_sku,
         quantity: item.quantity || 1,
+        cut_type_id: item.cut_type_id || null,
       })),
     };
 
@@ -602,13 +637,16 @@ export default function App() {
             </button>
           </aside>
           <section className="cashier-main cashier-main-flat">
-            <div className="order-table sorter-table">
+            <div className="order-table">
               <div className="order-table-header">
                 <div>№</div>
                 <div>מקליט</div>
                 <div>שם</div>
                 <div>הערה</div>
+                <div>אופן חיתוך</div>
                 <div>כמות</div>
+                <div>מדדים</div>
+                <div />
               </div>
               <div className="order-table-body">
                 {!cashierBranchId || !cashierDepartmentId ? (
@@ -634,6 +672,27 @@ export default function App() {
                             }
                             placeholder="הערה"
                           />
+                        </div>
+                        <div>
+                          <select
+                            className="order-cut-type-select"
+                            value={product.cut_type_id || ''}
+                            onChange={(event) =>
+                              handleCutTypeChange(product.product_id, event.target.value)
+                            }
+                          >
+                            <option value="">ללא</option>
+                            {(cutTypeOptionsByProductId[product.product_id] || []).map((cutType) => (
+                              <option key={cutType.id} value={cutType.id}>
+                                {cutType.name}
+                              </option>
+                            ))}
+                          </select>
+                          {cutTypeErrorByProductId[product.product_id] && (
+                            <div className="helper-text error-text">
+                              {cutTypeErrorByProductId[product.product_id]}
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="order-qty-wrapper">
@@ -772,15 +831,13 @@ export default function App() {
         </header>
         <div className="cashier-shell">
           <section className="cashier-main sorter-main">
-            <div className="order-table">
+            <div className="order-table sorter-table">
               <div className="order-table-header">
                 <div>№</div>
                 <div>מקליט</div>
                 <div>שם</div>
                 <div>הערה</div>
                 <div>כמות</div>
-                <div>מדדים</div>
-                <div />
               </div>
               <div className="order-table-body">
                 {sorterItemsLoading && <div className="helper-text">טוען פריטים...</div>}
