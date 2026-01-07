@@ -225,6 +225,141 @@ input {
   padding: 18px 20px 28px;
 }
 
+.board-page {
+  min-height: 100vh;
+  background: #ededed;
+  padding: 20px 28px 30px;
+}
+
+.board-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.board-logo img {
+  max-width: 140px;
+  max-height: 70px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.board-title {
+  margin: 0;
+  color: #6a6a6a;
+  font-size: 28px;
+}
+
+.board-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.board-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.board-search {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  margin-bottom: 12px;
+}
+
+.board-search input {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  text-align: right;
+}
+
+.board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-row {
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid #e2e2e2;
+  padding: 10px 4px;
+  text-align: right;
+  cursor: pointer;
+}
+
+.board-row.selected {
+  font-weight: 600;
+  color: #1f4ca0;
+}
+
+.board-action {
+  border: none;
+  background: #bdbdbd;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  justify-self: end;
+  min-width: 180px;
+}
+
+.board-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.board-orders {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.board-column {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  min-height: 300px;
+}
+
+.board-column-title {
+  color: #777;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.board-order-list {
+  display: grid;
+  gap: 12px;
+}
+
+.board-order-card {
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #4a4a4a;
+}
+
+.board-order-card.done {
+  background: #ededed;
+  color: #6a6a6a;
+}
+
 .cashier-header {
   display: grid;
   grid-template-columns: 48px 1fr 48px;
@@ -483,6 +618,21 @@ input {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
   z-index: 10;
   min-width: 220px;
+}
+
+.order-qty-close {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: #e6e6e6;
+  color: #555;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .order-qty-option {

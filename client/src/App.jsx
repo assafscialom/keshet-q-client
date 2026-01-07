@@ -15,6 +15,12 @@ const findBranchId = (pathname) => {
 const isCashierRoute = (pathname) => pathname.startsWith('/cashier');
 const isCashierNewRoute = (pathname) => pathname.startsWith('/cashier-new');
 const isSorterRoute = (pathname) => pathname.startsWith('/sorter');
+const isBoardRoute = (pathname) => pathname.startsWith('/board/branch/');
+
+const findBoardBranchId = (pathname) => {
+  const match = pathname.match(/board\/branch\/(\d+)/i);
+  return match ? match[1] : null;
+};
 
 const getStoredDepartmentId = () => {
   if (typeof window === 'undefined') return null;
@@ -61,12 +67,18 @@ export default function App() {
   const [sorterItemsError, setSorterItemsError] = useState('');
   const [sorterUpdateLoading, setSorterUpdateLoading] = useState(false);
   const [sorterUpdateError, setSorterUpdateError] = useState('');
+  const [boardDepartments, setBoardDepartments] = useState([]);
+  const [boardDepartmentId, setBoardDepartmentId] = useState(null);
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [boardError, setBoardError] = useState('');
+  const [boardOrders, setBoardOrders] = useState({ progress: [], done: [] });
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
   const homePathRef = useRef(window.location.pathname);
 
   const branchId = useMemo(() => findBranchId(route), [route]);
+  const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
   const cashierDepartmentId = selectedDepartmentId || getStoredDepartmentId();
   const cashierBranchId = branchId || getStoredBranchId();
 
@@ -83,7 +95,8 @@ export default function App() {
   }, [route]);
 
   useEffect(() => {
-    if (isCashierRoute(route) || isCashierNewRoute(route) || isSorterRoute(route)) return;
+    if (isCashierRoute(route) || isCashierNewRoute(route) || isSorterRoute(route) || isBoardRoute(route))
+      return;
     if (!branchId) {
       setError('Branch id is missing from the URL.');
       return;
@@ -173,6 +186,44 @@ export default function App() {
     };
   }, [cashierDepartmentId, route]);
 
+  useEffect(() => {
+    if (!isBoardRoute(route)) return;
+    if (!boardBranchId) {
+      setBoardDepartments([]);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchBoardDepartments = async () => {
+      setBoardLoading(true);
+      setBoardError('');
+
+      try {
+        const response = await apiClient.get(`/departments/${boardBranchId}`);
+        if (cancelled) return;
+        const items = response?.data?.data ?? [];
+        const normalized = items.map((item) => ({
+          id: item.department_id ?? item.id,
+          name: item.department_name ?? item.name ?? 'Department',
+        }));
+        setBoardDepartments(normalized);
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Failed to load board departments', err);
+        setBoardError('Failed to load departments. Please try again.');
+      } finally {
+        if (!cancelled) {
+          setBoardLoading(false);
+        }
+      }
+    };
+
+    fetchBoardDepartments();
+    return () => {
+      cancelled = true;
+    };
+  }, [boardBranchId, route]);
+
   const fetchSorterOrders = async (cancelSignal) => {
     setSorterLoading(true);
     setSorterError('');
@@ -247,6 +298,29 @@ export default function App() {
       setSorterUpdateError('Failed to update order. Please try again.');
     } finally {
       setSorterUpdateLoading(false);
+    }
+  };
+
+  const handleBoardShowOrders = async () => {
+    if (!boardDepartmentId) return;
+    setBoardLoading(true);
+    setBoardError('');
+
+    try {
+      const response = await apiClient.get(
+        `https://qserver.keshet-teamim.co.il/api/orders/lists/all/${boardDepartmentId}`,
+      );
+      const data = response?.data ?? {};
+      const entry = data[boardDepartmentId] ?? data[String(boardDepartmentId)] ?? {};
+      setBoardOrders({
+        progress: entry.progress ?? [],
+        done: entry.done ?? [],
+      });
+    } catch (err) {
+      console.error('Failed to load board orders', err);
+      setBoardError('Failed to load board orders. Please try again.');
+    } finally {
+      setBoardLoading(false);
     }
   };
 
@@ -570,6 +644,14 @@ export default function App() {
                             />
                             {openQuantityForId === product.product_id && (
                               <div className="order-qty-popover">
+                                <button
+                                  type="button"
+                                  className="order-qty-close"
+                                  onClick={() => setOpenQuantityForId(null)}
+                                  aria-label="Close quantity options"
+                                >
+                                  ✕
+                                </button>
                                 {[100, 150, 200, 250, 300, 350, 400].map((qty) => (
                                   <button
                                     key={qty}
@@ -749,6 +831,72 @@ export default function App() {
               </div>
             )}
           </aside>
+        </div>
+      </div>
+    );
+  }
+
+  if (isBoardRoute(route)) {
+    return (
+      <div className="board-page">
+        <header className="board-header">
+          <div className="board-logo">
+            <img src="/logo.png" alt="Keshet Taamim" />
+          </div>
+          <h1 className="board-title">מחלקה</h1>
+        </header>
+        <div className="board-shell">
+          <section className="board-card">
+            <div className="board-search">
+              <input placeholder="חיפוש" />
+            </div>
+            <div className="board-list">
+              {boardLoading && <div className="helper-text">טוען מחלקות...</div>}
+              {boardError && <div className="helper-text error-text">{boardError}</div>}
+              {!boardLoading &&
+                !boardError &&
+                boardDepartments.map((dept) => (
+                  <button
+                    key={dept.id}
+                    type="button"
+                    className={`board-row${boardDepartmentId === dept.id ? ' selected' : ''}`}
+                    onClick={() => setBoardDepartmentId(dept.id)}
+                  >
+                    {dept.name}
+                  </button>
+                ))}
+            </div>
+          </section>
+          <button
+            type="button"
+            className="board-action"
+            onClick={handleBoardShowOrders}
+            disabled={!boardDepartmentId || boardLoading}
+          >
+            צג הזמנות
+          </button>
+          <section className="board-orders">
+            <div className="board-column wide">
+              <div className="board-column-title">בתהליך</div>
+              <div className="board-order-list">
+                {boardOrders.progress.map((order) => (
+                  <div key={order.id} className="board-order-card">
+                    #{order.order_number ?? order.id}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="board-column narrow">
+              <div className="board-column-title">מוכן</div>
+              <div className="board-order-list">
+                {boardOrders.done.map((order) => (
+                  <div key={order.id} className="board-order-card done">
+                    #{order.order_number ?? order.id}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     );
