@@ -52,6 +52,20 @@ class DataTypesTableSeeder extends Seeder
                 'description'           => '',
             ])->save();
         }
+
+        $dataType = $this->dataType('slug', 'cut-types');
+        if (!$dataType->exists) {
+            $dataType->fill([
+                'name'                  => 'cut_types',
+                'display_name_singular' => 'אופן חיתוך',
+                'display_name_plural'   => 'אופני חיתוך',
+                'icon'                  => 'voyager-list',
+                'model_name'            => 'App\\Entities\\CutTypes',
+                'controller'            => '',
+                'generate_permissions'  => 1,
+                'description'           => '',
+            ])->save();
+        }
     }
 
     /**
