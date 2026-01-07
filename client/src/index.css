@@ -248,11 +248,13 @@ input {
 
 .cashier-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-areas: "main side";
   gap: 22px;
 }
 
 .cashier-main {
+  grid-area: main;
   display: flex;
   flex-direction: column;
   min-height: 70vh;
@@ -640,6 +642,7 @@ input {
 }
 
 .cashier-side {
+  grid-area: side;
   background: #fff;
   border-radius: 10px;
   padding: 18px;
@@ -763,6 +766,9 @@ input {
 
   .cashier-shell {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "side"
+      "main";
   }
 
   .cashier-main {
