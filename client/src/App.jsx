@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import apiClient from './api/client';
 import './index.css';
 
@@ -12,6 +12,19 @@ const findBranchId = (pathname) => {
   return match ? match[1] : null;
 };
 
+const isCashierRoute = (pathname) => pathname.startsWith('/cashier');
+const isCashierNewRoute = (pathname) => pathname.startsWith('/cashier-new');
+
+const getStoredDepartmentId = () => {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem('selectedDepartmentId');
+};
+
+const getStoredBranchId = () => {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem('selectedBranchId');
+};
+
 export default function App() {
   const [query, setQuery] = useState('');
   const [departments, setDepartments] = useState([]);
@@ -20,12 +33,37 @@ export default function App() {
   const [error, setError] = useState('');
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState('');
+  const [cashierOrders, setCashierOrders] = useState([]);
+  const [cashierLoading, setCashierLoading] = useState(false);
+  const [cashierError, setCashierError] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [productQuery, setProductQuery] = useState('');
+  const [productResults, setProductResults] = useState([]);
+  const [productLoading, setProductLoading] = useState(false);
+  const [productError, setProductError] = useState('');
+  const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
+  const homePathRef = useRef(window.location.pathname);
 
-  const branchId = useMemo(() => findBranchId(window.location.pathname), []);
+  const branchId = useMemo(() => findBranchId(route), [route]);
+  const cashierDepartmentId = selectedDepartmentId || getStoredDepartmentId();
+  const cashierBranchId = branchId || getStoredBranchId();
 
   useEffect(() => {
+    const handlePopState = () => setRoute(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (!isCashierRoute(route)) {
+      homePathRef.current = route;
+    }
+  }, [route]);
+
+  useEffect(() => {
+    if (isCashierRoute(route) || isCashierNewRoute(route)) return;
     if (!branchId) {
       setError('Branch id is missing from the URL.');
       return;
@@ -51,14 +89,16 @@ export default function App() {
           name: item.department_name ?? item.name ?? 'Department',
         }));
 
-      setDepartments(normalized);
-      if (!normalized.find((item) => item.id === selectedDepartmentId)) {
-        setSelectedDepartmentId(null);
-      }
-    } catch (err) {
-      if (cancelled) return;
-      console.error('Failed to load departments', err);
-      setError('Failed to load departments. Please try again.');
+        setDepartments(normalized);
+        window.localStorage.setItem('selectedBranchId', branchId);
+        if (!normalized.find((item) => item.id === selectedDepartmentId)) {
+          setSelectedDepartmentId(null);
+          window.localStorage.removeItem('selectedDepartmentId');
+        }
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Failed to load departments', err);
+        setError('Failed to load departments. Please try again.');
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -71,15 +111,117 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [branchId]);
+  }, [branchId, route, selectedDepartmentId]);
+
+  useEffect(() => {
+    if (!isCashierRoute(route)) return;
+    if (!cashierDepartmentId) {
+      setCashierOrders([]);
+      setSelectedOrder(null);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchCashierOrders = async () => {
+      setCashierLoading(true);
+      setCashierError('');
+
+      try {
+        const response = await apiClient.get(
+          `https://qserver.keshet-teamim.co.il/api/orders/lists/archive/${cashierDepartmentId}`,
+        );
+        if (cancelled) return;
+        const data = response?.data?.data ?? [];
+        setCashierOrders(data);
+        if (data.length === 0) {
+          setSelectedOrder(null);
+        }
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Failed to load cashier orders', err);
+        setCashierError('Failed to load orders. Please try again.');
+      } finally {
+        if (!cancelled) {
+          setCashierLoading(false);
+        }
+      }
+    };
+
+    fetchCashierOrders();
+    return () => {
+      cancelled = true;
+    };
+  }, [cashierDepartmentId, route]);
+
+  useEffect(() => {
+    if (!isCashierNewRoute(route)) return;
+    if (!cashierBranchId || !cashierDepartmentId) {
+      setProductResults([]);
+      return;
+    }
+
+    const trimmed = productQuery.trim();
+    if (!trimmed) {
+      setProductResults([]);
+      return;
+    }
+
+    let cancelled = false;
+    const timeout = window.setTimeout(async () => {
+      setProductLoading(true);
+      setProductError('');
+
+      try {
+        const response = await apiClient.get(
+          `https://qserver.keshet-teamim.co.il/api/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(
+            trimmed,
+          )}`,
+        );
+        if (cancelled) return;
+        setProductResults(response?.data?.data ?? []);
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Failed to search products', err);
+        setProductError('Failed to search products. Please try again.');
+      } finally {
+        if (!cancelled) {
+          setProductLoading(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [cashierBranchId, cashierDepartmentId, productQuery, route]);
+
+  const mockOrderItems = [
+    { id: 1, name: 'בקליק קבב בוקבינה', code: '201#', note: 'אין תגובה' },
+    { id: 2, name: 'סלמי מילאנו פרוס', code: '203#', note: 'אין תגובה' },
+    { id: 3, name: 'סרדליקה סבינה/סוסיסק', code: '206#', note: 'אין תגובה' },
+    { id: 4, name: 'פיין סלמי', code: '207#', note: 'אין תגובה' },
+    { id: 5, name: 'לשון דליבני', code: '208#', note: 'אין תגובה' },
+  ];
+
+  const navigate = (nextPath) => {
+    if (nextPath === route) return;
+    window.history.pushState({}, '', nextPath);
+    setRoute(nextPath);
+  };
 
   const handleDepartmentSelect = (departmentId) => {
     setSelectedDepartmentId(departmentId);
+    window.localStorage.setItem('selectedDepartmentId', departmentId);
     setOrdersError('');
   };
 
   const handleShortcutClick = async (shortcutId) => {
     if (!selectedDepartmentId) return;
+    if (shortcutId === 'cashier') {
+      navigate('/cashier');
+      return;
+    }
     if (shortcutId !== 'sorter') return;
 
     setOrdersLoading(true);
@@ -104,6 +246,175 @@ export default function App() {
       item.name.toLowerCase().includes(query.toLowerCase()),
     );
   }, [departments, query]);
+
+  if (isCashierNewRoute(route)) {
+    return (
+      <div className="cashier-page">
+        <header className="cashier-header">
+          <button
+            type="button"
+            className="back-button"
+            onClick={() => navigate('/cashier')}
+            aria-label="Back"
+          >
+            ↩
+          </button>
+          <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
+        </header>
+        <div className="cashier-shell">
+          <section className="cashier-main cashier-main-flat">
+            <div className="order-table">
+              <div className="order-table-header">
+                <div>№</div>
+                <div>מקליט</div>
+                <div>שם</div>
+                <div>הערה</div>
+                <div>כמות</div>
+                <div>מדדים</div>
+              </div>
+              <div className="order-table-body">
+                {!cashierBranchId || !cashierDepartmentId ? (
+                  <div className="helper-text error-text">
+                    נדרש לבחור סניף ומחלקה לפני חיפוש מוצרים.
+                  </div>
+                ) : (
+                  <>
+                {productLoading && <div className="helper-text">טוען מוצרים...</div>}
+                {productError && <div className="helper-text error-text">{productError}</div>}
+                {!productLoading && !productError && productResults.length === 0 && (
+                  <div className="helper-text">אין מוצרים להצגה</div>
+                )}
+                {!productLoading &&
+                  !productError &&
+                  productResults.map((product, index) => (
+                    <div key={`${product.product_id}-${index}`} className="order-table-row">
+                      <div>{index + 1}</div>
+                      <div>{product.product_sku || '-'}</div>
+                      <div>{product.product_name}</div>
+                      <div>{product.product_description || '-'}</div>
+                      <div>{product.product_quantity || '-'}</div>
+                      <div>{product.metric_type || '-'}</div>
+                    </div>
+                  ))}
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+          <aside className="cashier-side">
+            <div className="cashier-logo">
+              <img src="/logo.png" alt="Keshet Taamim" />
+            </div>
+            <div className="cashier-search">
+              <input
+                value={productQuery}
+                onChange={(event) => setProductQuery(event.target.value)}
+                placeholder="חיפוש"
+              />
+              <button type="button" aria-label="Search">
+                🔍
+              </button>
+            </div>
+            <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
+            <button type="button" className="cashier-secondary" onClick={() => navigate('/cashier')}>
+              היסטוריה / История
+            </button>
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
+  if (isCashierRoute(route)) {
+    const hasOrders = cashierOrders.length > 0;
+    return (
+      <div className="cashier-page">
+        <header className="cashier-header">
+          <button
+            type="button"
+            className="back-button"
+            onClick={() => navigate(homePathRef.current || '/')}
+            aria-label="Back"
+          >
+            ↩
+          </button>
+          <h1 className="cashier-title">היסטוריה / История</h1>
+        </header>
+        <div className="cashier-shell">
+          <section className="cashier-main">
+            <div className="cashier-main-content">
+              {cashierLoading && <div className="helper-text">טוען הזמנות...</div>}
+              {cashierError && <div className="helper-text error-text">{cashierError}</div>}
+              {!cashierLoading && !cashierError && !selectedOrder && hasOrders && (
+                <div className="order-list">
+                  {cashierOrders.map((order) => (
+                    <button
+                      key={order.id}
+                      type="button"
+                      className="order-card"
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <div className="order-cancel">✕</div>
+                      <div className="order-number">
+                        #{order.order_number ?? order.id}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!cashierLoading && !cashierError && selectedOrder && (
+                <div className="order-detail">
+                  <div className="order-detail-header">
+                    <div className="order-detail-title">
+                      הזמנה #{selectedOrder.order_number ?? selectedOrder.id}
+                    </div>
+                    <button
+                      type="button"
+                      className="order-detail-close"
+                      onClick={() => setSelectedOrder(null)}
+                    >
+                      סגירה / Закрыть
+                    </button>
+                  </div>
+                  <div className="order-detail-list">
+                    {mockOrderItems.map((item) => (
+                      <div key={item.id} className="order-detail-row">
+                        <div className="order-qty">{item.id}</div>
+                        <div className="order-item">
+                          <div className="order-item-title">
+                            {item.name} {item.code}
+                          </div>
+                          <div className="order-item-note">{item.note}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {!cashierLoading && !cashierError && !hasOrders && (
+                <div className="helper-text">אין הזמנות להצגה</div>
+              )}
+            </div>
+            <button type="button" className="cashier-primary" onClick={() => navigate('/cashier-new')}>
+              צור הזמנה חדשה / Создать заказ
+            </button>
+          </section>
+          <aside className="cashier-side">
+            <div className="cashier-logo">
+              <img src="/logo.png" alt="Keshet Taamim" />
+            </div>
+            <div className="cashier-search">
+              <input placeholder="נא להכניס מספר הזמנה לחיפוש" />
+              <button type="button" aria-label="Search">
+                🔍
+              </button>
+            </div>
+            <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
+          </aside>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
