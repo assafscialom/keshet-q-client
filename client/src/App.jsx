@@ -327,19 +327,23 @@ export default function App() {
   };
 
   const handleBoardShowOrders = async (departmentId = boardDepartmentId, skipNav = false) => {
-    if (!departmentId) return;
+    const normalizedId =
+      typeof departmentId === 'object' && departmentId !== null
+        ? departmentId.id
+        : departmentId;
+    if (!normalizedId) return;
     if (!skipNav) {
-      navigate(`/board/branch/${boardBranchId}/department/${departmentId}`);
+      navigate(`/board/branch/${boardBranchId}/department/${normalizedId}`);
     }
     setBoardLoading(true);
     setBoardError('');
 
     try {
       const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/lists/all/${departmentId}`,
+        `https://qserver.keshet-teamim.co.il/api/orders/lists/all/${normalizedId}`,
       );
       const data = response?.data ?? {};
-      const entry = data[departmentId] ?? data[String(departmentId)] ?? {};
+      const entry = data[normalizedId] ?? data[String(normalizedId)] ?? {};
       setBoardOrders({
         progress: entry.progress ?? [],
         done: entry.done ?? [],
