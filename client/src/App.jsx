@@ -333,7 +333,7 @@ export default function App() {
         : departmentId;
     if (!normalizedId) return;
     if (!skipNav) {
-      navigate(`/board/branch/${boardBranchId}/department/${normalizedId}`);
+      navigate(`/board/branch/${getBoardBranchIdSafe()}/department/${normalizedId}`);
     }
     setBoardLoading(true);
     setBoardError('');
@@ -439,6 +439,9 @@ export default function App() {
     const homePath = storedBranchId ? `/branch/${storedBranchId}` : '/';
     navigate(homePath);
   };
+
+  const getBoardBranchIdSafe = () =>
+    boardBranchId || findBoardBranchId(window.location.pathname) || getStoredBranchId();
 
   const handleDepartmentSelect = (departmentId) => {
     setSelectedDepartmentId(departmentId);
@@ -951,7 +954,7 @@ export default function App() {
                         key={dept.id}
                         type="button"
                         className={`board-row${boardDepartmentId === dept.id ? ' selected' : ''}`}
-                        onClick={() => setBoardDepartmentId(dept.id)}
+                        onClick={() => setBoardDepartmentId(Number(dept.id))}
                       >
                         {dept.name}
                       </button>
