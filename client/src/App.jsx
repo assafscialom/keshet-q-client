@@ -41,6 +41,12 @@ export default function App() {
   const [productResults, setProductResults] = useState([]);
   const [productLoading, setProductLoading] = useState(false);
   const [productError, setProductError] = useState('');
+  const [orderItems, setOrderItems] = useState([]);
+  const [customerName, setCustomerName] = useState('');
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptNumber, setReceiptNumber] = useState(1);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
@@ -247,6 +253,83 @@ export default function App() {
     );
   }, [departments, query]);
 
+  const handleAddProduct = (product) => {
+    setOrderItems((prev) => {
+      const existing = prev.find((item) => item.product_id === product.product_id);
+      if (existing) {
+        return prev.map((item) =>
+          item.product_id === product.product_id
+            ? { ...item, quantity: (item.quantity || 1) + 1 }
+            : item,
+        );
+      }
+      return [
+        ...prev,
+        {
+          ...product,
+          quantity: 1,
+          note: '',
+        },
+      ];
+    });
+  };
+
+  const handleQuantityChange = (productId, value) => {
+    const parsed = Number.parseInt(value, 10);
+    setOrderItems((prev) =>
+      prev.map((item) =>
+        item.product_id === productId
+          ? { ...item, quantity: Number.isNaN(parsed) || parsed < 1 ? 1 : parsed }
+          : item,
+      ),
+    );
+  };
+
+  const handleNoteChange = (productId, value) => {
+    setOrderItems((prev) =>
+      prev.map((item) =>
+        item.product_id === productId ? { ...item, note: value } : item,
+      ),
+    );
+  };
+
+  const handleRemoveItem = (productId) => {
+    setOrderItems((prev) => prev.filter((item) => item.product_id !== productId));
+  };
+
+  const handleCreateOrder = async () => {
+    if (!customerName.trim() || orderItems.length === 0 || !cashierDepartmentId) return;
+    setCreateLoading(true);
+    setCreateError('');
+
+    const payload = {
+      customer_name: customerName.trim(),
+      department_id: cashierDepartmentId,
+      products: orderItems.map((item) => ({
+        comment: item.note || '',
+        metric_type: item.metric_type || '',
+        product_id: item.product_id,
+        product_name: item.product_name,
+        product_sku: item.product_sku,
+        quantity: item.quantity || 1,
+      })),
+    };
+
+    try {
+      const response = await apiClient.post('https://qserver.keshet-teamim.co.il/api/orders', payload);
+      const orderNumber = response?.data?.order_number;
+      if (orderNumber) {
+        setReceiptNumber(orderNumber);
+      }
+      setShowReceipt(true);
+    } catch (err) {
+      console.error('Failed to create order', err);
+      setCreateError('Failed to create order. Please try again.');
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
   if (isCashierNewRoute(route)) {
     return (
       <div className="cashier-page">
@@ -271,6 +354,7 @@ export default function App() {
                 <div>הערה</div>
                 <div>כמות</div>
                 <div>מדדים</div>
+                <div />
               </div>
               <div className="order-table-body">
                 {!cashierBranchId || !cashierDepartmentId ? (
@@ -279,27 +363,72 @@ export default function App() {
                   </div>
                 ) : (
                   <>
-                {productLoading && <div className="helper-text">טוען מוצרים...</div>}
-                {productError && <div className="helper-text error-text">{productError}</div>}
-                {!productLoading && !productError && productResults.length === 0 && (
-                  <div className="helper-text">אין מוצרים להצגה</div>
-                )}
-                {!productLoading &&
-                  !productError &&
-                  productResults.map((product, index) => (
-                    <div key={`${product.product_id}-${index}`} className="order-table-row">
-                      <div>{index + 1}</div>
-                      <div>{product.product_sku || '-'}</div>
-                      <div>{product.product_name}</div>
-                      <div>{product.product_description || '-'}</div>
-                      <div>{product.product_quantity || '-'}</div>
-                      <div>{product.metric_type || '-'}</div>
-                    </div>
-                  ))}
+                    {orderItems.length === 0 && (
+                      <div className="helper-text">לא נבחרו מוצרים עדיין</div>
+                    )}
+                    {orderItems.map((product, index) => (
+                      <div key={`${product.product_id}-${index}`} className="order-table-row">
+                        <div>{index + 1}</div>
+                        <div>{product.product_sku || '-'}</div>
+                        <div>{product.product_name}</div>
+                        <div>
+                          <textarea
+                            className="order-note-input"
+                            value={product.note || ''}
+                            onChange={(event) =>
+                              handleNoteChange(product.product_id, event.target.value)
+                            }
+                            placeholder="הערה"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            className="order-qty-input"
+                            type="number"
+                            min="1"
+                            value={product.quantity || 1}
+                            onChange={(event) =>
+                              handleQuantityChange(product.product_id, event.target.value)
+                            }
+                          />
+                        </div>
+                        <div>{product.metric_type || '-'}</div>
+                        <div>
+                          <button
+                            type="button"
+                            className="order-remove-button"
+                            onClick={() => handleRemoveItem(product.product_id)}
+                            aria-label="Remove item"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </>
                 )}
               </div>
             </div>
+            <div className="order-actions">
+              <button
+                type="button"
+                className="order-create-button"
+                onClick={handleCreateOrder}
+                disabled={!customerName.trim() || orderItems.length === 0 || createLoading}
+              >
+                {createLoading ? 'יוצר הזמנה...' : '✓ צור הזמנה / Создать'}
+              </button>
+              <button type="button" className="order-cancel-button">
+                ✕ בטל / Отменить
+              </button>
+              <input
+                className="order-customer-input"
+                placeholder="שם פרטי ושם משפחה"
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+              />
+            </div>
+            {createError && <div className="helper-text error-text">{createError}</div>}
           </section>
           <aside className="cashier-side">
             <div className="cashier-logo">
@@ -309,18 +438,83 @@ export default function App() {
               <input
                 value={productQuery}
                 onChange={(event) => setProductQuery(event.target.value)}
-                placeholder="חיפוש"
+                placeholder="פרג"
               />
               <button type="button" aria-label="Search">
                 🔍
               </button>
             </div>
-            <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
+            <div className="search-results">
+              {productResults.map((product) => (
+                <div key={product.product_id} className="search-result-card">
+                  <button
+                    type="button"
+                    className="search-add-button"
+                    onClick={() => handleAddProduct(product)}
+                  >
+                    +
+                  </button>
+                  <div className="search-result-info">
+                    <div className="search-result-sku">#{product.product_sku}</div>
+                    <div className="search-result-name">{product.product_name}</div>
+                  </div>
+                </div>
+              ))}
+              {!productLoading && !productError && productResults.length === 0 && (
+                <div className="helper-text">אין מוצרים להצגה</div>
+              )}
+            </div>
             <button type="button" className="cashier-secondary" onClick={() => navigate('/cashier')}>
-              היסטוריה / История
+              🕘 היסטוריה / История
             </button>
           </aside>
         </div>
+        {showReceipt && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-card">
+              <div className="modal-header">
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={() => setShowReceipt(false)}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+                <button type="button" className="modal-print" onClick={() => window.print()}>
+                  הדפס / Печать
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="receipt-logo">
+                  <img src="/logo.png" alt="Keshet Taamim" />
+                </div>
+                <div className="receipt-number">№{receiptNumber}</div>
+                <div className="receipt-subtitle">
+                  {orderItems[0]?.department_name || 'מחלקה'}
+                </div>
+                <div className="receipt-items">
+                  {orderItems.map((item) => (
+                    <div key={item.product_id} className="receipt-row">
+                      <div className="receipt-row-main">
+                        <div className="receipt-sku">#{item.product_sku || '-'}</div>
+                        <div className="receipt-name">{item.product_name}</div>
+                      </div>
+                      <div className="receipt-row-meta">
+                        <div>כמות {item.quantity || 1}</div>
+                        <div>{item.note || 'אין תגובה'}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="receipt-footer">
+                  <div>{customerName}</div>
+                  <div>{new Date().toLocaleString('he-IL')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
