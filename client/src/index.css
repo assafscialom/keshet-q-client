@@ -591,6 +591,11 @@ input {
   color: #4a4a4a;
 }
 
+.sorter-table .order-table-header,
+.sorter-table .order-table-row {
+  grid-template-columns: 48px 120px 1fr 1fr 120px;
+}
+
 .order-qty-input {
   width: 100%;
   border: none;

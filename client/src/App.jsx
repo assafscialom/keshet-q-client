@@ -43,6 +43,7 @@ export default function App() {
   const [cashierOrders, setCashierOrders] = useState([]);
   const [cashierLoading, setCashierLoading] = useState(false);
   const [cashierError, setCashierError] = useState('');
+  const [cashierSearch, setCashierSearch] = useState('');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [orderItemsById, setOrderItemsById] = useState({});
   const [orderItemsLoadingById, setOrderItemsLoadingById] = useState({});
@@ -155,16 +156,19 @@ export default function App() {
     }
 
     let cancelled = false;
-    const fetchCashierOrders = async () => {
+    const fetchCashierOrders = async (searchTerm) => {
       setCashierLoading(true);
       setCashierError('');
 
       try {
-        const response = await apiClient.get(
-          `https://qserver.keshet-teamim.co.il/api/orders/lists/archive/${cashierDepartmentId}`,
-        );
+        const endpoint = searchTerm
+          ? `https://qserver.keshet-teamim.co.il/api/orders/search/${cashierDepartmentId}?search=${encodeURIComponent(
+              searchTerm,
+            )}`
+          : `https://qserver.keshet-teamim.co.il/api/orders/lists/archive/${cashierDepartmentId}`;
+        const response = await apiClient.get(endpoint);
         if (cancelled) return;
-        const data = response?.data?.data ?? [];
+        const data = response?.data?.data ?? response?.data ?? [];
         setCashierOrders(data);
         if (data.length === 0) {
           setExpandedOrderId(null);
@@ -180,11 +184,15 @@ export default function App() {
       }
     };
 
-    fetchCashierOrders();
+    const trimmed = cashierSearch.trim();
+    const timeout = window.setTimeout(() => {
+      fetchCashierOrders(trimmed);
+    }, 250);
     return () => {
       cancelled = true;
+      window.clearTimeout(timeout);
     };
-  }, [cashierDepartmentId, route]);
+  }, [cashierDepartmentId, route, cashierSearch]);
 
   useEffect(() => {
     if (!isBoardRoute(route)) return;
@@ -594,15 +602,13 @@ export default function App() {
             </button>
           </aside>
           <section className="cashier-main cashier-main-flat">
-            <div className="order-table">
+            <div className="order-table sorter-table">
               <div className="order-table-header">
                 <div>№</div>
                 <div>מקליט</div>
                 <div>שם</div>
                 <div>הערה</div>
                 <div>כמות</div>
-                <div>מדדים</div>
-                <div />
               </div>
               <div className="order-table-body">
                 {!cashierBranchId || !cashierDepartmentId ? (
@@ -791,8 +797,6 @@ export default function App() {
                       <div>{item.product_name?.name || '-'}</div>
                       <div>{item.comment || '-'}</div>
                       <div>{item.quantity_in_order ?? '-'}</div>
-                      <div>{item.product_name?.metric_id || '-'}</div>
-                      <div />
                     </div>
                   ))}
               </div>
@@ -1000,7 +1004,11 @@ export default function App() {
               <img src="/logo.png" alt="Keshet Taamim" />
             </div>
             <div className="cashier-search">
-              <input placeholder="נא להכניס מספר הזמנה לחיפוש" />
+              <input
+                placeholder="נא להכניס מספר הזמנה לחיפוש"
+                value={cashierSearch}
+                onChange={(event) => setCashierSearch(event.target.value)}
+              />
               <button type="button" aria-label="Search">
                 🔍
               </button>
