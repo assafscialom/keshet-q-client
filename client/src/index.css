@@ -589,6 +589,7 @@ input {
   border-radius: 8px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
   color: #4a4a4a;
+  align-items: center;
 }
 
 .sorter-table .order-table-header,
@@ -607,12 +608,15 @@ input {
 
 .order-qty-wrapper {
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .order-qty-popover {
   position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -622,7 +626,7 @@ input {
   padding: 8px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
   z-index: 10;
-  min-width: 220px;
+  min-width: 240px;
 }
 
 .order-qty-close {
