@@ -248,8 +248,8 @@ input {
 
 .cashier-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  grid-template-areas: "main side";
+  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-areas: "side main";
   gap: 22px;
 }
 
