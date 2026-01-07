@@ -9,7 +9,9 @@ return [
     | Here you can specify voyager user configs
     |
     */
-
+	'route' => [
+        'prefix' => env('VOYAGER_PREFIX', 'admin'),
+    ],
     'user' => [
         'add_default_role_on_register' => true,
         'default_role'                 => 'user',
@@ -19,7 +21,7 @@ return [
         // Otherwise `php artisan voyager:install` will fail with class not found error.
         'namespace'                    => null,
         'default_avatar'               => 'users/default.png',
-        'redirect'                     => '/admin',
+        'redirect' 					   => env('VOYAGER_PREFIX', '/admin'),
     ],
 
     /*

@@ -12,15 +12,15 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('voyager.dashboard');
 });
 
 
-Route::group(['prefix' => 'admin'], function () {
+Route::group(['prefix' => env('VOYAGER_PREFIX', '')], function () {
     Voyager::routes();
 });
 //export
-Route::group(['prefix' => 'admin','as' => 'voyager.', 'middleware' => 'admin.user'], function()
+Route::group(['prefix' => env('VOYAGER_PREFIX', ''), 'as' => 'voyager.', 'middleware' => 'admin.user'], function()
 {
     Route::get('export','ExportController@form')->name('export.form');
     Route::get('log/{hash?}',function(){
