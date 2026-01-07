@@ -961,14 +961,14 @@ export default function App() {
                     ))}
                 </div>
               </section>
-              <button
-                type="button"
-                className="board-action"
-                onClick={handleBoardShowOrders}
-                disabled={!boardDepartmentId || boardLoading}
-              >
-                צג הזמנות
-              </button>
+          <button
+            type="button"
+            className="board-action"
+            onClick={() => handleBoardShowOrders()}
+            disabled={!boardDepartmentId || boardLoading}
+          >
+            צג הזמנות
+          </button>
             </>
           )}
           <section className="board-orders">
