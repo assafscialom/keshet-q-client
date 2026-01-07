@@ -885,6 +885,46 @@ input {
   background: #fff;
 }
 
+.barcode-button {
+  width: 38px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #2b49a4;
+  background:
+    linear-gradient(
+      90deg,
+      #111 0,
+      #111 4px,
+      transparent 4px,
+      transparent 7px,
+      #111 7px,
+      #111 9px,
+      transparent 9px,
+      transparent 12px,
+      #111 12px,
+      #111 13px,
+      transparent 13px,
+      transparent 16px,
+      #111 16px,
+      #111 18px,
+      transparent 18px,
+      transparent 21px,
+      #111 21px,
+      #111 23px,
+      transparent 23px,
+      transparent 26px,
+      #111 26px,
+      #111 29px,
+      transparent 29px,
+      transparent 32px,
+      #111 32px,
+      #111 34px,
+      transparent 34px
+    ),
+    #fff;
+  cursor: pointer;
+}
+
 .cashier-search input {
   border: none;
   outline: none;

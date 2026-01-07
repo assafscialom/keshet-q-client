@@ -86,6 +86,7 @@ export default function App() {
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
   const homePathRef = useRef(window.location.pathname);
+  const productSearchRef = useRef(null);
 
   const branchId = useMemo(() => findBranchId(route), [route]);
   const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
@@ -627,10 +628,17 @@ export default function App() {
               <img src="/logo.png" alt="Keshet Taamim" />
             </div>
             <div className="cashier-search">
+              <button
+                type="button"
+                className="barcode-button"
+                onClick={() => productSearchRef.current?.focus()}
+                aria-label="Barcode scan"
+              />
               <input
                 value={productQuery}
                 onChange={(event) => setProductQuery(event.target.value)}
                 placeholder="פרג"
+                ref={productSearchRef}
               />
               <button type="button" aria-label="Search">
                 🔍
