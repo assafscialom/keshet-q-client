@@ -299,6 +299,15 @@ export default function App() {
   };
 
   const handleQuantityChange = (productId, value) => {
+    if (value === '') {
+      setOrderItems((prev) =>
+        prev.map((item) =>
+          item.product_id === productId ? { ...item, quantity: '' } : item,
+        ),
+      );
+      return;
+    }
+
     const parsed = Number.parseInt(value, 10);
     setOrderItems((prev) =>
       prev.map((item) =>
@@ -354,6 +363,16 @@ export default function App() {
     }
   };
 
+  const handleReceiptClose = () => {
+    setShowReceipt(false);
+    navigate(homePathRef.current || '/');
+  };
+
+  const handleReceiptPrint = () => {
+    window.print();
+    handleReceiptClose();
+  };
+
   if (isCashierNewRoute(route)) {
     return (
       <div className="cashier-page">
@@ -369,6 +388,44 @@ export default function App() {
           <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
         </header>
         <div className="cashier-shell">
+          <aside className="cashier-side">
+            <div className="cashier-logo">
+              <img src="/logo.png" alt="Keshet Taamim" />
+            </div>
+            <div className="cashier-search">
+              <input
+                value={productQuery}
+                onChange={(event) => setProductQuery(event.target.value)}
+                placeholder="פרג"
+              />
+              <button type="button" aria-label="Search">
+                🔍
+              </button>
+            </div>
+            <div className="search-results">
+              {productResults.map((product) => (
+                <div key={product.product_id} className="search-result-card">
+                  <button
+                    type="button"
+                    className="search-add-button"
+                    onClick={() => handleAddProduct(product)}
+                  >
+                    +
+                  </button>
+                  <div className="search-result-info">
+                    <div className="search-result-sku">#{product.product_sku}</div>
+                    <div className="search-result-name">{product.product_name}</div>
+                  </div>
+                </div>
+              ))}
+              {!productLoading && !productError && productResults.length === 0 && (
+                <div className="helper-text">אין מוצרים להצגה</div>
+              )}
+            </div>
+            <button type="button" className="cashier-secondary" onClick={() => navigate('/cashier')}>
+              🕘 היסטוריה / История
+            </button>
+          </aside>
           <section className="cashier-main cashier-main-flat">
             <div className="order-table">
               <div className="order-table-header">
@@ -410,6 +467,8 @@ export default function App() {
                             className="order-qty-input"
                             type="number"
                             min="1"
+                            list="qty-options"
+                            inputMode="numeric"
                             value={product.quantity || 1}
                             onChange={(event) =>
                               handleQuantityChange(product.product_id, event.target.value)
@@ -433,6 +492,15 @@ export default function App() {
                 )}
               </div>
             </div>
+            <datalist id="qty-options">
+              <option value="100" />
+              <option value="150" />
+              <option value="200" />
+              <option value="250" />
+              <option value="300" />
+              <option value="350" />
+              <option value="400" />
+            </datalist>
             <div className="order-actions">
               <button
                 type="button"
@@ -454,44 +522,6 @@ export default function App() {
             </div>
             {createError && <div className="helper-text error-text">{createError}</div>}
           </section>
-          <aside className="cashier-side">
-            <div className="cashier-logo">
-              <img src="/logo.png" alt="Keshet Taamim" />
-            </div>
-            <div className="cashier-search">
-              <input
-                value={productQuery}
-                onChange={(event) => setProductQuery(event.target.value)}
-                placeholder="פרג"
-              />
-              <button type="button" aria-label="Search">
-                🔍
-              </button>
-            </div>
-            <div className="search-results">
-              {productResults.map((product) => (
-                <div key={product.product_id} className="search-result-card">
-                  <button
-                    type="button"
-                    className="search-add-button"
-                    onClick={() => handleAddProduct(product)}
-                  >
-                    +
-                  </button>
-                  <div className="search-result-info">
-                    <div className="search-result-sku">#{product.product_sku}</div>
-                    <div className="search-result-name">{product.product_name}</div>
-                  </div>
-                </div>
-              ))}
-              {!productLoading && !productError && productResults.length === 0 && (
-                <div className="helper-text">אין מוצרים להצגה</div>
-              )}
-            </div>
-            <button type="button" className="cashier-secondary" onClick={() => navigate('/cashier')}>
-              🕘 היסטוריה / История
-            </button>
-          </aside>
         </div>
         {showReceipt && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
@@ -500,12 +530,12 @@ export default function App() {
                 <button
                   type="button"
                   className="modal-close"
-                  onClick={() => setShowReceipt(false)}
+                  onClick={handleReceiptClose}
                   aria-label="Close"
                 >
                   ✕
                 </button>
-                <button type="button" className="modal-print" onClick={() => window.print()}>
+                <button type="button" className="modal-print" onClick={handleReceiptPrint}>
                   הדפס / Печать
                 </button>
               </div>
@@ -526,7 +556,7 @@ export default function App() {
                       </div>
                       <div className="receipt-row-meta">
                         <div>כמות {item.quantity || 1}</div>
-                        <div>{item.note || 'אין תגובה'}</div>
+                        {item.note ? <div>{item.note}</div> : null}
                       </div>
                     </div>
                   ))}
