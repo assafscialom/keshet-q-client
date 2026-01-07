@@ -350,8 +350,12 @@ export default function App() {
 
     try {
       const response = await apiClient.post('https://qserver.keshet-teamim.co.il/api/orders', payload);
-      const orderNumber = response?.data?.order_number;
-      if (orderNumber) {
+      const orderNumber =
+        response?.data?.order_number ??
+        response?.data?.data?.order_number ??
+        response?.data?.id ??
+        response?.data?.data?.id;
+      if (orderNumber != null) {
         setReceiptNumber(orderNumber);
       }
       setShowReceipt(true);
@@ -365,7 +369,7 @@ export default function App() {
 
   const handleReceiptClose = () => {
     setShowReceipt(false);
-    navigate(homePathRef.current || '/');
+    navigate('/');
   };
 
   const handleReceiptPrint = () => {
@@ -380,7 +384,7 @@ export default function App() {
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate('/cashier')}
+            onClick={() => navigate('/')}
             aria-label="Back"
           >
             ↩
@@ -465,8 +469,7 @@ export default function App() {
                         <div>
                           <input
                             className="order-qty-input"
-                            type="number"
-                            min="1"
+                            type="text"
                             list="qty-options"
                             inputMode="numeric"
                             value={product.quantity || 1}
@@ -581,7 +584,7 @@ export default function App() {
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate(homePathRef.current || '/')}
+            onClick={() => navigate('/')}
             aria-label="Back"
           >
             ↩
