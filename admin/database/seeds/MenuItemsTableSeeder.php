@@ -180,14 +180,15 @@ class MenuItemsTableSeeder extends Seeder
             'url'     => '',
             'route'   => 'voyager.cut-types.index',
         ]);
-        if (!$menuItem->exists) {
-            $menuItem->fill([
-                'target'     => '_self',
-                'icon_class' => 'voyager-list',
-                'color'      => null,
-                'parent_id'  => null,
-                'order'      => 6,
-            ])->save();
-        }
+        $departmentsItem = MenuItem::where('menu_id', $menu->id)
+            ->where('route', 'voyager.departments.index')
+            ->first();
+        $menuItem->fill([
+            'target'     => '_self',
+            'icon_class' => 'voyager-list',
+            'color'      => null,
+            'parent_id'  => $departmentsItem ? $departmentsItem->parent_id : null,
+            'order'      => $departmentsItem ? $departmentsItem->order + 1 : 6,
+        ])->save();
     }
 }
