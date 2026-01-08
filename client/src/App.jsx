@@ -65,9 +65,9 @@ export default function App() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [openQuantityForId, setOpenQuantityForId] = useState(null);
-  const [cutTypeOptionsByProductId, setCutTypeOptionsByProductId] = useState({});
-  const [cutTypeLoadingByProductId, setCutTypeLoadingByProductId] = useState({});
-  const [cutTypeErrorByProductId, setCutTypeErrorByProductId] = useState({});
+  const [cutTypeOptions, setCutTypeOptions] = useState([]);
+  const [cutTypeLoading, setCutTypeLoading] = useState(false);
+  const [cutTypeError, setCutTypeError] = useState('');
   const [sorterOrders, setSorterOrders] = useState([]);
   const [sorterLoading, setSorterLoading] = useState(false);
   const [sorterError, setSorterError] = useState('');
@@ -405,6 +405,33 @@ export default function App() {
     };
   }, [cashierBranchId, cashierDepartmentId, productQuery, route]);
 
+  useEffect(() => {
+    if (!isCashierNewRoute(route)) return;
+    let cancelled = false;
+    const fetchCutTypes = async () => {
+      setCutTypeLoading(true);
+      setCutTypeError('');
+      try {
+        const response = await apiClient.get('https://qserver.keshet-teamim.co.il/api/cut-types');
+        if (cancelled) return;
+        setCutTypeOptions(Array.isArray(response?.data) ? response.data : response?.data?.data ?? []);
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Failed to load cut types', err);
+        setCutTypeError('Failed to load cut types.');
+      } finally {
+        if (!cancelled) {
+          setCutTypeLoading(false);
+        }
+      }
+    };
+
+    fetchCutTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [route]);
+
   const toggleOrder = async (orderId) => {
     if (expandedOrderId === orderId) {
       setExpandedOrderId(null);
@@ -477,7 +504,6 @@ export default function App() {
   }, [departments, query]);
 
   const handleAddProduct = (product) => {
-    fetchCutTypes(product.product_id);
     setOrderItems((prev) => {
       const existing = prev.find((item) => item.product_id === product.product_id);
       if (existing) {
@@ -537,29 +563,6 @@ export default function App() {
         item.product_id === productId ? { ...item, cut_type_id: value || null } : item,
       ),
     );
-  };
-
-  const fetchCutTypes = async (productId) => {
-    if (cutTypeOptionsByProductId[productId] || cutTypeLoadingByProductId[productId]) return;
-    setCutTypeLoadingByProductId((prev) => ({ ...prev, [productId]: true }));
-    setCutTypeErrorByProductId((prev) => ({ ...prev, [productId]: '' }));
-
-    try {
-      const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/products/${productId}/cut-types`,
-      );
-      const raw = response?.data ?? [];
-      const normalized = Array.isArray(raw) ? raw : raw?.data ?? [];
-      setCutTypeOptionsByProductId((prev) => ({ ...prev, [productId]: normalized }));
-    } catch (err) {
-      console.error('Failed to load cut types', err);
-      setCutTypeErrorByProductId((prev) => ({
-        ...prev,
-        [productId]: 'Failed to load cut types.',
-      }));
-    } finally {
-      setCutTypeLoadingByProductId((prev) => ({ ...prev, [productId]: false }));
-    }
   };
 
   const handlePresetQuantity = (productId, value) => {
@@ -723,15 +726,15 @@ export default function App() {
                             }
                           >
                             <option value="">ללא</option>
-                            {(cutTypeOptionsByProductId[product.product_id] || []).map((cutType) => (
+                            {cutTypeOptions.map((cutType) => (
                               <option key={cutType.id} value={cutType.id}>
                                 {cutType.name}
                               </option>
                             ))}
                           </select>
-                          {cutTypeErrorByProductId[product.product_id] && (
+                          {cutTypeError && (
                             <div className="helper-text error-text">
-                              {cutTypeErrorByProductId[product.product_id]}
+                              {cutTypeError}
                             </div>
                           )}
                         </div>
