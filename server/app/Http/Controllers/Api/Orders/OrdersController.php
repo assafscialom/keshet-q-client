@@ -62,20 +62,17 @@ class OrdersController extends Controller
 
         $order = $this->model->create($order);
         foreach ($request->products as $product) {
-            $comment = null;
-            if (isset($product['comment'])) {
-                $comment = $product['comment'];
-            }
-            $cutTypeId = null;
-            if (isset($product['cut_type_id'])) {
-                $cutTypeId = $product['cut_type_id'];
+            $comment = data_get($product, 'comment');
+            $cutTypeId = data_get($product, 'cut_type_id');
+            if ($cutTypeId === '') {
+                $cutTypeId = null;
             }
             OrdersToProducts::create([
                 "order_id" => $order->id,
-                'product_id' => $product['product_id'],
+                'product_id' => data_get($product, 'product_id'),
                 "comment" => $comment,
-                "quantity_in_order" => $product['quantity'],
-                "cut_type_id" => $cutTypeId
+                "quantity_in_order" => data_get($product, 'quantity'),
+                "cut_type_id" => $cutTypeId ? (int)$cutTypeId : null
             ]);
         }
 
