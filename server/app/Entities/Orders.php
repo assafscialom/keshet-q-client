@@ -18,7 +18,7 @@ class Orders extends Model
     }
 
     public function products(){
-        return $this->hasMany(OrdersToProducts::class,'order_id','id')->with(['product_name']);
+        return $this->hasMany(OrdersToProducts::class,'order_id','id')->with(['product_name', 'cutType']);
     }
 
     public static function byStatus($department_id, $status_id)

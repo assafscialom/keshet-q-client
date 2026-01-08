@@ -882,6 +882,7 @@ export default function App() {
                 <div>שם</div>
                 <div>הערה</div>
                 <div>כמות</div>
+                <div>אופן חיתוך</div>
               </div>
               <div className="order-table-body">
                 {sorterItemsLoading && <div className="helper-text">טוען פריטים...</div>}
@@ -898,6 +899,7 @@ export default function App() {
                       <div>{item.product_name?.name || '-'}</div>
                       <div>{item.comment || '-'}</div>
                       <div>{item.quantity_in_order ?? '-'}</div>
+                      <div>{item.cut_type?.name || '-'}</div>
                     </div>
                   ))}
               </div>
