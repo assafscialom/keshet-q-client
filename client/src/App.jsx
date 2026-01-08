@@ -173,10 +173,8 @@ export default function App() {
 
       try {
         const endpoint = searchTerm
-          ? `https://qserver.keshet-teamim.co.il/api/orders/search/${cashierDepartmentId}?search=${encodeURIComponent(
-              searchTerm,
-            )}`
-          : `https://qserver.keshet-teamim.co.il/api/orders/lists/archive/${cashierDepartmentId}`;
+          ? `/orders/search/${cashierDepartmentId}?search=${encodeURIComponent(searchTerm)}`
+          : `/orders/lists/archive/${cashierDepartmentId}`;
         const response = await apiClient.get(endpoint);
         if (cancelled) return;
         const data = response?.data?.data ?? response?.data ?? [];
@@ -260,9 +258,7 @@ export default function App() {
     setSorterError('');
 
     try {
-      const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/lists/progress/${cashierDepartmentId}`,
-      );
+        const response = await apiClient.get(`/orders/lists/progress/${cashierDepartmentId}`);
       if (cancelSignal?.cancelled) return;
       setSorterOrders(response?.data ?? []);
     } catch (err) {
@@ -301,9 +297,7 @@ export default function App() {
     setSorterItemsError('');
 
     try {
-      const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/${orderId}/products`,
-      );
+      const response = await apiClient.get(`/orders/${orderId}/products`);
       setSorterItems(response?.data?.products ?? []);
     } catch (err) {
       console.error('Failed to load sorter order items', err);
@@ -319,10 +313,7 @@ export default function App() {
     setSorterUpdateError('');
 
     try {
-      await apiClient.patch(
-        `https://qserver.keshet-teamim.co.il/api/orders/${sorterSelectedOrderId}`,
-        { status_id: 2 },
-      );
+      await apiClient.patch(`/orders/${sorterSelectedOrderId}`, { status_id: 2 });
       await fetchSorterOrders();
     } catch (err) {
       console.error('Failed to update order status', err);
@@ -345,9 +336,7 @@ export default function App() {
     setBoardError('');
 
     try {
-      const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/lists/all/${normalizedId}`,
-      );
+      const response = await apiClient.get(`/orders/lists/all/${normalizedId}`);
       const data = response?.data ?? {};
       const entry = data[normalizedId] ?? data[String(normalizedId)] ?? {};
       setBoardOrders({
@@ -382,7 +371,7 @@ export default function App() {
 
       try {
         const response = await apiClient.get(
-          `https://qserver.keshet-teamim.co.il/api/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(
+          `/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(
             trimmed,
           )}`,
         );
@@ -445,9 +434,7 @@ export default function App() {
     setOrderItemsErrorById((prev) => ({ ...prev, [orderId]: '' }));
 
     try {
-      const response = await apiClient.get(
-        `https://qserver.keshet-teamim.co.il/api/orders/${orderId}/products`,
-      );
+      const response = await apiClient.get(`/orders/${orderId}/products`);
       const products = response?.data?.products ?? [];
       setOrderItemsById((prev) => ({ ...prev, [orderId]: products }));
     } catch (err) {
