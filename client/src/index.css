@@ -1229,6 +1229,35 @@ input {
     padding: 16px;
   }
 
+  .cashier-side {
+    padding: 14px;
+  }
+
+  .cashier-logo img {
+    max-width: 120px;
+  }
+
+  .cashier-search {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .cashier-search input {
+    font-size: 14px;
+  }
+
+  .barcode-button,
+  .cashier-search button {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .barcode-label,
+  .cashier-hint {
+    font-size: 12px;
+  }
+
   .order-card {
     min-width: 200px;
   }
