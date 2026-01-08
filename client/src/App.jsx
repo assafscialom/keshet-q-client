@@ -16,16 +16,21 @@ const isCashierRoute = (pathname) => pathname.startsWith('/cashier');
 const isCashierNewRoute = (pathname) => pathname.startsWith('/cashier-new');
 const isSorterRoute = (pathname) => pathname.startsWith('/sorter');
 const isBoardRoute = (pathname) => pathname.startsWith('/board/branch/');
-const isBoardOrdersRoute = (pathname) => pathname.includes('/board/branch/') && pathname.includes('/department/');
+const isBoardOrdersRoute = (pathname) =>
+  pathname.includes('/board/branch/') && pathname.includes('/departments/');
 
 const findBoardBranchId = (pathname) => {
   const match = pathname.match(/board\/branch\/(\d+)/i);
   return match ? match[1] : null;
 };
 
-const findBoardDepartmentId = (pathname) => {
-  const match = pathname.match(/department\/(\d+)/i);
-  return match ? match[1] : null;
+const findBoardDepartmentIds = (pathname) => {
+  const match = pathname.match(/departments\/([\d,]+)/i);
+  if (!match) return [];
+  return match[1]
+    .split(',')
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value));
 };
 
 const getStoredDepartmentId = () => {
@@ -65,6 +70,7 @@ export default function App() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [openQuantityForId, setOpenQuantityForId] = useState(null);
+  const [lastAddedProduct, setLastAddedProduct] = useState(null);
   const [cutTypeOptions, setCutTypeOptions] = useState([]);
   const [cutTypeLoading, setCutTypeLoading] = useState(false);
   const [cutTypeError, setCutTypeError] = useState('');
@@ -78,7 +84,7 @@ export default function App() {
   const [sorterUpdateLoading, setSorterUpdateLoading] = useState(false);
   const [sorterUpdateError, setSorterUpdateError] = useState('');
   const [boardDepartments, setBoardDepartments] = useState([]);
-  const [boardDepartmentId, setBoardDepartmentId] = useState(null);
+  const [boardDepartmentIds, setBoardDepartmentIds] = useState([]);
   const [boardLoading, setBoardLoading] = useState(false);
   const [boardError, setBoardError] = useState('');
   const [boardOrders, setBoardOrders] = useState({ progress: [], done: [] });
@@ -90,7 +96,7 @@ export default function App() {
 
   const branchId = useMemo(() => findBranchId(route), [route]);
   const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
-  const boardRouteDepartmentId = useMemo(() => findBoardDepartmentId(route), [route]);
+  const boardRouteDepartmentIds = useMemo(() => findBoardDepartmentIds(route), [route]);
   const cashierDepartmentId = selectedDepartmentId || getStoredDepartmentId();
   const cashierBranchId = branchId || getStoredBranchId();
 
@@ -243,15 +249,14 @@ export default function App() {
 
   useEffect(() => {
     if (!isBoardOrdersRoute(route)) return;
-    if (!boardRouteDepartmentId) return;
-    setBoardDepartmentId(Number(boardRouteDepartmentId));
-    const departmentId = Number(boardRouteDepartmentId);
-    handleBoardShowOrders(departmentId, true);
+    if (!boardRouteDepartmentIds.length) return;
+    setBoardDepartmentIds(boardRouteDepartmentIds);
+    handleBoardShowOrders(boardRouteDepartmentIds, true);
     const intervalId = window.setInterval(() => {
-      handleBoardShowOrders(departmentId, true);
+      handleBoardShowOrders(boardRouteDepartmentIds, true);
     }, 10000);
     return () => window.clearInterval(intervalId);
-  }, [boardRouteDepartmentId, route]);
+  }, [boardRouteDepartmentIds, route]);
 
   const fetchSorterOrders = async (cancelSignal) => {
     setSorterLoading(true);
@@ -323,26 +328,34 @@ export default function App() {
     }
   };
 
-  const handleBoardShowOrders = async (departmentId = boardDepartmentId, skipNav = false) => {
-    const normalizedId =
-      typeof departmentId === 'object' && departmentId !== null
-        ? departmentId.id
-        : departmentId;
-    if (!normalizedId) return;
+  const handleBoardShowOrders = async (
+    departmentIds = boardDepartmentIds,
+    skipNav = false,
+  ) => {
+    const normalizedIds = Array.isArray(departmentIds)
+      ? departmentIds
+      : [departmentIds];
+    const cleanedIds = normalizedIds
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    if (!cleanedIds.length) return;
     if (!skipNav) {
-      navigate(`/board/branch/${getBoardBranchIdSafe()}/department/${normalizedId}`);
+      navigate(`/board/branch/${getBoardBranchIdSafe()}/departments/${cleanedIds.join(',')}`);
     }
     setBoardLoading(true);
     setBoardError('');
 
     try {
-      const response = await apiClient.get(`/orders/lists/all/${normalizedId}`);
+      const response = await apiClient.get(`/orders/lists/all/${cleanedIds.join(',')}`);
       const data = response?.data ?? {};
-      const entry = data[normalizedId] ?? data[String(normalizedId)] ?? {};
-      setBoardOrders({
-        progress: entry.progress ?? [],
-        done: entry.done ?? [],
+      const progress = [];
+      const done = [];
+      cleanedIds.forEach((deptId) => {
+        const entry = data[deptId] ?? data[String(deptId)] ?? {};
+        progress.push(...(entry.progress ?? []));
+        done.push(...(entry.done ?? []));
       });
+      setBoardOrders({ progress, done });
     } catch (err) {
       console.error('Failed to load board orders', err);
       setBoardError('Failed to load board orders. Please try again.');
@@ -491,6 +504,10 @@ export default function App() {
   }, [departments, query]);
 
   const handleAddProduct = (product) => {
+    setLastAddedProduct({
+      name: product.product_name,
+      sku: product.product_sku,
+    });
     setOrderItems((prev) => {
       const existing = prev.find((item) => item.product_id === product.product_id);
       if (existing) {
@@ -590,6 +607,7 @@ export default function App() {
       setShowReceipt(true);
       setOrderItems([]);
       setCustomerName('');
+      setLastAddedProduct(null);
     } catch (err) {
       console.error('Failed to create order', err);
       setCreateError('Failed to create order. Please try again.');
@@ -601,6 +619,14 @@ export default function App() {
   const handleReceiptClose = () => {
     setShowReceipt(false);
     navigateHome();
+  };
+
+  const scrollToBottom = () => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleReceiptPrint = () => {
@@ -646,6 +672,11 @@ export default function App() {
             </div>
             <div className="barcode-label">סריקת ברקוד</div>
             <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
+            {lastAddedProduct && (
+              <div className="basket-hint">
+                נוסף לסל: {lastAddedProduct.name} #{lastAddedProduct.sku}
+              </div>
+            )}
             <div className="search-results">
               {productResults.map((product) => (
                 <div key={product.product_id} className="search-result-card">
@@ -804,6 +835,14 @@ export default function App() {
             {createError && <div className="helper-text error-text">{createError}</div>}
           </section>
         </div>
+        <div className="mobile-scroll-controls">
+          <button type="button" onClick={scrollToBottom} aria-label="Scroll down">
+            ↓
+          </button>
+          <button type="button" onClick={scrollToTop} aria-label="Scroll up">
+            ↑
+          </button>
+        </div>
         {showReceipt && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
             <div className="modal-card">
@@ -884,12 +923,14 @@ export default function App() {
                   !sorterItemsError &&
                   sorterItems.map((item, index) => (
                     <div key={item.id || index} className="order-table-row">
-                      <div>{index + 1}</div>
-                      <div>{item.product_name?.sku || '-'}</div>
-                      <div>{item.product_name?.name || '-'}</div>
-                      <div>{item.comment || '-'}</div>
-                      <div>{item.quantity_in_order ?? '-'}</div>
-                      <div>{item.cut_type?.name || item.cut_type_id || '-'}</div>
+                      <div data-label="№">{index + 1}</div>
+                      <div data-label="מקליט">{item.product_name?.sku || '-'}</div>
+                      <div data-label="שם">{item.product_name?.name || '-'}</div>
+                      <div data-label="הערה">{item.comment || '-'}</div>
+                      <div data-label="כמות">{item.quantity_in_order ?? '-'}</div>
+                      <div data-label="אופן חיתוך">
+                        {item.cut_type?.name || item.cut_type_id || '-'}
+                      </div>
                     </div>
                   ))}
               </div>
@@ -935,12 +976,18 @@ export default function App() {
 
   if (isBoardRoute(route)) {
     const showOrdersOnly = isBoardOrdersRoute(route);
-    const activeDepartmentId = showOrdersOnly ? boardRouteDepartmentId : boardDepartmentId;
+    const selectedNames = boardDepartments
+      .filter((dept) => boardDepartmentIds.includes(Number(dept.id)))
+      .map((dept) => dept.name);
     return (
       <div className="board-page">
         <header className="board-header">
           {showOrdersOnly && (
-            <button type="button" className="back-button" onClick={() => navigate(`/board/branch/${boardBranchId}`)}>
+            <button
+              type="button"
+              className="back-button"
+              onClick={() => navigate(`/board/branch/${boardBranchId}`)}
+            >
               ↩
             </button>
           )}
@@ -961,29 +1008,43 @@ export default function App() {
                   {boardError && <div className="helper-text error-text">{boardError}</div>}
                   {!boardLoading &&
                     !boardError &&
-                    boardDepartments.map((dept) => (
-                      <button
-                        key={dept.id}
-                        type="button"
-                        className={`board-row${boardDepartmentId === dept.id ? ' selected' : ''}`}
-                        onClick={() => setBoardDepartmentId(Number(dept.id))}
-                      >
-                        {dept.name}
-                      </button>
-                    ))}
+                    boardDepartments.map((dept) => {
+                      const id = Number(dept.id);
+                      const isSelected = boardDepartmentIds.includes(id);
+                      return (
+                        <button
+                          key={dept.id}
+                          type="button"
+                          className={`board-row${isSelected ? ' selected' : ''}`}
+                          onClick={() =>
+                            setBoardDepartmentIds((prev) => {
+                              if (prev.includes(id)) {
+                                return prev.filter((value) => value !== id);
+                              }
+                              return [...prev, id];
+                            })
+                          }
+                        >
+                          {dept.name}
+                        </button>
+                      );
+                    })}
                 </div>
               </section>
-          <button
-            type="button"
-            className="board-action"
-            onClick={() => handleBoardShowOrders()}
-            disabled={!boardDepartmentId || boardLoading}
-          >
-            צג הזמנות
-          </button>
+              <button
+                type="button"
+                className="board-action"
+                onClick={() => handleBoardShowOrders()}
+                disabled={!boardDepartmentIds.length || boardLoading}
+              >
+                צג הזמנות
+              </button>
             </>
           )}
           <section className="board-orders">
+            {showOrdersOnly && selectedNames.length > 0 && (
+              <div className="board-departments-title">{selectedNames.join(' / ')}</div>
+            )}
             <div className="board-column wide">
               <div className="board-column-title">בתהליך</div>
               <div className="board-order-list">
