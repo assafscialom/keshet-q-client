@@ -558,9 +558,10 @@ export default function App() {
   };
 
   const handleCutTypeChange = (productId, value) => {
+    const normalized = value ? Number(value) : null;
     setOrderItems((prev) =>
       prev.map((item) =>
-        item.product_id === productId ? { ...item, cut_type_id: value || null } : item,
+        item.product_id === productId ? { ...item, cut_type_id: normalized } : item,
       ),
     );
   };
@@ -585,7 +586,7 @@ export default function App() {
         product_name: item.product_name,
         product_sku: item.product_sku,
         quantity: item.quantity || 1,
-        cut_type_id: item.cut_type_id || null,
+        cut_type_id: item.cut_type_id ? Number(item.cut_type_id) : null,
       })),
     };
 
