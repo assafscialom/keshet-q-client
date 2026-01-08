@@ -181,7 +181,13 @@ class MenuItemsTableSeeder extends Seeder
             'route'   => 'voyager.cut-types.index',
         ]);
         $departmentsItem = MenuItem::where('menu_id', $menu->id)
-            ->where('route', 'voyager.departments.index')
+            ->where(function ($query) {
+                $query->where('route', 'voyager.departments.index')
+                    ->orWhere('route', 'departments.index')
+                    ->orWhere('url', 'LIKE', '%departments%')
+                    ->orWhere('title', 'LIKE', '%Departments%')
+                    ->orWhere('title', 'LIKE', '%מחלק%');
+            })
             ->first();
         $menuItem->fill([
             'target'     => '_self',
