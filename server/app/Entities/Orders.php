@@ -4,6 +4,7 @@ namespace App\Entities;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Class Products.
@@ -50,6 +51,10 @@ class Orders extends Model
     }
 
     public static function  withProducts($order_id){
-        return Orders::where('id',$order_id)->with(['status','products'])->first();
+        $with = ['status', 'products.product_name'];
+        if (Schema::hasTable('cut_types') && Schema::hasColumn('orders_to_products', 'cut_type_id')) {
+            $with[] = 'products.cutType';
+        }
+        return Orders::where('id',$order_id)->with($with)->first();
     }
 }

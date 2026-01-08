@@ -899,7 +899,7 @@ export default function App() {
                       <div>{item.product_name?.name || '-'}</div>
                       <div>{item.comment || '-'}</div>
                       <div>{item.quantity_in_order ?? '-'}</div>
-                      <div>{item.cut_type?.name || '-'}</div>
+                      <div>{item.cut_type?.name || item.cut_type_id || '-'}</div>
                     </div>
                   ))}
               </div>
