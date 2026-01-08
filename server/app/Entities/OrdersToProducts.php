@@ -19,6 +19,11 @@ class OrdersToProducts extends Model
         "cut_type_id",
     ];
 
+    protected $with = [
+        'product_name',
+        'cutType',
+    ];
+
     public function product_name(){
         return $this->hasOne(Products::class,'id','product_id');
     }
