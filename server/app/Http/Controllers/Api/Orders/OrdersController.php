@@ -67,12 +67,14 @@ class OrdersController extends Controller
             if ($cutTypeId === '') {
                 $cutTypeId = null;
             }
-            OrdersToProducts::create([
+            DB::table('orders_to_products')->insert([
                 "order_id" => $order->id,
                 'product_id' => data_get($product, 'product_id'),
                 "comment" => $comment,
                 "quantity_in_order" => data_get($product, 'quantity'),
-                "cut_type_id" => $cutTypeId ? (int)$cutTypeId : null
+                "cut_type_id" => $cutTypeId ? (int)$cutTypeId : null,
+                "created_at" => now(),
+                "updated_at" => now(),
             ]);
         }
 
