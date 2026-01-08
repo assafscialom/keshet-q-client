@@ -412,7 +412,7 @@ export default function App() {
       setCutTypeLoading(true);
       setCutTypeError('');
       try {
-        const response = await apiClient.get('https://qserver.keshet-teamim.co.il/api/cut-types');
+        const response = await apiClient.get('/cut-types');
         if (cancelled) return;
         setCutTypeOptions(Array.isArray(response?.data) ? response.data : response?.data?.data ?? []);
       } catch (err) {
