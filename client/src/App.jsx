@@ -591,7 +591,7 @@ export default function App() {
     };
 
     try {
-      const response = await apiClient.post('https://qserver.keshet-teamim.co.il/api/orders', payload);
+      const response = await apiClient.post('/orders', payload);
       const orderNumber =
         response?.data?.order_number ??
         response?.data?.data?.order_number ??
@@ -601,6 +601,8 @@ export default function App() {
         setReceiptNumber(orderNumber);
       }
       setShowReceipt(true);
+      setOrderItems([]);
+      setCustomerName('');
     } catch (err) {
       console.error('Failed to create order', err);
       setCreateError('Failed to create order. Please try again.');

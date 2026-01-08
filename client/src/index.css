@@ -886,7 +886,7 @@ input {
 }
 
 .barcode-button {
-  width: 38px;
+  width: 34px;
   height: 34px;
   border-radius: 8px;
   border: 1px solid #2b49a4;
@@ -894,14 +894,14 @@ input {
     linear-gradient(
       90deg,
       #111 0,
-      #111 3px,
-      transparent 3px,
-      transparent 6px,
-      #111 6px,
-      #111 8px,
-      transparent 8px,
-      transparent 11px,
-      #111 11px,
+      #111 2px,
+      transparent 2px,
+      transparent 5px,
+      #111 5px,
+      #111 7px,
+      transparent 7px,
+      transparent 10px,
+      #111 10px,
       #111 12px,
       transparent 12px,
       transparent 15px,
@@ -918,21 +918,23 @@ input {
       transparent 28px,
       transparent 31px,
       #111 31px,
-      #111 34px,
-      transparent 34px
+      #111 33px,
+      transparent 33px
     ),
     #fff;
   cursor: pointer;
+  position: relative;
 }
 
 .barcode-button::after {
-  content: "228";
-  display: block;
-  margin-top: 18px;
-  font-size: 8px;
-  font-weight: 700;
-  color: #111;
-  text-align: center;
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  right: 2px;
+  height: 6px;
+  background: #fff;
+  border-radius: 4px;
 }
 
 .cashier-search input {
