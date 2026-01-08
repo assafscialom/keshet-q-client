@@ -989,7 +989,7 @@ input {
 .mobile-scroll-controls {
   position: fixed;
   right: 12px;
-  bottom: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
   display: none;
   flex-direction: column;
   gap: 8px;
@@ -1229,6 +1229,32 @@ input {
     padding: 16px;
   }
 
+  .sorter-page .cashier-shell {
+    gap: 12px;
+  }
+
+  .sorter-page .cashier-side {
+    order: -1;
+    border-radius: 12px;
+  }
+
+  .sorter-page .sorter-pill {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .sorter-page .sorter-card {
+    padding: 10px 12px;
+  }
+
+  .sorter-page .sorter-actions {
+    justify-content: center;
+  }
+
+  .sorter-page .sorter-collected-button {
+    width: 100%;
+  }
+
   .cashier-side {
     padding: 14px;
   }
@@ -1326,5 +1352,11 @@ input {
 
   .mobile-scroll-controls {
     display: flex;
+  }
+
+  .mobile-scroll-controls button {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
   }
 }
