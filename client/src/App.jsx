@@ -963,7 +963,10 @@ export default function App() {
                     className="sorter-card"
                     onClick={() => handleSorterOrderClick(order.id)}
                   >
-                    #{order.order_number ?? order.id}
+                    <span className="sorter-order-number">#{order.order_number ?? order.id}</span>
+                    {order.customer_name && (
+                      <span className="sorter-order-customer">{order.customer_name}</span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -1050,7 +1053,10 @@ export default function App() {
               <div className="board-order-list">
                 {boardOrders.progress.map((order) => (
                   <div key={order.id} className="board-order-card">
-                    #{order.order_number ?? order.id}
+                    <span className="board-order-number">#{order.order_number ?? order.id}</span>
+                    {order.customer_name && (
+                      <span className="board-order-customer">{order.customer_name}</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1060,7 +1066,10 @@ export default function App() {
               <div className="board-order-list">
                 {boardOrders.done.map((order) => (
                   <div key={order.id} className="board-order-card done">
-                    #{order.order_number ?? order.id}
+                    <span className="board-order-number">#{order.order_number ?? order.id}</span>
+                    {order.customer_name && (
+                      <span className="board-order-customer">{order.customer_name}</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1101,8 +1110,13 @@ export default function App() {
                         onClick={() => toggleOrder(order.id)}
                       >
                         <div className="order-cancel">✕</div>
-                        <div className="order-number">
-                          #{order.order_number ?? order.id}
+                        <div className="order-meta">
+                          <div className="order-number">
+                            #{order.order_number ?? order.id}
+                          </div>
+                          {order.customer_name && (
+                            <div className="order-customer">{order.customer_name}</div>
+                          )}
                         </div>
                       </button>
                       {expandedOrderId === order.id && (
@@ -1110,6 +1124,12 @@ export default function App() {
                           <div className="order-detail-header">
                             <div className="order-detail-title">
                               הזמנה #{order.order_number ?? order.id}
+                              {order.customer_name && (
+                                <span className="order-detail-customer">
+                                  {' '}
+                                  · {order.customer_name}
+                                </span>
+                              )}
                             </div>
                             <button
                               type="button"

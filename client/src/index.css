@@ -356,13 +356,28 @@ input {
 }
 
 .board-order-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
   background: #f7f7f7;
   border-radius: 10px;
   padding: 14px;
   text-align: center;
+  color: #4a4a4a;
+}
+
+.board-order-number {
   font-size: 24px;
   font-weight: 700;
-  color: #4a4a4a;
+}
+
+.board-order-customer {
+  font-size: 18px;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.85;
 }
 
 .board-order-card.done {
@@ -457,6 +472,13 @@ input {
   cursor: pointer;
 }
 
+.order-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
 .order-cancel {
   width: 28px;
   height: 28px;
@@ -472,6 +494,12 @@ input {
   font-size: 26px;
   font-weight: 700;
   color: #5a5a5a;
+}
+
+.order-customer {
+  font-size: 16px;
+  font-weight: 600;
+  color: #6a6a6a;
 }
 
 .order-detail {
@@ -493,6 +521,11 @@ input {
 
 .order-detail-title {
   font-weight: 600;
+}
+
+.order-detail-customer {
+  font-weight: 500;
+  opacity: 0.85;
 }
 
 .order-detail-close {
@@ -1070,6 +1103,9 @@ input {
 }
 
 .sorter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   background: #fff;
   border: 1px solid #1f1f1f;
   border-radius: 6px;
@@ -1079,6 +1115,18 @@ input {
   color: #5a5a5a;
   cursor: pointer;
   width: 100%;
+}
+
+.sorter-order-number {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sorter-order-customer {
+  font-size: 14px;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.85;
 }
 
 .sorter-actions {
