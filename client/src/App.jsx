@@ -75,6 +75,10 @@ export default function App() {
   const [cutTypeOptions, setCutTypeOptions] = useState([]);
   const [cutTypeLoading, setCutTypeLoading] = useState(false);
   const [cutTypeError, setCutTypeError] = useState('');
+  const [pendingProduct, setPendingProduct] = useState(null);
+  const [pendingNote, setPendingNote] = useState('');
+  const [pendingCutTypeId, setPendingCutTypeId] = useState('');
+  const [pendingQuantity, setPendingQuantity] = useState(1);
   const [sorterOrders, setSorterOrders] = useState([]);
   const [sorterLoading, setSorterLoading] = useState(false);
   const [sorterError, setSorterError] = useState('');
@@ -522,9 +526,9 @@ export default function App() {
         ...prev,
         {
           ...product,
-          quantity: 1,
-          note: '',
-          cut_type_id: null,
+          quantity: product.quantity ?? 1,
+          note: product.note ?? '',
+          cut_type_id: product.cut_type_id ?? null,
         },
       ];
     });
@@ -685,7 +689,12 @@ export default function App() {
                   <button
                     type="button"
                     className="search-add-button"
-                    onClick={() => handleAddProduct(product)}
+                    onClick={() => {
+                      setPendingProduct(product);
+                      setPendingNote('');
+                      setPendingCutTypeId('');
+                      setPendingQuantity(1);
+                    }}
                   >
                     +
                   </button>
@@ -816,6 +825,12 @@ export default function App() {
               </div>
             </div>
             <div className="order-actions">
+              <input
+                className="order-customer-input"
+                placeholder="שם פרטי ושם משפחה"
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+              />
               <button
                 type="button"
                 className="order-create-button"
@@ -827,12 +842,6 @@ export default function App() {
               <button type="button" className="order-cancel-button">
                 ✕ בטל / Отменить
               </button>
-              <input
-                className="order-customer-input"
-                placeholder="שם פרטי ושם משפחה"
-                value={customerName}
-                onChange={(event) => setCustomerName(event.target.value)}
-              />
             </div>
             {createError && <div className="helper-text error-text">{createError}</div>}
           </section>
@@ -845,6 +854,77 @@ export default function App() {
             ↑
           </button>
         </div>
+        {pendingProduct && (
+          <div className="modal-overlay" role="dialog" aria-modal="true" onClick={() => setPendingProduct(null)}>
+            <div className="modal-card product-detail-card" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <button type="button" className="modal-close" onClick={() => setPendingProduct(null)}>✕</button>
+                <div className="product-detail-title">
+                  <span className="search-result-sku">#{pendingProduct.product_sku}</span>
+                  <span className="search-result-name">{pendingProduct.product_name}</span>
+                </div>
+              </div>
+              <div className="product-detail-body">
+                <label className="product-detail-label">
+                  כמות
+                  <div className="order-qty-wrapper">
+                    <input
+                      className="order-qty-input"
+                      type="text"
+                      inputMode="numeric"
+                      value={pendingQuantity}
+                      onChange={(e) => setPendingQuantity(e.target.value)}
+                    />
+                  </div>
+                  <div className="product-detail-presets">
+                    {[100, 150, 200, 250, 300, 350, 400].map((qty) => (
+                      <button key={qty} type="button" className="order-qty-option" onClick={() => setPendingQuantity(qty)}>
+                        {qty}
+                      </button>
+                    ))}
+                  </div>
+                </label>
+                <label className="product-detail-label">
+                  אופן חיתוך
+                  <select
+                    className="order-cut-type-select"
+                    value={pendingCutTypeId}
+                    onChange={(e) => setPendingCutTypeId(e.target.value)}
+                  >
+                    <option value="">ללא</option>
+                    {cutTypeOptions.map((ct) => (
+                      <option key={ct.id} value={ct.id}>{ct.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="product-detail-label">
+                  הערה
+                  <textarea
+                    className="order-note-input"
+                    value={pendingNote}
+                    onChange={(e) => setPendingNote(e.target.value)}
+                    placeholder="הערה"
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="order-create-button"
+                  onClick={() => {
+                    handleAddProduct({
+                      ...pendingProduct,
+                      quantity: pendingQuantity || 1,
+                      note: pendingNote,
+                      cut_type_id: pendingCutTypeId || null,
+                    });
+                    setPendingProduct(null);
+                  }}
+                >
+                  + הוסף להזמנה
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {showReceipt && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
             <div className="modal-card">
