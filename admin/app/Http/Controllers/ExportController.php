@@ -64,8 +64,10 @@ class ExportController extends Controller
                         $unitid = Metrics::where('type',$unit)->first()->id;
                     }
 //                    sleep(1);
-                    \DB::table('products')->insert(["branch_id"=>$branch_id,"department_id"=>$department_id,"sku"=>$cells[0],"name" => $cells[1], "metric_id" => $unitid]);
-//                    Products::create(["branch_id"=>$branch_id,"department_id"=>$department_id,"sku"=>$cells[0],"name" => $cells[1], "metric_id" => $unitid]);
+                    Products::withTrashed()->updateOrCreate(
+                        ['sku' => $cells[0], 'branch_id' => $branch_id, 'department_id' => $department_id],
+                        ['name' => $cells[1], 'metric_id' => $unitid, 'deleted_at' => null]
+                    );
                     \DB::table('importLog')->insert([
                         "branch_id"=>$branch_id,
                         "department_id"=>$department_id,
