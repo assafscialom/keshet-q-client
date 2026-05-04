@@ -324,6 +324,8 @@ export default function App() {
 
     try {
       await apiClient.patch(`/orders/${sorterSelectedOrderId}`, { status_id: 2 });
+      setSorterSelectedOrderId(null);
+      setSorterItems([]);
       await fetchSorterOrders();
     } catch (err) {
       console.error('Failed to update order status', err);
@@ -659,6 +661,12 @@ export default function App() {
             <div className="cashier-logo">
               <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
+            <input
+              className="order-customer-input"
+              placeholder="שם פרטי ושם משפחה"
+              value={customerName}
+              onChange={(event) => setCustomerName(event.target.value)}
+            />
             <div className="cashier-search">
               <button
                 type="button"
@@ -825,12 +833,6 @@ export default function App() {
               </div>
             </div>
             <div className="order-actions">
-              <input
-                className="order-customer-input"
-                placeholder="שם פרטי ושם משפחה"
-                value={customerName}
-                onChange={(event) => setCustomerName(event.target.value)}
-              />
               <button
                 type="button"
                 className="order-create-button"
@@ -986,6 +988,11 @@ export default function App() {
         </header>
         <div className="cashier-shell">
           <section className="cashier-main sorter-main">
+            {sorterSelectedOrderId && (
+              <div className="sorter-order-header">
+                הזמנה #{sorterOrders.find((o) => o.id === sorterSelectedOrderId)?.order_number ?? sorterSelectedOrderId}
+              </div>
+            )}
             <div className="order-table sorter-table">
               <div className="order-table-header">
                 <div>№</div>

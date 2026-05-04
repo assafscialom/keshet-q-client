@@ -1123,6 +1123,16 @@ input {
   color: #303030;
 }
 
+.sorter-order-header {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e3a5f;
+  padding: 10px 16px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 8px;
+  text-align: right;
+}
+
 .sorter-pill {
   background: #bdbdbd;
   color: #fff;
