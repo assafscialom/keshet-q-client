@@ -67,6 +67,7 @@ export default function App() {
   const [customerName, setCustomerName] = useState('');
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptNumber, setReceiptNumber] = useState(1);
+  const [receiptDepartmentName, setReceiptDepartmentName] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [openQuantityForId, setOpenQuantityForId] = useState(null);
@@ -604,6 +605,7 @@ export default function App() {
       if (orderNumber != null) {
         setReceiptNumber(orderNumber);
       }
+      setReceiptDepartmentName(orderItems[0]?.department_name || '');
       setShowReceipt(true);
       setOrderItems([]);
       setCustomerName('');
@@ -865,7 +867,7 @@ export default function App() {
                 </div>
                 <div className="receipt-number">№{receiptNumber}</div>
                 <div className="receipt-subtitle">
-                  {orderItems[0]?.department_name || 'מחלקה'}
+                  {receiptDepartmentName || 'מחלקה'}
                 </div>
                 <div className="receipt-items">
                   {orderItems.map((item) => (
