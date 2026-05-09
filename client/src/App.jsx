@@ -648,7 +648,7 @@ export default function App() {
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
       @page { size: 105mm auto; margin: 6mm 8mm; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: Arial, sans-serif; direction: rtl; width: 89mm; }
+      body { font-family: Arial, sans-serif; direction: rtl; width: 89mm; margin: 0 auto; }
       .receipt-page { page-break-after: always; break-after: page; padding-bottom: 4mm; }
       .receipt-page:last-child { page-break-after: avoid; break-after: avoid; }
       .receipt-page-top { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: flex-start; margin-bottom: 4mm; }
