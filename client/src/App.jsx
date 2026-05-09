@@ -68,6 +68,8 @@ export default function App() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptNumber, setReceiptNumber] = useState(1);
   const [receiptDepartmentName, setReceiptDepartmentName] = useState('');
+  const [receiptItems, setReceiptItems] = useState([]);
+  const [receiptCustomerName, setReceiptCustomerName] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [openQuantityForId, setOpenQuantityForId] = useState(null);
@@ -612,6 +614,8 @@ export default function App() {
         setReceiptNumber(orderNumber);
       }
       setReceiptDepartmentName(orderItems[0]?.department_name || '');
+      setReceiptItems([...orderItems]);
+      setReceiptCustomerName(customerName.trim());
       setShowReceipt(true);
       setOrderItems([]);
       setCustomerName('');
@@ -929,7 +933,7 @@ export default function App() {
         )}
         {showReceipt && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
-            <div className="modal-card">
+            <div className="modal-card receipt-modal">
               <div className="modal-header">
                 <button
                   type="button"
@@ -943,31 +947,57 @@ export default function App() {
                   הדפס / Печать
                 </button>
               </div>
-              <div className="modal-body">
-                <div className="receipt-logo">
-                  <img src="/keshet.png" alt="Keshet Taamim" />
-                </div>
-                <div className="receipt-number">№{receiptNumber}</div>
-                <div className="receipt-subtitle">
-                  {receiptDepartmentName || 'מחלקה'}
-                </div>
-                <div className="receipt-items">
-                  {orderItems.map((item) => (
-                    <div key={item.product_id} className="receipt-row">
-                      <div className="receipt-row-main">
-                        <div className="receipt-sku">#{item.product_sku || '-'}</div>
-                        <div className="receipt-name">{item.product_name}</div>
-                      </div>
-                      <div className="receipt-row-meta">
-                        <div>כמות {item.quantity || 1}</div>
-                        {item.note ? <div>{item.note}</div> : null}
-                      </div>
+              <div className="modal-body receipt-pages">
+                {['מקור', 'העתק לקוח'].map((label) => (
+                  <div key={label} className="receipt-page">
+                    <div className="receipt-page-top">
+                      <span className="receipt-timestamp">{new Date().toLocaleString('he-IL')}</span>
+                      <span className="receipt-label-tag">{label}</span>
                     </div>
-                  ))}
-                </div>
-                <div className="receipt-footer">
-                  <div>{customerName}</div>
-                  <div>{new Date().toLocaleString('he-IL')}</div>
+                    <div className="receipt-page-header">
+                      <div className="receipt-logo">
+                        <img src="/keshet.png" alt="Keshet Taamim" />
+                      </div>
+                      <div className="receipt-number">№{receiptNumber}</div>
+                      <div className="receipt-subtitle">{receiptDepartmentName}</div>
+                    </div>
+                    <div className="receipt-items">
+                      {receiptItems.map((item) => (
+                        <div key={item.product_id} className="receipt-row">
+                          <div className="receipt-field"><span className="receipt-field-label">מק"ט</span><span>{item.product_sku || '-'}</span></div>
+                          <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{item.product_name}</span></div>
+                          <div className="receipt-field"><span className="receipt-field-label">כמות</span><strong>{item.quantity || 1}{item.metric_type || ''}</strong></div>
+                          <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note || 'אין תגובה'}</span></div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="receipt-customer-row">
+                      <span className="receipt-field-label">שם לקוח</span>
+                      <span>{receiptCustomerName}</span>
+                    </div>
+                    <div className="receipt-page-footer">
+                      <span>{new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',', '')}</span>
+                      <span className="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
+                    </div>
+                  </div>
+                ))}
+                <div className="receipt-page receipt-page-customer">
+                  <div className="receipt-page-top">
+                    <span className="receipt-timestamp">{new Date().toLocaleString('he-IL')}</span>
+                  </div>
+                  <div className="receipt-logo receipt-logo-large">
+                    <img src="/keshet.png" alt="Keshet Taamim" />
+                  </div>
+                  <div className="receipt-number receipt-number-xl">{receiptNumber}</div>
+                  <div className="receipt-subtitle">{receiptDepartmentName}</div>
+                  <div className="receipt-customer-row">
+                    <span className="receipt-field-label">שם לקוח</span>
+                    <span>{receiptCustomerName}</span>
+                  </div>
+                  <div className="receipt-page-footer">
+                    <span>{new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',', '')}</span>
+                    <span className="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
+                  </div>
                 </div>
               </div>
             </div>
