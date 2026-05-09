@@ -646,27 +646,27 @@ export default function App() {
     if (!content) return;
     const win = window.open('', '_blank');
     win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>
-      @page { size: A4; margin: 15mm 15mm; }
+      @page { margin: 8mm; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: Arial, sans-serif; direction: rtl; width: 180mm; }
-      .receipt-page { page-break-after: always; break-after: page; padding-bottom: 10mm; }
+      body { font-family: Arial, sans-serif; direction: rtl; width: 100%; }
+      .receipt-page { page-break-after: always; break-after: page; padding-bottom: 6mm; }
       .receipt-page:last-child { page-break-after: avoid; break-after: avoid; }
-      .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; }
-      .receipt-logo img { width: 100px; height: auto; object-fit: contain; }
-      .receipt-label-tag { font-size: 13pt; font-weight: 700; }
-      .receipt-number { font-size: 42pt; font-weight: 900; text-align: center; margin: 4mm 0 2mm; }
-      .receipt-subtitle { font-size: 13pt; text-align: center; margin-bottom: 6mm; }
+      .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6mm; }
+      .receipt-logo img { width: 90px; height: auto; object-fit: contain; }
+      .receipt-label-tag { font-size: 12pt; font-weight: 700; }
+      .receipt-number { font-size: 40pt; font-weight: 900; text-align: center; margin: 3mm 0 1mm; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 3mm 0; font-size: 12pt; font-weight: 700; }
+      .receipt-subtitle { font-size: 12pt; text-align: center; margin: 2mm 0 4mm; }
       .receipt-items { width: 100%; }
-      .receipt-row { border-top: 1px solid #888; padding: 4mm 0; }
+      .receipt-row { border-top: 1px solid #888; padding: 3mm 0; }
       .receipt-field { display: flex; justify-content: space-between; font-size: 11pt; margin-bottom: 1mm; }
       .receipt-field-label { font-weight: 700; min-width: 40px; }
-      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 4mm 0; font-size: 12pt; font-weight: 700; }
-      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6mm; border-top: 1px solid #ddd; padding-top: 3mm; font-size: 8pt; color: #666; }
-      .receipt-disclaimer { max-width: 80mm; text-align: left; }
-      .receipt-logo-large img { width: 160px; height: auto; display: block; margin: 15mm auto 8mm; }
-      .receipt-number-xl { font-size: 100pt; font-weight: 900; text-align: center; line-height: 1; margin: 8mm 0; }
-      .receipt-page-customer .receipt-subtitle { font-size: 14pt; }
-      .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20mm; font-size: 16pt; }
+      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 5mm; border-top: 1px solid #ddd; padding-top: 2mm; font-size: 8pt; color: #666; }
+      .receipt-disclaimer { max-width: 50%; text-align: left; }
+      .receipt-logo-large img { width: 140px; height: auto; display: block; margin: 10mm auto 6mm; }
+      .receipt-number-xl { font-size: 90pt; font-weight: 900; text-align: center; line-height: 1; margin: 6mm 0; }
+      .receipt-page-customer .receipt-subtitle { font-size: 13pt; }
+      .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 15mm; font-size: 15pt; }
     </style></head><body>${content}</body></html>`);
     win.document.close();
     win.focus();
@@ -985,6 +985,10 @@ export default function App() {
                       <span className="receipt-label-tag">{label}</span>
                     </div>
                     <div className="receipt-number">№{receiptNumber}</div>
+                    <div className="receipt-customer-row">
+                      <span className="receipt-field-label">שם לקוח</span>
+                      <span>{receiptCustomerName}</span>
+                    </div>
                     <div className="receipt-subtitle">{receiptDepartmentName}</div>
                     <div className="receipt-items">
                       {receiptItems.map((item) => (
@@ -995,10 +999,6 @@ export default function App() {
                           <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note || 'אין תגובה'}</span></div>
                         </div>
                       ))}
-                    </div>
-                    <div className="receipt-customer-row">
-                      <span className="receipt-field-label">שם לקוח</span>
-                      <span>{receiptCustomerName}</span>
                     </div>
                     <div className="receipt-page-footer">
                       <span>{new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',', '')}</span>
