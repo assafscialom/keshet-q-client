@@ -642,8 +642,34 @@ export default function App() {
   };
 
   const handleReceiptPrint = () => {
-    window.print();
-    handleReceiptClose();
+    const content = document.getElementById('receipt-print-area')?.innerHTML;
+    if (!content) return;
+    const win = window.open('', '_blank', 'width=794,height=1123');
+    win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: Arial, sans-serif; direction: rtl; }
+      .receipt-page { padding: 16mm 14mm; page-break-after: always; break-after: page; }
+      .receipt-page:last-child { page-break-after: avoid; break-after: avoid; }
+      .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+      .receipt-logo img { max-width: 110px; max-height: 55px; object-fit: contain; }
+      .receipt-label-tag { font-size: 15px; font-weight: 700; }
+      .receipt-timestamp { font-size: 11px; color: #555; }
+      .receipt-number { font-size: 52px; font-weight: 900; text-align: center; margin: 6px 0 2px; }
+      .receipt-subtitle { font-size: 16px; text-align: center; margin-bottom: 14px; }
+      .receipt-items { display: flex; flex-direction: column; }
+      .receipt-row { border-top: 1px solid #aaa; padding: 8px 0; }
+      .receipt-field { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 2px; }
+      .receipt-field-label { font-weight: 700; min-width: 55px; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #aaa; padding: 8px 0; font-size: 15px; font-weight: 700; }
+      .receipt-page-footer { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #666; }
+      .receipt-disclaimer { max-width: 180px; text-align: left; }
+      .receipt-logo-large img { max-width: 180px; max-height: 90px; display: block; margin: 20px auto 10px; }
+      .receipt-number-xl { font-size: 130px; font-weight: 900; text-align: center; line-height: 1; margin: 10px 0; }
+      .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 30px; }
+    </style></head><body>${content}</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); win.close(); }, 400);
   };
 
   if (isCashierNewRoute(route)) {
@@ -944,23 +970,20 @@ export default function App() {
                   ✕
                 </button>
                 <button type="button" className="modal-print" onClick={handleReceiptPrint}>
-                  הדפס / Печать
+                  Печать 🖨️
                 </button>
               </div>
-              <div className="modal-body receipt-pages">
-                {['מקור', 'העתק לקוח'].map((label) => (
+              <div className="modal-body receipt-pages" id="receipt-print-area">
+                {[{ label: 'מקור' }, { label: 'העתק ללקוח' }].map(({ label }) => (
                   <div key={label} className="receipt-page">
                     <div className="receipt-page-top">
-                      <span className="receipt-timestamp">{new Date().toLocaleString('he-IL')}</span>
-                      <span className="receipt-label-tag">{label}</span>
-                    </div>
-                    <div className="receipt-page-header">
                       <div className="receipt-logo">
                         <img src="/keshet.png" alt="Keshet Taamim" />
                       </div>
-                      <div className="receipt-number">№{receiptNumber}</div>
-                      <div className="receipt-subtitle">{receiptDepartmentName}</div>
+                      <span className="receipt-label-tag">{label}</span>
                     </div>
+                    <div className="receipt-number">№{receiptNumber}</div>
+                    <div className="receipt-subtitle">{receiptDepartmentName}</div>
                     <div className="receipt-items">
                       {receiptItems.map((item) => (
                         <div key={item.product_id} className="receipt-row">
@@ -982,9 +1005,6 @@ export default function App() {
                   </div>
                 ))}
                 <div className="receipt-page receipt-page-customer">
-                  <div className="receipt-page-top">
-                    <span className="receipt-timestamp">{new Date().toLocaleString('he-IL')}</span>
-                  </div>
                   <div className="receipt-logo receipt-logo-large">
                     <img src="/keshet.png" alt="Keshet Taamim" />
                   </div>
