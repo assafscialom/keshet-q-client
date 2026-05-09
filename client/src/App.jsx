@@ -645,28 +645,27 @@ export default function App() {
     const content = document.getElementById('receipt-print-area')?.innerHTML;
     if (!content) return;
     const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>
-      @page { margin: 8mm; }
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+      @page { size: 105mm auto; margin: 6mm 8mm; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: Arial, sans-serif; direction: rtl; width: 100%; }
-      .receipt-page { page-break-after: always; break-after: page; padding-bottom: 6mm; }
+      body { font-family: Arial, sans-serif; direction: rtl; width: 89mm; }
+      .receipt-page { page-break-after: always; break-after: page; padding-bottom: 4mm; }
       .receipt-page:last-child { page-break-after: avoid; break-after: avoid; }
-      .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6mm; }
-      .receipt-logo img { width: 90px; height: auto; object-fit: contain; }
-      .receipt-label-tag { font-size: 12pt; font-weight: 700; }
-      .receipt-number { font-size: 40pt; font-weight: 900; text-align: center; margin: 3mm 0 1mm; }
-      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 3mm 0; font-size: 12pt; font-weight: 700; }
-      .receipt-subtitle { font-size: 12pt; text-align: center; margin: 2mm 0 4mm; }
+      .receipt-page-top { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: flex-start; margin-bottom: 4mm; }
+      .receipt-logo img { width: 80px; height: auto; object-fit: contain; }
+      .receipt-label-tag { font-size: 11pt; font-weight: 700; }
+      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; margin: 2mm 0 1mm; }
+      .receipt-customer-row { display: flex; flex-direction: row-reverse; justify-content: space-between; border-top: 1px solid #888; padding: 2mm 0; font-size: 11pt; font-weight: 700; }
+      .receipt-subtitle { font-size: 11pt; text-align: center; margin: 2mm 0 3mm; }
       .receipt-items { width: 100%; }
-      .receipt-row { border-top: 1px solid #888; padding: 3mm 0; }
-      .receipt-field { display: flex; justify-content: space-between; font-size: 11pt; margin-bottom: 1mm; }
-      .receipt-field-label { font-weight: 700; min-width: 40px; }
-      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 5mm; border-top: 1px solid #ddd; padding-top: 2mm; font-size: 8pt; color: #666; }
-      .receipt-disclaimer { max-width: 50%; text-align: left; }
-      .receipt-logo-large img { width: 140px; height: auto; display: block; margin: 10mm auto 6mm; }
-      .receipt-number-xl { font-size: 90pt; font-weight: 900; text-align: center; line-height: 1; margin: 6mm 0; }
-      .receipt-page-customer .receipt-subtitle { font-size: 13pt; }
-      .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 15mm; font-size: 15pt; }
+      .receipt-row { border-top: 1px solid #888; padding: 2mm 0; }
+      .receipt-field { display: flex; flex-direction: row-reverse; justify-content: space-between; font-size: 10pt; margin-bottom: 1mm; }
+      .receipt-field-label { font-weight: 700; }
+      .receipt-page-footer { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: flex-end; margin-top: 4mm; border-top: 1px solid #ddd; padding-top: 2mm; font-size: 7pt; color: #666; }
+      .receipt-disclaimer { max-width: 50%; text-align: right; }
+      .receipt-logo-large img { width: 120px; height: auto; display: block; margin: 8mm auto 4mm; }
+      .receipt-number-xl { font-size: 80pt; font-weight: 900; text-align: center; line-height: 1; margin: 5mm 0; }
+      .receipt-page-customer .receipt-customer-row { flex-direction: row-reverse; justify-content: center; gap: 10mm; font-size: 14pt; }
     </style></head><body>${content}</body></html>`);
     win.document.close();
     win.focus();
