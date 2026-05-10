@@ -1020,7 +1020,7 @@ input {
 #receipt-print-only { display: none; }
 
 @media print {
-  @page { size: 105mm auto; margin: 6mm 8mm; }
+  @page { size: 80mm auto; margin: 3mm 4mm; }
 
   * { visibility: hidden !important; }
 
@@ -1029,9 +1029,8 @@ input {
     visibility: visible !important;
     position: fixed;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 89mm;
+    left: 0;
+    width: 100%;
     direction: rtl;
   }
 
