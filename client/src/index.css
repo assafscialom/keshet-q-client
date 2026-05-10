@@ -960,6 +960,7 @@ input {
 .receipt-field {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   font-size: 15px;
   margin-bottom: 3px;
 }
@@ -967,6 +968,11 @@ input {
 .receipt-field-label {
   font-weight: 700;
   min-width: 60px;
+}
+
+.receipt-field span:last-child {
+  text-align: right;
+  flex: 1;
 }
 
 .receipt-customer-row {
@@ -977,6 +983,11 @@ input {
   font-size: 16px;
   font-weight: 700;
   margin-top: 4px;
+}
+
+.receipt-customer-row span:last-child {
+  text-align: right;
+  flex: 1;
 }
 
 .receipt-page-footer {
