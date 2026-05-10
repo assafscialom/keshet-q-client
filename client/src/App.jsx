@@ -923,6 +923,8 @@ export default function App() {
                       cut_type_id: pendingCutTypeId || null,
                     });
                     setPendingProduct(null);
+                    setProductQuery('');
+                    setProductResults([]);
                   }}
                 >
                   + הוסף להזמנה
@@ -1339,14 +1341,18 @@ export default function App() {
                 <div className="helper-text">אין הזמנות להצגה</div>
               )}
             </div>
-            <button type="button" className="cashier-primary" onClick={() => navigate('/cashier-new')}>
-              צור הזמנה חדשה / Создать заказ
-            </button>
           </section>
           <aside className="cashier-side">
             <div className="cashier-logo">
               <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
+            <button type="button" className="cashier-primary cashier-primary-sticky" onClick={() => {
+              setLastAddedProduct(null);
+              setProductQuery('');
+              navigate('/cashier-new');
+            }}>
+              צור הזמנה חדשה / Создать заказ
+            </button>
             <div className="cashier-search">
               <input
                 placeholder="נא להכניס מספר הזמנה לחיפוש"

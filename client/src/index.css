@@ -584,6 +584,13 @@ input {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
+.cashier-primary-sticky {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  width: 100%;
+}
+
 .cashier-secondary {
   border: none;
   background: #bdbdbd;
