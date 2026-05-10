@@ -1017,47 +1017,38 @@ input {
 }
 
 /* ── Print styles ── */
+#receipt-print-only { display: none; }
+
 @media print {
   @page { size: 105mm auto; margin: 6mm 8mm; }
 
-  * { visibility: hidden; }
+  * { visibility: hidden !important; }
 
-  .modal-card.receipt-modal,
-  .modal-card.receipt-modal * { visibility: visible; }
-
-  .modal-overlay {
-    position: fixed !important;
-    inset: 0 !important;
-    background: white !important;
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    padding: 0 !important;
+  #receipt-print-only {
+    display: block !important;
+    visibility: visible !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 89mm;
+    direction: rtl;
   }
 
-  .modal-card.receipt-modal {
-    width: 89mm !important;
-    max-height: none !important;
-    overflow: visible !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-  }
+  #receipt-print-only * { visibility: visible !important; }
 
-  .modal-header { display: none !important; }
-
-  .receipt-page {
+  #receipt-print-only .receipt-page {
     page-break-after: always;
     break-after: page;
     border: none !important;
-    padding: 4mm 0;
+    padding: 4mm 2mm;
   }
 
-  .receipt-page:last-child {
+  #receipt-print-only .receipt-page:last-child {
     page-break-after: avoid;
     break-after: avoid;
   }
 
-  .receipt-number { direction: ltr; }
+  #receipt-print-only .receipt-number { direction: ltr; }
 }
 
 .cashier-side {
