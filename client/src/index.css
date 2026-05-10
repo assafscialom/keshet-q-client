@@ -1018,23 +1018,46 @@ input {
 
 /* ── Print styles ── */
 @media print {
-  body * { visibility: hidden; }
-  .receipt-pages,
-  .receipt-pages * { visibility: visible; }
-  .receipt-pages {
-    position: fixed;
-    inset: 0;
-    gap: 0;
+  @page { size: 105mm auto; margin: 6mm 8mm; }
+
+  * { visibility: hidden; }
+
+  .modal-card.receipt-modal,
+  .modal-card.receipt-modal * { visibility: visible; }
+
+  .modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: white !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
+
+  .modal-card.receipt-modal {
+    width: 89mm !important;
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .modal-header { display: none !important; }
+
   .receipt-page {
     page-break-after: always;
-    border: none;
-    padding: 20mm 15mm;
+    break-after: page;
+    border: none !important;
+    padding: 4mm 0;
   }
+
   .receipt-page:last-child {
     page-break-after: avoid;
+    break-after: avoid;
   }
-  .modal-header { display: none; }
+
+  .receipt-number { direction: ltr; }
 }
 
 .cashier-side {
