@@ -654,7 +654,7 @@ export default function App() {
       .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4mm; }
       .receipt-logo img { width: 80px; height: auto; object-fit: contain; }
       .receipt-label-tag { font-size: 11pt; font-weight: 700; }
-      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; margin: 2mm 0 1mm; }
+      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; margin: 2mm 0 1mm; direction: ltr; }
       .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 2mm 0; font-size: 11pt; font-weight: 700; }
       .receipt-subtitle { font-size: 11pt; text-align: center; margin: 2mm 0 3mm; }
       .receipt-items { width: 100%; }

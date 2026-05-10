@@ -925,6 +925,7 @@ input {
   line-height: 1;
   margin: 8px 0 4px;
   text-align: center;
+  direction: ltr;
 }
 
 .receipt-number-xl {
