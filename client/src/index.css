@@ -1029,7 +1029,8 @@ input {
     visibility: visible !important;
     position: fixed;
     top: 0;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 89mm;
     direction: rtl;
   }
