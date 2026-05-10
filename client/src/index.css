@@ -1022,19 +1022,13 @@ input {
 @media print {
   @page { size: 80mm auto; margin: 3mm 4mm; }
 
-  * { visibility: hidden !important; }
+  #root { display: none !important; }
 
   #receipt-print-only {
     display: block !important;
-    visibility: visible !important;
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     direction: rtl;
   }
-
-  #receipt-print-only * { visibility: visible !important; }
 
   #receipt-print-only .receipt-page {
     page-break-after: always;
@@ -1049,6 +1043,10 @@ input {
   }
 
   #receipt-print-only .receipt-number { direction: ltr; }
+  #receipt-print-only .receipt-page-top { display: flex; justify-content: space-between; }
+  #receipt-print-only .receipt-field { display: flex; justify-content: space-between; }
+  #receipt-print-only .receipt-customer-row { display: flex; justify-content: space-between; }
+  #receipt-print-only .receipt-page-footer { display: flex; justify-content: space-between; font-size: 8px; color: #666; margin-top: 3mm; }
 }
 
 .cashier-side {

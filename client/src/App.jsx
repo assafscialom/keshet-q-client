@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import apiClient from './api/client';
 import './index.css';
 
@@ -996,7 +997,7 @@ export default function App() {
             </div>
           </div>
         )}
-        {showReceipt && (
+        {showReceipt && createPortal(
           <div id="receipt-print-only" className="receipt-pages">
             {[{ label: 'מקור' }, { label: 'העתק ללקוח' }].map(({ label }) => (
               <div key={label} className="receipt-page">
@@ -1039,7 +1040,8 @@ export default function App() {
                 <span className="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     );
