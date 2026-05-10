@@ -853,11 +853,11 @@ export default function App() {
           </section>
         </div>
         <div className="mobile-scroll-controls">
-          <button type="button" onClick={scrollToBottom} aria-label="Scroll down">
-            ↓
-          </button>
           <button type="button" onClick={scrollToTop} aria-label="Scroll up">
             ↑
+          </button>
+          <button type="button" onClick={scrollToBottom} aria-label="Scroll down">
+            ↓
           </button>
         </div>
         {pendingProduct && (
