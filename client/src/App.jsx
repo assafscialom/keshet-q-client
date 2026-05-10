@@ -996,7 +996,7 @@ export default function App() {
                           <div className="receipt-field"><span className="receipt-field-label">מק"ט</span><span>{item.product_sku || '-'}</span></div>
                           <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{item.product_name}</span></div>
                           <div className="receipt-field"><span className="receipt-field-label">כמות</span><strong>{item.quantity || 1}{item.metric_type || ''}</strong></div>
-                          <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note || 'אין תגובה'}</span></div>
+                          {item.note ? <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note}</span></div> : null}
                         </div>
                       ))}
                     </div>
