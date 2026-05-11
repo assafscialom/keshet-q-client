@@ -1027,6 +1027,9 @@ export default function App() {
                   <span>{new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',', '')}</span>
                   <span className="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
                 </div>
+                <div style={{pageBreakAfter:'avoid',breakAfter:'avoid',height:0}}>
+                  <img src="data:image/png;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style={{display:'block',height:'5px',width:'100%'}} alt="" />
+                </div>
               </div>
             ))}
             <div className="receipt-page receipt-page-customer">
@@ -1040,6 +1043,9 @@ export default function App() {
               <div className="receipt-page-footer">
                 <span>{new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',', '')}</span>
                 <span className="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
+              </div>
+              <div style={{pageBreakAfter:'avoid',breakAfter:'avoid',height:0}}>
+                <img src="data:image/png;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style={{display:'block',height:'5px',width:'100%'}} alt="" />
               </div>
             </div>
           </div>,

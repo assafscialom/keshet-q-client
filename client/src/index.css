@@ -1028,13 +1028,13 @@ input {
 #receipt-print-only { display: none; }
 
 @media print {
-  @page { size: 80mm auto; margin: 3mm 4mm; }
+  @page { size: 80mm auto; margin: 0; }
 
   #root { display: none !important; }
 
   #receipt-print-only {
     display: block !important;
-    width: 100%;
+    width: 80mm;
     direction: rtl;
   }
 
