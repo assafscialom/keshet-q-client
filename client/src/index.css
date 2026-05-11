@@ -1042,12 +1042,15 @@ input {
     page-break-after: always;
     break-after: page;
     border: none !important;
-    padding: 4mm 2mm;
+    padding: 4mm 2mm 45px;
+    border-bottom: 2px dotted grey !important;
   }
 
   #receipt-print-only .receipt-page:last-child {
     page-break-after: avoid;
     break-after: avoid;
+    border-bottom: none !important;
+    padding-bottom: 4mm;
   }
 
   #receipt-print-only .receipt-number { direction: ltr; }
