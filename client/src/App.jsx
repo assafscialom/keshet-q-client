@@ -96,6 +96,7 @@ export default function App() {
   const [boardLoading, setBoardLoading] = useState(false);
   const [boardError, setBoardError] = useState('');
   const [boardOrders, setBoardOrders] = useState({ progress: [], done: [] });
+  const [clockTime, setClockTime] = useState(new Date());
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
@@ -112,6 +113,11 @@ export default function App() {
     const handlePopState = () => setRoute(window.location.pathname);
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => setClockTime(new Date()), 1000);
+    return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
@@ -1160,99 +1166,113 @@ export default function App() {
     const selectedNames = boardDepartments
       .filter((dept) => boardDepartmentIds.includes(Number(dept.id)))
       .map((dept) => dept.name);
+    if (showOrdersOnly) {
+      const timeStr = clockTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+      const dateStr = clockTime.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+      return (
+        <div className="board-tv">
+          <header className="board-tv-header">
+            <div className="board-tv-clock">
+              <div className="board-tv-time">{timeStr}</div>
+              <div className="board-tv-date">{dateStr}</div>
+            </div>
+            <div className="board-tv-brand">
+              <div className="board-tv-dept">{selectedNames.join(' / ')}</div>
+              <div className="board-tv-tagline">ברוכים הבאים — קחו מספר והמתינו לקריאה</div>
+            </div>
+            <div className="board-tv-logo">
+              <img src="/keshet.png" alt="Keshet Taamim" />
+            </div>
+          </header>
+          <div className="board-tv-columns">
+            <div className="board-tv-col">
+              <div className="board-tv-col-header">
+                <span className="board-tv-col-title">הזמנות מוכנות לאיסוף</span>
+                <span className="board-tv-badge board-tv-badge-green">{boardOrders.done.length} מוכנות</span>
+              </div>
+              <div className="board-tv-cards">
+                {boardOrders.done.map((order) => (
+                  <div key={order.id} className="board-tv-card board-tv-card-ready">
+                    <div className="board-tv-card-body">
+                      <div className="board-tv-card-name">{order.customer_name || '-'}</div>
+                    </div>
+                    <div className="board-tv-order-badge">
+                      <span className="board-tv-order-label">הזמנה</span>
+                      <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="board-tv-col">
+              <div className="board-tv-col-header">
+                <span className="board-tv-col-title">בתור</span>
+                <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} ממתינים</span>
+              </div>
+              <div className="board-tv-cards">
+                {boardOrders.progress.map((order, i) => (
+                  <div key={order.id} className={`board-tv-card${i === 0 ? ' board-tv-card-next' : ''}`}>
+                    <div className={`board-tv-num-badge${i === 0 ? ' next' : ''}`}>{i + 1}</div>
+                    <div className="board-tv-card-body">
+                      <div className="board-tv-card-name">{order.customer_name || `#${order.order_number ?? order.id}`}</div>
+                      {i === 0 && <div className="board-tv-next-label">הבא בתור</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="board-page">
         <header className="board-header">
-          {showOrdersOnly && (
-            <button
-              type="button"
-              className="back-button"
-              onClick={() => navigate(`/board/branch/${boardBranchId}`)}
-            >
-              ↩
-            </button>
-          )}
           <div className="board-logo">
             <img src="/keshet.png" alt="Keshet Taamim" />
           </div>
           <h1 className="board-title">מחלקה</h1>
         </header>
         <div className="board-shell">
-          {!showOrdersOnly && (
-            <>
-              <section className="board-card">
-                <div className="board-search">
-                  <input placeholder="חיפוש" />
-                </div>
-                <div className="board-list">
-                  {boardLoading && <div className="helper-text">טוען מחלקות...</div>}
-                  {boardError && <div className="helper-text error-text">{boardError}</div>}
-                  {!boardLoading &&
-                    !boardError &&
-                    boardDepartments.map((dept) => {
-                      const id = Number(dept.id);
-                      const isSelected = boardDepartmentIds.includes(id);
-                      return (
-                        <button
-                          key={dept.id}
-                          type="button"
-                          className={`board-row${isSelected ? ' selected' : ''}`}
-                          onClick={() =>
-                            setBoardDepartmentIds((prev) => {
-                              if (prev.includes(id)) {
-                                return prev.filter((value) => value !== id);
-                              }
-                              return [...prev, id];
-                            })
-                          }
-                        >
-                          {dept.name}
-                        </button>
-                      );
-                    })}
-                </div>
-              </section>
-              <button
-                type="button"
-                className="board-action"
-                onClick={() => handleBoardShowOrders()}
-                disabled={!boardDepartmentIds.length || boardLoading}
-              >
-                צג הזמנות
-              </button>
-            </>
-          )}
-          <section className="board-orders">
-            {showOrdersOnly && selectedNames.length > 0 && (
-              <div className="board-departments-title">{selectedNames.join(' / ')}</div>
-            )}
-            <div className="board-column wide">
-              <div className="board-column-title">בתהליך</div>
-              <div className="board-order-list">
-                {boardOrders.progress.map((order) => (
-                  <div key={order.id} className="board-order-card">
-                    <span className="board-order-number">#{order.order_number ?? order.id}</span>
-                    {order.customer_name && (
-                      <span className="board-order-customer">{order.customer_name}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+          <section className="board-card">
+            <div className="board-search">
+              <input placeholder="חיפוש" />
             </div>
-            <div className="board-column narrow">
-              <div className="board-column-title">מוכן</div>
-              <div className="board-order-list">
-                {boardOrders.done.map((order) => (
-                  <div key={order.id} className="board-order-card done">
-                    <span className="board-order-number">#{order.order_number ?? order.id}</span>
-                    {order.customer_name && (
-                      <span className="board-order-customer">{order.customer_name}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+            <div className="board-list">
+              {boardLoading && <div className="helper-text">טוען מחלקות...</div>}
+              {boardError && <div className="helper-text error-text">{boardError}</div>}
+              {!boardLoading &&
+                !boardError &&
+                boardDepartments.map((dept) => {
+                  const id = Number(dept.id);
+                  const isSelected = boardDepartmentIds.includes(id);
+                  return (
+                    <button
+                      key={dept.id}
+                      type="button"
+                      className={`board-row${isSelected ? ' selected' : ''}`}
+                      onClick={() =>
+                        setBoardDepartmentIds((prev) => {
+                          if (prev.includes(id)) return prev.filter((v) => v !== id);
+                          return [...prev, id];
+                        })
+                      }
+                    >
+                      {dept.name}
+                    </button>
+                  );
+                })}
             </div>
           </section>
+          <button
+            type="button"
+            className="board-action"
+            onClick={() => handleBoardShowOrders()}
+            disabled={!boardDepartmentIds.length || boardLoading}
+          >
+            צג הזמנות
+          </button>
         </div>
       </div>
     );
