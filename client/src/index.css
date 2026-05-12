@@ -366,7 +366,7 @@ input {
 }
 
 .board-tv-card-next {
-  background: linear-gradient(135deg, oklch(0.88 0.16 85) 0%, oklch(0.75 0.2 50) 100%);
+  background: #ffffff;
   border: none;
   animation: pulse-glow 2.4s ease-in-out infinite;
 }
@@ -376,7 +376,7 @@ input {
 }
 
 .board-tv-card-next .board-tv-next-label {
-  color: oklch(0.35 0.15 265);
+  color: oklch(0.45 0.17 265);
 }
 
 .board-tv-card-body {
@@ -417,26 +417,41 @@ input {
   color: oklch(0.85 0.17 85);
 }
 
+.board-tv-card-ready {
+  background: linear-gradient(180deg, oklch(0.48 0.17 265) 0%, oklch(0.42 0.17 265) 100%);
+  padding: 0;
+  overflow: hidden;
+}
+
+.board-tv-card-ready .board-tv-card-body {
+  background: oklch(0.74 0.18 150);
+  padding: 16px 20px;
+  flex: 1;
+}
+
+.board-tv-card-ready .board-tv-card-name {
+  color: oklch(0.15 0.04 260);
+}
+
 .board-tv-order-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: oklch(0.74 0.18 150);
-  border-radius: 12px;
-  padding: 6px 14px;
+  padding: 16px 18px;
   flex-shrink: 0;
+  gap: 2px;
 }
 
 .board-tv-order-label {
   font-size: 11px;
-  color: oklch(0.15 0.04 260 / 0.8);
+  color: oklch(0.92 0.03 250 / 0.7);
   font-weight: 600;
 }
 
 .board-tv-order-num {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  color: oklch(0.15 0.04 260);
+  color: #fff;
   direction: ltr;
 }
 

@@ -1187,6 +1187,23 @@ export default function App() {
           <div className="board-tv-columns">
             <div className="board-tv-col">
               <div className="board-tv-col-header">
+                <span className="board-tv-col-title">בתור</span>
+                <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} ממתינים</span>
+              </div>
+              <div className="board-tv-cards">
+                {boardOrders.progress.map((order, i) => (
+                  <div key={order.id} className={`board-tv-card${i === 0 ? ' board-tv-card-next' : ''}`}>
+                    <div className={`board-tv-num-badge${i === 0 ? ' next' : ''}`}>{i + 1}</div>
+                    <div className="board-tv-card-body">
+                      <div className="board-tv-card-name">{order.customer_name || `#${order.order_number ?? order.id}`}</div>
+                      {i === 0 && <div className="board-tv-next-label">הבא בתור</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="board-tv-col">
+              <div className="board-tv-col-header">
                 <span className="board-tv-col-title">הזמנות מוכנות לאיסוף</span>
                 <span className="board-tv-badge board-tv-badge-green">{boardOrders.done.length} מוכנות</span>
               </div>
@@ -1199,23 +1216,6 @@ export default function App() {
                     <div className="board-tv-order-badge">
                       <span className="board-tv-order-label">הזמנה</span>
                       <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="board-tv-col">
-              <div className="board-tv-col-header">
-                <span className="board-tv-col-title">בתור</span>
-                <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} ממתינים</span>
-              </div>
-              <div className="board-tv-cards">
-                {boardOrders.progress.map((order, i) => (
-                  <div key={order.id} className={`board-tv-card${i === 0 ? ' board-tv-card-next' : ''}`}>
-                    <div className={`board-tv-num-badge${i === 0 ? ' next' : ''}`}>{i + 1}</div>
-                    <div className="board-tv-card-body">
-                      <div className="board-tv-card-name">{order.customer_name || `#${order.order_number ?? order.id}`}</div>
-                      {i === 0 && <div className="board-tv-next-label">הבא בתור</div>}
                     </div>
                   </div>
                 ))}
