@@ -320,15 +320,17 @@ export default function App() {
     }
   };
 
-  const handleSorterCollected = async () => {
-    if (!sorterSelectedOrderId) return;
+  const handleSorterCollected = async (orderId) => {
+    if (!orderId) return;
     setSorterUpdateLoading(true);
     setSorterUpdateError('');
 
     try {
-      await apiClient.patch(`/orders/${sorterSelectedOrderId}`, { status_id: 2 });
-      setSorterSelectedOrderId(null);
-      setSorterItems([]);
+      await apiClient.patch(`/orders/${orderId}`, { status_id: 2 });
+      if (sorterSelectedOrderId === orderId) {
+        setSorterSelectedOrderId(null);
+        setSorterItems([]);
+      }
       await fetchSorterOrders(null, false);
     } catch (err) {
       console.error('Failed to update order status', err);
@@ -1102,27 +1104,7 @@ export default function App() {
                   ))}
               </div>
             </div>
-            <div className="sorter-actions">
-              <button
-                type="button"
-                className={`sorter-collected-button sorter-checkbox-button${sorterUpdateLoading ? ' loading' : ''}`}
-                onClick={handleSorterCollected}
-                disabled={!sorterSelectedOrderId || sorterUpdateLoading}
-                aria-label="נאסף"
-              >
-                {sorterUpdateLoading ? (
-                  <span className="sorter-spinner" />
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-              </button>
-              <span className="sorter-collected-label">
-                {sorterUpdateLoading ? 'מעדכן...' : 'נאסף'}
-              </span>
-              {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
-            </div>
+            {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
           </section>
           <aside className="cashier-side sorter-side">
             <div className="cashier-logo">
@@ -1134,17 +1116,36 @@ export default function App() {
             {!sorterLoading && !sorterError && (
               <div className="sorter-list">
                 {sorterOrders.map((order) => (
-                  <button
+                  <div
                     key={order.id}
-                    type="button"
-                    className="sorter-card"
-                    onClick={() => handleSorterOrderClick(order.id)}
+                    className={`sorter-card${sorterSelectedOrderId === order.id ? ' selected' : ''}`}
                   >
-                    <span className="sorter-order-number">#{order.order_number ?? order.id}</span>
-                    {order.customer_name && (
-                      <span className="sorter-order-customer">{order.customer_name}</span>
-                    )}
-                  </button>
+                    <button
+                      type="button"
+                      className="sorter-card-info"
+                      onClick={() => handleSorterOrderClick(order.id)}
+                    >
+                      <span className="sorter-order-number">#{order.order_number ?? order.id}</span>
+                      {order.customer_name && (
+                        <span className="sorter-order-customer">{order.customer_name}</span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="sorter-card-check"
+                      onClick={() => handleSorterCollected(order.id)}
+                      disabled={sorterUpdateLoading}
+                      aria-label="נאסף"
+                    >
+                      {sorterUpdateLoading && sorterSelectedOrderId === order.id ? (
+                        <span className="sorter-spinner" />
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
