@@ -32,7 +32,7 @@ class Orders extends Model
         $data = $data->whereDate('created_at', Carbon::today())->with(['status'])->orderBy('created_at','desc');
 
         if ($status_id == 2) {
-            $data = $data->where('updated_at', '>=', Carbon::now()->subMinutes(15));
+            $data = $data->where('updated_at', '>=', Carbon::now()->subMinutes(5));
         }
 
         return $data->get();

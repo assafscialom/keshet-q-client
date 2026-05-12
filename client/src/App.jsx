@@ -266,12 +266,12 @@ export default function App() {
     return () => window.clearInterval(intervalId);
   }, [boardRouteDepartmentIds, route]);
 
-  const fetchSorterOrders = async (cancelSignal) => {
-    setSorterLoading(true);
+  const fetchSorterOrders = async (cancelSignal, showLoading = false) => {
+    if (showLoading) setSorterLoading(true);
     setSorterError('');
 
     try {
-        const response = await apiClient.get(`/orders/lists/progress/${cashierDepartmentId}`);
+      const response = await apiClient.get(`/orders/lists/progress/${cashierDepartmentId}`);
       if (cancelSignal?.cancelled) return;
       setSorterOrders(response?.data ?? []);
     } catch (err) {
@@ -295,8 +295,8 @@ export default function App() {
     }
 
     const cancelSignal = { cancelled: false };
-    fetchSorterOrders(cancelSignal);
-    const intervalId = window.setInterval(() => fetchSorterOrders(cancelSignal), 10000);
+    fetchSorterOrders(cancelSignal, true);
+    const intervalId = window.setInterval(() => fetchSorterOrders(cancelSignal, false), 10000);
     return () => {
       cancelSignal.cancelled = true;
       window.clearInterval(intervalId);
@@ -329,7 +329,7 @@ export default function App() {
       await apiClient.patch(`/orders/${sorterSelectedOrderId}`, { status_id: 2 });
       setSorterSelectedOrderId(null);
       setSorterItems([]);
-      await fetchSorterOrders();
+      await fetchSorterOrders(null, false);
     } catch (err) {
       console.error('Failed to update order status', err);
       setSorterUpdateError('Failed to update order. Please try again.');
@@ -1105,12 +1105,22 @@ export default function App() {
             <div className="sorter-actions">
               <button
                 type="button"
-                className="sorter-collected-button"
+                className={`sorter-collected-button sorter-checkbox-button${sorterUpdateLoading ? ' loading' : ''}`}
                 onClick={handleSorterCollected}
                 disabled={!sorterSelectedOrderId || sorterUpdateLoading}
+                aria-label="נאסף"
               >
-                {sorterUpdateLoading ? 'מעדכן...' : 'נאסף'}
+                {sorterUpdateLoading ? (
+                  <span className="sorter-spinner" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
               </button>
+              <span className="sorter-collected-label">
+                {sorterUpdateLoading ? 'מעדכן...' : 'נאסף'}
+              </span>
               {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
             </div>
           </section>
