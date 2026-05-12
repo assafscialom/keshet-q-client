@@ -1195,8 +1195,12 @@ export default function App() {
                   <div key={order.id} className={`board-tv-card${i === 0 ? ' board-tv-card-next' : ''}`}>
                     <div className={`board-tv-num-badge${i === 0 ? ' next' : ''}`}>{i + 1}</div>
                     <div className="board-tv-card-body">
-                      <div className="board-tv-card-name">{order.customer_name || `#${order.order_number ?? order.id}`}</div>
+                      <div className="board-tv-card-name">{order.customer_name || '-'}</div>
                       {i === 0 && <div className="board-tv-next-label">הבא בתור</div>}
+                    </div>
+                    <div className="board-tv-order-badge">
+                      <span className="board-tv-order-label">הזמנה</span>
+                      <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
                     </div>
                   </div>
                 ))}

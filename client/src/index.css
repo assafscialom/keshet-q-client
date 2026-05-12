@@ -430,24 +430,36 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fff;
+  background: oklch(0.52 0.16 265);
   border-radius: 14px;
   padding: 8px 16px;
   flex-shrink: 0;
   gap: 1px;
 }
 
+.board-tv-card-ready .board-tv-order-badge {
+  background: #fff;
+}
+
 .board-tv-order-label {
   font-size: 11px;
-  color: oklch(0.45 0.17 265);
+  color: oklch(0.92 0.03 250 / 0.7);
   font-weight: 600;
 }
 
 .board-tv-order-num {
   font-size: 20px;
   font-weight: 800;
-  color: oklch(0.25 0.15 265);
+  color: #fff;
   direction: ltr;
+}
+
+.board-tv-card-ready .board-tv-order-label {
+  color: oklch(0.45 0.17 265);
+}
+
+.board-tv-card-ready .board-tv-order-num {
+  color: oklch(0.25 0.15 265);
 }
 
 @keyframes pulse-glow {
