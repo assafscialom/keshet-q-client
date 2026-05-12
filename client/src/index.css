@@ -350,6 +350,27 @@ input {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  animation: slide-in-right 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.board-tv-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.board-tv-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: oklch(0.6 0.16 265);
+  transition: background 0.3s;
+}
+
+.board-tv-dot.active {
+  background: oklch(0.85 0.17 85);
+  width: 20px;
+  border-radius: 4px;
 }
 
 .board-tv-card {

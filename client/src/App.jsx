@@ -97,6 +97,7 @@ export default function App() {
   const [boardError, setBoardError] = useState('');
   const [boardOrders, setBoardOrders] = useState({ progress: [], done: [] });
   const [clockTime, setClockTime] = useState(new Date());
+  const [boardProgressPage, setBoardProgressPage] = useState(0);
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
@@ -119,6 +120,16 @@ export default function App() {
     const id = setInterval(() => setClockTime(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const total = boardOrders.progress.length;
+    if (total <= 5) { setBoardProgressPage(0); return; }
+    const pages = Math.ceil(total / 5);
+    const id = setInterval(() => {
+      setBoardProgressPage((prev) => (prev + 1) % pages);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [boardOrders.progress.length]);
 
   useEffect(() => {
     if (!isCashierRoute(route)) {
@@ -1188,22 +1199,36 @@ export default function App() {
             <div className="board-tv-col">
               <div className="board-tv-col-header">
                 <span className="board-tv-col-title">בתור</span>
-                <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} ממתינים</span>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  {boardOrders.progress.length > 5 && (
+                    <div className="board-tv-dots">
+                      {Array.from({length: Math.ceil(boardOrders.progress.length / 5)}).map((_, p) => (
+                        <span key={p} className={`board-tv-dot${p === boardProgressPage ? ' active' : ''}`} />
+                      ))}
+                    </div>
+                  )}
+                  <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} ממתינים</span>
+                </div>
               </div>
-              <div className="board-tv-cards">
-                {boardOrders.progress.map((order, i) => (
-                  <div key={order.id} className={`board-tv-card${i === 0 ? ' board-tv-card-next' : ''}`}>
-                    <div className={`board-tv-num-badge${i === 0 ? ' next' : ''}`}>{i + 1}</div>
-                    <div className="board-tv-card-body">
-                      <div className="board-tv-card-name">{order.customer_name || '-'}</div>
-                      {i === 0 && <div className="board-tv-next-label">הבא בתור</div>}
-                    </div>
-                    <div className="board-tv-order-badge">
-                      <span className="board-tv-order-label">הזמנה</span>
-                      <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="board-tv-cards" key={boardProgressPage}>
+                {boardOrders.progress
+                  .slice(boardProgressPage * 5, boardProgressPage * 5 + 5)
+                  .map((order, i) => {
+                    const globalIndex = boardProgressPage * 5 + i;
+                    return (
+                      <div key={order.id} className={`board-tv-card${globalIndex === 0 ? ' board-tv-card-next' : ''}`}>
+                        <div className={`board-tv-num-badge${globalIndex === 0 ? ' next' : ''}`}>{globalIndex + 1}</div>
+                        <div className="board-tv-card-body">
+                          <div className="board-tv-card-name">{order.customer_name || '-'}</div>
+                          {globalIndex === 0 && <div className="board-tv-next-label">הבא בתור</div>}
+                        </div>
+                        <div className="board-tv-order-badge">
+                          <span className="board-tv-order-label">הזמנה</span>
+                          <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
             <div className="board-tv-col">
