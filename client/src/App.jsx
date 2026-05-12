@@ -1172,16 +1172,16 @@ export default function App() {
       return (
         <div className="board-tv">
           <header className="board-tv-header">
-            <div className="board-tv-clock">
-              <div className="board-tv-time">{timeStr}</div>
-              <div className="board-tv-date">{dateStr}</div>
+            <div className="board-tv-logo">
+              <img src="/keshet.png" alt="Keshet Taamim" />
             </div>
             <div className="board-tv-brand">
               <div className="board-tv-dept">{selectedNames.join(' / ')}</div>
               <div className="board-tv-tagline">ברוכים הבאים — קחו מספר והמתינו לקריאה</div>
             </div>
-            <div className="board-tv-logo">
-              <img src="/keshet.png" alt="Keshet Taamim" />
+            <div className="board-tv-clock">
+              <div className="board-tv-time">{timeStr}</div>
+              <div className="board-tv-date">{dateStr}</div>
             </div>
           </header>
           <div className="board-tv-columns">

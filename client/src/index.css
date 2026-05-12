@@ -228,13 +228,14 @@ input {
 /* ── Board TV screen ── */
 .board-tv {
   min-height: 100vh;
-  background: #0d1526;
+  background: radial-gradient(ellipse at top, oklch(0.5 0.18 265) 0%, oklch(0.32 0.17 265) 70%);
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   padding: 24px 32px;
   gap: 24px;
   direction: rtl;
-  font-family: Arial, sans-serif;
+  font-family: 'Heebo', 'Rubik', system-ui, sans-serif;
 }
 
 .board-tv-header {
@@ -242,42 +243,10 @@ input {
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
-}
-
-.board-tv-clock {
-  flex-shrink: 0;
-}
-
-.board-tv-time {
-  font-size: 56px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1;
-  direction: ltr;
-}
-
-.board-tv-date {
-  font-size: 16px;
-  color: #94a3b8;
-  margin-top: 4px;
-}
-
-.board-tv-brand {
-  flex: 1;
-  text-align: center;
-}
-
-.board-tv-dept {
-  font-size: 36px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
-}
-
-.board-tv-tagline {
-  font-size: 15px;
-  color: #94a3b8;
-  margin-top: 6px;
+  background: linear-gradient(180deg, oklch(0.42 0.17 265) 0%, oklch(0.38 0.18 265) 100%);
+  border-radius: 20px;
+  padding: 20px 28px;
+  border: 1px solid oklch(0.6 0.16 265 / 0.3);
 }
 
 .board-tv-logo {
@@ -294,6 +263,44 @@ input {
   width: 100px;
   height: auto;
   object-fit: contain;
+}
+
+.board-tv-brand {
+  flex: 1;
+  text-align: center;
+}
+
+.board-tv-dept {
+  font-size: 36px;
+  font-weight: 800;
+  color: oklch(0.99 0.01 250);
+  line-height: 1.2;
+}
+
+.board-tv-tagline {
+  font-size: 15px;
+  color: oklch(0.92 0.03 250);
+  margin-top: 6px;
+}
+
+.board-tv-clock {
+  flex-shrink: 0;
+  text-align: left;
+}
+
+.board-tv-time {
+  font-size: 56px;
+  font-weight: 800;
+  color: oklch(0.99 0.01 250);
+  line-height: 1;
+  direction: ltr;
+}
+
+.board-tv-date {
+  font-size: 16px;
+  color: oklch(0.92 0.03 250);
+  margin-top: 4px;
+  direction: rtl;
 }
 
 .board-tv-columns {
@@ -319,24 +326,24 @@ input {
 .board-tv-col-title {
   font-size: 20px;
   font-weight: 700;
-  color: #fff;
+  color: oklch(0.99 0.01 250);
 }
 
 .board-tv-badge {
   font-size: 13px;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
 }
 
 .board-tv-badge-green {
-  background: #22c55e;
-  color: #fff;
+  background: oklch(0.74 0.18 150);
+  color: oklch(0.15 0.04 260);
 }
 
 .board-tv-badge-gray {
-  background: #334155;
-  color: #cbd5e1;
+  background: oklch(0.5 0.17 265);
+  color: oklch(0.92 0.03 250);
 }
 
 .board-tv-cards {
@@ -346,18 +353,30 @@ input {
 }
 
 .board-tv-card {
-  background: #1e2a45;
-  border-radius: 14px;
+  background: linear-gradient(180deg, oklch(0.48 0.17 265) 0%, oklch(0.42 0.17 265) 100%);
+  border-radius: 16px;
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  border: 1px solid oklch(0.6 0.16 265 / 0.25);
+  box-shadow: 0 10px 40px -10px oklch(0 0 0 / 0.4);
+  animation: slide-in-right 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .board-tv-card-next {
-  background: #1e3460;
-  border: 1px solid #3b5bdb;
+  background: linear-gradient(135deg, oklch(0.88 0.16 85) 0%, oklch(0.75 0.2 50) 100%);
+  border: none;
+  animation: pulse-glow 2.4s ease-in-out infinite;
+}
+
+.board-tv-card-next .board-tv-card-name {
+  color: oklch(0.25 0.15 265);
+}
+
+.board-tv-card-next .board-tv-next-label {
+  color: oklch(0.35 0.15 265);
 }
 
 .board-tv-card-body {
@@ -370,12 +389,12 @@ input {
 .board-tv-card-name {
   font-size: 22px;
   font-weight: 700;
-  color: #fff;
+  color: oklch(0.99 0.01 250);
 }
 
 .board-tv-next-label {
   font-size: 13px;
-  color: #60a5fa;
+  color: oklch(0.92 0.03 250);
   font-weight: 600;
 }
 
@@ -383,8 +402,8 @@ input {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #334155;
-  color: #cbd5e1;
+  background: oklch(0.52 0.16 265);
+  color: oklch(0.92 0.03 250);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -394,15 +413,15 @@ input {
 }
 
 .board-tv-num-badge.next {
-  background: #3b5bdb;
-  color: #fff;
+  background: oklch(0.25 0.15 265);
+  color: oklch(0.85 0.17 85);
 }
 
 .board-tv-order-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #22c55e;
+  background: oklch(0.74 0.18 150);
   border-radius: 12px;
   padding: 6px 14px;
   flex-shrink: 0;
@@ -410,15 +429,25 @@ input {
 
 .board-tv-order-label {
   font-size: 11px;
-  color: rgba(255,255,255,0.8);
+  color: oklch(0.15 0.04 260 / 0.8);
   font-weight: 600;
 }
 
 .board-tv-order-num {
   font-size: 18px;
   font-weight: 800;
-  color: #fff;
+  color: oklch(0.15 0.04 260);
   direction: ltr;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 60px oklch(0.82 0.17 80 / 0.35), 0 20px 60px -10px oklch(0 0 0 / 0.5); }
+  50% { box-shadow: 0 0 120px oklch(0.82 0.17 80 / 0.55), 0 20px 60px -10px oklch(0 0 0 / 0.5); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 /* ── Board selector page ── */
