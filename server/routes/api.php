@@ -54,6 +54,8 @@ $api->version('v1', function($api){
             $api->post('{product_id}/cut-types', 'Api\Products\ProductsController@syncCutTypes');
         });
 
+        $api->post('print/{branch_id}', 'Api\Print\PrintController@print');
+
         $api->group(['prefix' => 'cut-types'], function ($api) {
             $api->get('/', 'Api\Products\CutTypesController@index');
             $api->post('/', 'Api\Products\CutTypesController@store');

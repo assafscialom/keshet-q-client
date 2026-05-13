@@ -670,8 +670,27 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleReceiptPrint = () => {
-    window.print();
+  const handleReceiptPrint = async () => {
+    try {
+      const response = await apiClient.post(`/print/${cashierBranchId}`, {
+        order_number:    receiptNumber,
+        customer_name:   receiptCustomerName,
+        department_name: receiptDepartmentName,
+        items: receiptItems.map((item) => ({
+          sku:       item.product_sku,
+          name:      item.product_name,
+          quantity:  item.quantity || 1,
+          metric:    item.metric_type || '',
+          note:      item.note || '',
+          cut_type:  item.cut_type_id ? (cutTypeOptions.find(c => c.id == item.cut_type_id)?.name || '') : '',
+        })),
+      });
+      if (!response?.data?.success) {
+        window.print();
+      }
+    } catch {
+      window.print();
+    }
   };
 
   if (isCashierNewRoute(route)) {

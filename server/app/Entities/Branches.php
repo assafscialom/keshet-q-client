@@ -9,5 +9,5 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Branches extends Model
 {
-
+    protected $fillable = ['name', 'address', 'printer_ip'];
 }
