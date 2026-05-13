@@ -676,7 +676,37 @@ export default function App() {
   };
 
   const handleReceiptPrint = () => {
-    setTimeout(() => window.print(), 300);
+    const content = document.getElementById('receipt-print-area')?.innerHTML ?? '';
+    const css = `
+      @page { margin: 5mm; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: Arial, sans-serif; direction: rtl; font-size: 13px; }
+      .receipt-page { page-break-after: always; break-after: page; padding-bottom: 40px; border-bottom: 2px dotted grey; }
+      .receipt-page:last-child { page-break-after: avoid; break-after: avoid; border-bottom: none; padding-bottom: 4mm; }
+      .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+      .receipt-logo img { max-width: 90px; height: auto; }
+      .receipt-label-tag { font-weight: 700; font-size: 14px; }
+      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
+      .receipt-number-xl { font-size: 80pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
+      .receipt-subtitle { text-align: center; font-size: 13px; margin: 4px 0 8px; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 14px; gap: 16px; }
+      .receipt-customer-row span:last-child { text-align: right; flex: 1; }
+      .receipt-items { width: 100%; }
+      .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
+      .receipt-field { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 13px; }
+      .receipt-field-label { font-weight: 700; }
+      .receipt-field span:last-child { text-align: right; flex: 1; }
+      .receipt-page-footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: #666; border-top: 1px solid #ddd; padding-top: 4px; }
+      .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
+      .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
+    `;
+    const win = window.open('', '_blank');
+    if (!win) { window.print(); return; }
+    win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"/><style>${css}</style></head><body>${content}</body></html>`);
+    win.document.close();
+    win.focus();
+    win.onload = () => { win.print(); };
+    setTimeout(() => { if (win && !win.closed) win.print(); }, 800);
   };
 
   if (isCashierNewRoute(route)) {
