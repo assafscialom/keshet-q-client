@@ -675,9 +675,9 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const buildPrintPage = (label, isCustomer = false) => {
+  const buildPrintPage = (label, snap, num, cust, dept, isCustomer = false) => {
     const ts = new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',','');
-    const itemsHtml = receiptItems.map(item => {
+    const itemsHtml = snap.map(item => {
       const cutName = item.cut_type_name || '';
       return `
         <div class="row"><span class="lbl">מק"ט</span><span>${item.product_sku || '-'}</span></div>
@@ -690,17 +690,17 @@ export default function App() {
     }).join('');
     if (isCustomer) return `
       <div style="text-align:center"><img src="${window.location.origin}/keshet.png" style="width:100px"/></div>
-      <div class="num">${receiptNumber}</div>
-      <div style="text-align:center;font-size:13px">${receiptDepartmentName}</div>
+      <div class="num">${num}</div>
+      <div style="text-align:center;font-size:13px">${dept}</div>
       <hr/>
-      <div class="row"><span class="lbl bold">שם לקוח</span><span>${receiptCustomerName}</span></div>
+      <div class="row"><span class="lbl bold">שם לקוח</span><span>${cust}</span></div>
       <div class="footer"><span>${ts}</span><span style="font-size:9px">תיתכן סטייה קלה</span></div>`;
     return `
       <div class="top"><img src="${window.location.origin}/keshet.png" style="width:80px"/><span class="lbl-tag">${label}</span></div>
-      <div class="num">№${receiptNumber}</div>
+      <div class="num">№${num}</div>
       <hr/>
-      <div class="row"><span class="lbl bold">שם לקוח</span><span>${receiptCustomerName}</span></div>
-      <div style="text-align:center;font-size:12px;margin-bottom:6px">${receiptDepartmentName}</div>
+      <div class="row"><span class="lbl bold">שם לקוח</span><span>${cust}</span></div>
+      <div style="text-align:center;font-size:12px;margin-bottom:6px">${dept}</div>
       <hr/>${itemsHtml}
       <div class="footer"><span>${ts}</span><span style="font-size:9px">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span></div>`;
   };
@@ -718,10 +718,14 @@ export default function App() {
   });
 
   const handleReceiptPrint = async () => {
+    const snap = receiptItems.map(i => ({ ...i }));
+    const num  = receiptNumber;
+    const cust = receiptCustomerName;
+    const dept = receiptDepartmentName;
     const pages = [
-      buildPrintPage('מקור'),
-      buildPrintPage('העתק ללקוח'),
-      buildPrintPage('', true),
+      buildPrintPage('מקור',        snap, num, cust, dept),
+      buildPrintPage('העתק ללקוח', snap, num, cust, dept),
+      buildPrintPage('',            snap, num, cust, dept, true),
     ];
     for (const page of pages) {
       await printSinglePage(page);
