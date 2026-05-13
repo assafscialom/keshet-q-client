@@ -1257,7 +1257,7 @@ export default function App() {
           <div className="board-tv-columns">
             <div className="board-tv-col">
               <div className="board-tv-col-header">
-                <span className="board-tv-col-title">בתור</span>
+                <span className="board-tv-col-title">בתור / Очередь</span>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   {boardOrders.progress.length > 5 && (
                     <div className="board-tv-dots">
@@ -1292,7 +1292,7 @@ export default function App() {
             </div>
             <div className="board-tv-col">
               <div className="board-tv-col-header">
-                <span className="board-tv-col-title">הזמנות מוכנות לאיסוף</span>
+                <span className="board-tv-col-title">מוכנות / Готово</span>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   {boardOrders.done.length > boardPageSize && (
                     <div className="board-tv-dots">
