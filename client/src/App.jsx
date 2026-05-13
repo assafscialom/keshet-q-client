@@ -670,26 +670,53 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const buildPrintPage = (label, isCustomer = false) => {
+    const ts = new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',','');
+    const itemsHtml = receiptItems.map(item => `
+      <div class="row"><span class="lbl">מק"ט</span><span>${item.product_sku || '-'}</span></div>
+      <div class="row"><span class="lbl">שם</span><span>${item.product_name}</span></div>
+      <div class="row"><span class="lbl bold">כמות</span><strong>${item.quantity || 1}${item.metric_type || ''}</strong></div>
+      ${item.note ? `<div class="row"><span class="lbl">הערה</span><span>${item.note}</span></div>` : ''}
+      <hr/>
+    `).join('');
+    if (isCustomer) return `
+      <div style="text-align:center"><img src="${window.location.origin}/keshet.png" style="width:100px"/></div>
+      <div class="num">${receiptNumber}</div>
+      <div style="text-align:center;font-size:13px">${receiptDepartmentName}</div>
+      <hr/>
+      <div class="row"><span class="lbl bold">שם לקוח</span><span>${receiptCustomerName}</span></div>
+      <div class="footer"><span>${ts}</span><span style="font-size:9px">תיתכן סטייה קלה</span></div>`;
+    return `
+      <div class="top"><img src="${window.location.origin}/keshet.png" style="width:80px"/><span class="lbl-tag">${label}</span></div>
+      <div class="num">№${receiptNumber}</div>
+      <hr/>
+      <div class="row"><span class="lbl bold">שם לקוח</span><span>${receiptCustomerName}</span></div>
+      <div style="text-align:center;font-size:12px;margin-bottom:6px">${receiptDepartmentName}</div>
+      <hr/>${itemsHtml}
+      <div class="footer"><span>${ts}</span><span style="font-size:9px">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span></div>`;
+  };
+
+  const printSinglePage = (bodyHtml) => new Promise((resolve) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:80mm;height:1px;border:none';
+    document.body.appendChild(iframe);
+    const css = `@page{size:80mm auto;margin:4mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;direction:rtl;font-size:13px}.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}.lbl-tag{font-weight:700;font-size:13px}.num{font-size:36pt;font-weight:900;text-align:center;direction:ltr;margin:4px 0}.row{display:flex;justify-content:space-between;margin-bottom:3px}.lbl{font-weight:700;min-width:50px}.bold{font-weight:700}.footer{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:#555}hr{border:none;border-top:1px solid #888;margin:6px 0}`;
+    iframe.contentDocument.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>${css}</style></head><body>${bodyHtml}</body></html>`);
+    iframe.contentDocument.close();
+    iframe.contentWindow.onafterprint = () => { document.body.removeChild(iframe); resolve(); };
+    setTimeout(() => { iframe.contentWindow.print(); }, 300);
+    setTimeout(() => { try { document.body.removeChild(iframe); } catch {} resolve(); }, 5000);
+  });
+
   const handleReceiptPrint = async () => {
-    try {
-      const response = await apiClient.post(`/print/${cashierBranchId}`, {
-        order_number:    receiptNumber,
-        customer_name:   receiptCustomerName,
-        department_name: receiptDepartmentName,
-        items: receiptItems.map((item) => ({
-          sku:       item.product_sku,
-          name:      item.product_name,
-          quantity:  item.quantity || 1,
-          metric:    item.metric_type || '',
-          note:      item.note || '',
-          cut_type:  item.cut_type_id ? (cutTypeOptions.find(c => c.id == item.cut_type_id)?.name || '') : '',
-        })),
-      });
-      if (!response?.data?.success) {
-        window.print();
-      }
-    } catch {
-      window.print();
+    const pages = [
+      buildPrintPage('מקור'),
+      buildPrintPage('העתק ללקוח'),
+      buildPrintPage('', true),
+    ];
+    for (const page of pages) {
+      await printSinglePage(page);
+      await new Promise(r => setTimeout(r, 800));
     }
   };
 

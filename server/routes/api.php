@@ -54,7 +54,10 @@ $api->version('v1', function($api){
             $api->post('{product_id}/cut-types', 'Api\Products\ProductsController@syncCutTypes');
         });
 
-        $api->post('print/{branch_id}', 'Api\Print\PrintController@print');
+        $api->post('print/{branch_id}', 'Api\Print\PrintController@queue');
+        $api->get('print/{branch_id}/poll', 'Api\Print\PrintController@poll');
+        $api->post('print/job/{job_id}/done', 'Api\Print\PrintController@done');
+        $api->post('print/job/{job_id}/failed', 'Api\Print\PrintController@failed');
 
         $api->group(['prefix' => 'cut-types'], function ($api) {
             $api->get('/', 'Api\Products\CutTypesController@index');

@@ -1,0 +1,9 @@
+{
+  "name": "keshet-print-agent",
+  "version": "1.0.0",
+  "description": "Print agent for Keshet Teamim thermal printer",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  }
+}
