@@ -324,9 +324,10 @@ input {
 }
 
 .board-tv-col-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 900;
   color: oklch(0.99 0.01 250);
+  letter-spacing: 0.5px;
 }
 
 .board-tv-badge {
