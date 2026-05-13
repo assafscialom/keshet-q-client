@@ -672,13 +672,17 @@ export default function App() {
 
   const buildPrintPage = (label, isCustomer = false) => {
     const ts = new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',','');
-    const itemsHtml = receiptItems.map(item => `
-      <div class="row"><span class="lbl">מק"ט</span><span>${item.product_sku || '-'}</span></div>
-      <div class="row"><span class="lbl">שם</span><span>${item.product_name}</span></div>
-      <div class="row"><span class="lbl bold">כמות</span><strong>${item.quantity || 1}${item.metric_type || ''}</strong></div>
-      ${item.note ? `<div class="row"><span class="lbl">הערה</span><span>${item.note}</span></div>` : ''}
-      <hr/>
-    `).join('');
+    const itemsHtml = receiptItems.map(item => {
+      const cutName = item.cut_type_id ? (cutTypeOptions.find(c => String(c.id) === String(item.cut_type_id))?.name || '') : '';
+      return `
+        <div class="row"><span class="lbl">מק"ט</span><span>${item.product_sku || '-'}</span></div>
+        <div class="row"><span class="lbl">שם</span><span>${item.product_name}</span></div>
+        <div class="row"><span class="lbl bold">כמות</span><strong>${item.quantity || 1}${item.metric_type || ''}</strong></div>
+        ${cutName ? `<div class="row"><span class="lbl">חיתוך</span><span>${cutName}</span></div>` : ''}
+        ${item.note ? `<div class="row"><span class="lbl">הערה</span><span>${item.note}</span></div>` : ''}
+        <hr/>
+      `;
+    }).join('');
     if (isCustomer) return `
       <div style="text-align:center"><img src="${window.location.origin}/keshet.png" style="width:100px"/></div>
       <div class="num">${receiptNumber}</div>
