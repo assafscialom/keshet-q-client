@@ -693,9 +693,9 @@ export default function App() {
       .receipt-customer-row span:last-child { text-align: right; flex: 1; }
       .receipt-items { width: 100%; }
       .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
-      .receipt-field { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 13px; }
-      .receipt-field-label { font-weight: 700; }
-      .receipt-field span:last-child { text-align: right; flex: 1; }
+      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 13px; }
+      .receipt-field-label { font-weight: 700; white-space: nowrap; }
+      .receipt-field span:not(.receipt-field-label), .receipt-field strong { text-align: right; }
       .receipt-page-footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: #666; border-top: 1px solid #ddd; padding-top: 4px; }
       .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
       .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
@@ -1033,7 +1033,7 @@ export default function App() {
                           <div className="receipt-field"><span className="receipt-field-label">מק"ט</span><span>{item.product_sku || '-'}</span></div>
                           <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{item.product_name}</span></div>
                           <div className="receipt-field"><span className="receipt-field-label">כמות</span><strong>{item.quantity || 1}{item.metric_type || ''}</strong></div>
-                          {item.cut_type_name ? <div className="receipt-field"><span className="receipt-field-label">חיתוך</span><span>{item.cut_type_name}</span></div> : null}
+                          {item.cut_type_name ? <div className="receipt-field"><span className="receipt-field-label">חיתוך </span><span>{item.cut_type_name}</span></div> : null}
                           {item.note ? <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note}</span></div> : null}
                         </div>
                       ))}
