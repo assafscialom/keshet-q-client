@@ -1389,21 +1389,24 @@ input {
 #receipt-print-only { display: none; }
 
 @media print {
-  @page { size: 80mm auto; margin: 0; }
+  @page { margin: 5mm; }
 
   #root { display: none !important; }
 
   #receipt-print-only {
     display: block !important;
-    width: 80mm;
+    width: 100%;
+    max-width: 100%;
     direction: rtl;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
   }
 
   #receipt-print-only .receipt-page {
     page-break-after: always;
     break-after: page;
     border: none !important;
-    padding: 4mm 2mm 45px;
+    padding: 4mm 0 40px;
     border-bottom: 2px dotted grey !important;
   }
 
@@ -1414,11 +1417,17 @@ input {
     padding-bottom: 4mm;
   }
 
-  #receipt-print-only .receipt-number { direction: ltr; }
-  #receipt-print-only .receipt-page-top { display: flex; justify-content: space-between; }
-  #receipt-print-only .receipt-field { display: flex; justify-content: space-between; }
-  #receipt-print-only .receipt-customer-row { display: flex; justify-content: space-between; }
-  #receipt-print-only .receipt-page-footer { display: flex; justify-content: space-between; font-size: 8px; color: #666; margin-top: 3mm; }
+  #receipt-print-only .receipt-number { direction: ltr; font-size: 36pt; font-weight: 900; text-align: center; }
+  #receipt-print-only .receipt-number-xl { direction: ltr; font-size: 80pt; font-weight: 900; text-align: center; }
+  #receipt-print-only .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4mm; }
+  #receipt-print-only .receipt-logo img { max-width: 90px; height: auto; }
+  #receipt-print-only .receipt-field { display: flex; justify-content: space-between; margin-bottom: 2px; }
+  #receipt-print-only .receipt-field-label { font-weight: 700; }
+  #receipt-print-only .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #aaa; padding: 3mm 0; font-weight: 700; }
+  #receipt-print-only .receipt-row { border-top: 1px solid #aaa; padding: 3mm 0; }
+  #receipt-print-only .receipt-subtitle { text-align: center; margin: 2mm 0; }
+  #receipt-print-only .receipt-page-footer { display: flex; justify-content: space-between; font-size: 8px; color: #666; margin-top: 3mm; border-top: 1px solid #ddd; padding-top: 2mm; }
+  #receipt-print-only .receipt-logo-large img { max-width: 140px; height: auto; display: block; margin: 0 auto 4mm; }
 }
 
 .cashier-side {
