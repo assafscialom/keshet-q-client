@@ -98,6 +98,9 @@ export default function App() {
   const [boardOrders, setBoardOrders] = useState({ progress: [], done: [] });
   const [clockTime, setClockTime] = useState(new Date());
   const [boardProgressPage, setBoardProgressPage] = useState(0);
+  const [boardDonePage, setBoardDonePage] = useState(0);
+  const [boardPageSize, setBoardPageSize] = useState(() => Number(localStorage.getItem('boardPageSize') || 5));
+  const [showBoardSettings, setShowBoardSettings] = useState(false);
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
@@ -123,13 +126,19 @@ export default function App() {
 
   useEffect(() => {
     const total = boardOrders.progress.length;
-    if (total <= 5) { setBoardProgressPage(0); return; }
-    const pages = Math.ceil(total / 5);
-    const id = setInterval(() => {
-      setBoardProgressPage((prev) => (prev + 1) % pages);
-    }, 5000);
+    if (total <= boardPageSize) { setBoardProgressPage(0); return; }
+    const pages = Math.ceil(total / boardPageSize);
+    const id = setInterval(() => setBoardProgressPage((p) => (p + 1) % pages), 5000);
     return () => clearInterval(id);
-  }, [boardOrders.progress.length]);
+  }, [boardOrders.progress.length, boardPageSize]);
+
+  useEffect(() => {
+    const total = boardOrders.done.length;
+    if (total <= boardPageSize) { setBoardDonePage(0); return; }
+    const pages = Math.ceil(total / boardPageSize);
+    const id = setInterval(() => setBoardDonePage((p) => (p + 1) % pages), 5000);
+    return () => clearInterval(id);
+  }, [boardOrders.done.length, boardPageSize]);
 
   useEffect(() => {
     if (!isCashierRoute(route)) {
@@ -1202,7 +1211,7 @@ export default function App() {
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   {boardOrders.progress.length > 5 && (
                     <div className="board-tv-dots">
-                      {Array.from({length: Math.ceil(boardOrders.progress.length / 5)}).map((_, p) => (
+                      {Array.from({length: Math.ceil(boardOrders.progress.length / boardPageSize)}).map((_, p) => (
                         <span key={p} className={`board-tv-dot${p === boardProgressPage ? ' active' : ''}`} />
                       ))}
                     </div>
@@ -1212,9 +1221,9 @@ export default function App() {
               </div>
               <div className="board-tv-cards" key={boardProgressPage}>
                 {boardOrders.progress
-                  .slice(boardProgressPage * 5, boardProgressPage * 5 + 5)
+                  .slice(boardProgressPage * boardPageSize, boardProgressPage * boardPageSize + boardPageSize)
                   .map((order, i) => {
-                    const globalIndex = boardProgressPage * 5 + i;
+                    const globalIndex = boardProgressPage * boardPageSize + i;
                     return (
                       <div key={order.id} className={`board-tv-card${globalIndex === 0 ? ' board-tv-card-next' : ''}`}>
                         <div className={`board-tv-num-badge${globalIndex === 0 ? ' next' : ''}`}>{globalIndex + 1}</div>
@@ -1234,23 +1243,58 @@ export default function App() {
             <div className="board-tv-col">
               <div className="board-tv-col-header">
                 <span className="board-tv-col-title">הזמנות מוכנות לאיסוף</span>
-                <span className="board-tv-badge board-tv-badge-green">{boardOrders.done.length} מוכנות</span>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  {boardOrders.done.length > boardPageSize && (
+                    <div className="board-tv-dots">
+                      {Array.from({length: Math.ceil(boardOrders.done.length / boardPageSize)}).map((_, p) => (
+                        <span key={p} className={`board-tv-dot${p === boardDonePage ? ' active' : ''}`} />
+                      ))}
+                    </div>
+                  )}
+                  <span className="board-tv-badge board-tv-badge-green">{boardOrders.done.length} מוכנות</span>
+                </div>
               </div>
-              <div className="board-tv-cards">
-                {boardOrders.done.map((order) => (
-                  <div key={order.id} className="board-tv-card board-tv-card-ready">
-                    <div className="board-tv-card-body">
-                      <div className="board-tv-card-name">{order.customer_name || '-'}</div>
+              <div className="board-tv-cards" key={boardDonePage}>
+                {boardOrders.done
+                  .slice(boardDonePage * boardPageSize, boardDonePage * boardPageSize + boardPageSize)
+                  .map((order) => (
+                    <div key={order.id} className="board-tv-card board-tv-card-ready">
+                      <div className="board-tv-card-body">
+                        <div className="board-tv-card-name">{order.customer_name || '-'}</div>
+                      </div>
+                      <div className="board-tv-order-badge">
+                        <span className="board-tv-order-label">הזמנה</span>
+                        <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
+                      </div>
                     </div>
-                    <div className="board-tv-order-badge">
-                      <span className="board-tv-order-label">הזמנה</span>
-                      <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </div>
+          <button className="board-tv-settings-btn" onClick={() => setShowBoardSettings(true)}>⚙️</button>
+          {showBoardSettings && (
+            <div className="board-tv-settings-overlay" onClick={() => setShowBoardSettings(false)}>
+              <div className="board-tv-settings-card" onClick={e => e.stopPropagation()}>
+                <div className="board-tv-settings-title">הגדרות תצוגה</div>
+                <label className="board-tv-settings-label">
+                  מספר הזמנות לפני סלייד
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={boardPageSize}
+                    className="board-tv-settings-input"
+                    onChange={e => {
+                      const v = Math.max(1, Number(e.target.value));
+                      setBoardPageSize(v);
+                      localStorage.setItem('boardPageSize', v);
+                    }}
+                  />
+                </label>
+                <button className="board-tv-settings-close" onClick={() => setShowBoardSettings(false)}>שמור וסגור</button>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
