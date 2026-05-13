@@ -707,6 +707,7 @@ export default function App() {
     win.focus();
     win.onload = () => { win.print(); };
     setTimeout(() => { if (win && !win.closed) win.print(); }, 800);
+    setTimeout(() => { setShowReceipt(false); navigate('/cashier-new'); }, 1500);
   };
 
   if (isCashierNewRoute(route)) {
