@@ -676,7 +676,7 @@ export default function App() {
   };
 
   const handleReceiptPrint = () => {
-    window.print();
+    setTimeout(() => window.print(), 300);
   };
 
   if (isCashierNewRoute(route)) {

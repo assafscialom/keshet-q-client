@@ -1391,7 +1391,7 @@ input {
 @media print {
   @page { margin: 5mm; }
 
-  #root { display: none !important; }
+  body > *:not(#receipt-print-only) { display: none !important; }
 
   #receipt-print-only {
     display: block !important;
