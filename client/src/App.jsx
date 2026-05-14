@@ -784,6 +784,8 @@ export default function App() {
                       setPendingNote('');
                       setPendingCutTypeId('');
                       setPendingQuantity(1);
+                      setProductQuery('');
+                      setProductResults([]);
                     }}
                   >
                     +
