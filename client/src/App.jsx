@@ -449,6 +449,26 @@ export default function App() {
 
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
+    let barcodeBuffer = '';
+    let barcodeTimer = null;
+    const handleBarcode = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      if (e.key === 'Enter') {
+        if (barcodeBuffer.length > 2) setProductQuery(barcodeBuffer);
+        barcodeBuffer = '';
+        clearTimeout(barcodeTimer);
+      } else if (e.key.length === 1) {
+        barcodeBuffer += e.key;
+        clearTimeout(barcodeTimer);
+        barcodeTimer = setTimeout(() => { barcodeBuffer = ''; }, 100);
+      }
+    };
+    document.addEventListener('keydown', handleBarcode);
+    return () => { document.removeEventListener('keydown', handleBarcode); clearTimeout(barcodeTimer); };
+  }, [route]);
+
+  useEffect(() => {
+    if (!isCashierNewRoute(route)) return;
     let cancelled = false;
     const fetchCutTypes = async () => {
       setCutTypeLoading(true);
@@ -761,18 +781,16 @@ export default function App() {
                     setProductResults([]);
                   }
                 }}
+                inputMode="none"
                 onTouchEnd={() => {
                   const now = Date.now();
                   if (now - lastTapRef.current < 350) {
-                    setSearchInputMode('text');
-                    productSearchRef.current?.focus();
-                  } else {
+                    productSearchRef.current?.removeAttribute('inputmode');
                     productSearchRef.current?.focus();
                   }
                   lastTapRef.current = now;
                 }}
-                onBlur={() => setSearchInputMode('none')}
-                inputMode={searchInputMode}
+                onBlur={() => productSearchRef.current?.setAttribute('inputmode','none')}
                 placeholder="פרג"
                 ref={productSearchRef}
               />
