@@ -705,9 +705,10 @@ export default function App() {
     win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"/><style>${css}</style></head><body>${content}</body></html>`);
     win.document.close();
     win.focus();
-    win.onload = () => { win.print(); };
-    setTimeout(() => { if (win && !win.closed) win.print(); }, 800);
-    setTimeout(() => { setShowReceipt(false); navigate('/cashier-new'); }, 1500);
+    win.onload = () => { win.print(); win.close(); };
+    setTimeout(() => { if (win && !win.closed) { win.print(); win.close(); } }, 800);
+    setShowReceipt(false);
+    navigate('/cashier-new');
   };
 
   if (isCashierNewRoute(route)) {
@@ -745,6 +746,16 @@ export default function App() {
               <input
                 value={productQuery}
                 onChange={(event) => setProductQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && productResults.length === 1) {
+                    setPendingProduct(productResults[0]);
+                    setPendingNote('');
+                    setPendingCutTypeId('');
+                    setPendingQuantity(1);
+                    setProductQuery('');
+                    setProductResults([]);
+                  }
+                }}
                 placeholder="פרג"
                 ref={productSearchRef}
               />
