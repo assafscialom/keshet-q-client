@@ -79,6 +79,8 @@ export default function App() {
   const [cutTypeLoading, setCutTypeLoading] = useState(false);
   const [cutTypeError, setCutTypeError] = useState('');
   const [pendingProduct, setPendingProduct] = useState(null);
+  const [searchInputMode, setSearchInputMode] = useState('none');
+  const lastTapRef = useRef(0);
   const [pendingNote, setPendingNote] = useState('');
   const [pendingCutTypeId, setPendingCutTypeId] = useState('');
   const [pendingQuantity, setPendingQuantity] = useState(1);
@@ -759,6 +761,18 @@ export default function App() {
                     setProductResults([]);
                   }
                 }}
+                onTouchEnd={() => {
+                  const now = Date.now();
+                  if (now - lastTapRef.current < 350) {
+                    setSearchInputMode('text');
+                    productSearchRef.current?.focus();
+                  } else {
+                    productSearchRef.current?.focus();
+                  }
+                  lastTapRef.current = now;
+                }}
+                onBlur={() => setSearchInputMode('none')}
+                inputMode={searchInputMode}
                 placeholder="פרג"
                 ref={productSearchRef}
               />
