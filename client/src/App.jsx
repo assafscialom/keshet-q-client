@@ -452,7 +452,6 @@ export default function App() {
     let barcodeBuffer = '';
     let barcodeTimer = null;
     const handleBarcode = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       if (e.key === 'Enter') {
         if (barcodeBuffer.length > 2) setProductQuery(barcodeBuffer);
         barcodeBuffer = '';
@@ -460,7 +459,7 @@ export default function App() {
       } else if (e.key.length === 1) {
         barcodeBuffer += e.key;
         clearTimeout(barcodeTimer);
-        barcodeTimer = setTimeout(() => { barcodeBuffer = ''; }, 100);
+        barcodeTimer = setTimeout(() => { barcodeBuffer = ''; }, 150);
       }
     };
     document.addEventListener('keydown', handleBarcode);
@@ -781,16 +780,6 @@ export default function App() {
                     setProductResults([]);
                   }
                 }}
-                inputMode="none"
-                onTouchEnd={() => {
-                  const now = Date.now();
-                  if (now - lastTapRef.current < 350) {
-                    productSearchRef.current?.removeAttribute('inputmode');
-                    productSearchRef.current?.focus();
-                  }
-                  lastTapRef.current = now;
-                }}
-                onBlur={() => productSearchRef.current?.setAttribute('inputmode','none')}
                 placeholder="פרג"
                 ref={productSearchRef}
               />
