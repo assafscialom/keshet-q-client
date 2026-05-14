@@ -696,7 +696,8 @@ export default function App() {
       .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 13px; }
       .receipt-field-label { font-weight: 700; white-space: nowrap; }
       .receipt-field span:not(.receipt-field-label), .receipt-field strong { text-align: right; }
-      .receipt-page-footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: #666; border-top: 1px solid #ddd; padding-top: 4px; }
+      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 10px; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
+      .receipt-disclaimer { font-weight: 700; text-align: right; }
       .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
       .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
     `;
@@ -705,10 +706,12 @@ export default function App() {
     win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"/><style>${css}</style></head><body>${content}</body></html>`);
     win.document.close();
     win.focus();
-    win.onload = () => { win.print(); win.close(); };
-    setTimeout(() => { if (win && !win.closed) { win.print(); win.close(); } }, 800);
-    setShowReceipt(false);
-    navigate('/cashier-new');
+    win.onload = () => {
+      win.print();
+      setTimeout(() => { try { win.close(); } catch {} }, 3000);
+    };
+    setTimeout(() => { if (win && !win.closed) win.print(); }, 800);
+    setTimeout(() => { setShowReceipt(false); navigate('/cashier-new'); }, 3500);
   };
 
   if (isCashierNewRoute(route)) {
