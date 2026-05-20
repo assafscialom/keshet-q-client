@@ -236,6 +236,7 @@ input {
   gap: 24px;
   direction: rtl;
   font-family: 'Heebo', 'Rubik', system-ui, sans-serif;
+  font-size: 120%;
 }
 
 .board-tv-header {

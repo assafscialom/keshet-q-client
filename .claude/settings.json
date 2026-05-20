@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:tv-shopper-screen.lovable.app)"
+      "WebFetch(domain:tv-shopper-screen.lovable.app)",
+      "Bash(ssh root@87.106.50.91 \"which php8.* php php8.3 php8.2 2>/dev/null; ls /usr/bin/php* 2>/dev/null\")"
     ]
   }
 }
