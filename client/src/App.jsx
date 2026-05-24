@@ -635,7 +635,7 @@ export default function App() {
   };
 
   const handleCreateOrder = async () => {
-    if (!customerName.trim() || orderItems.length === 0 || !cashierDepartmentId) return;
+    if (orderItems.length === 0 || !cashierDepartmentId) return;
     setCreateLoading(true);
     setCreateError('');
 
@@ -780,7 +780,7 @@ export default function App() {
                     setProductResults([]);
                   }
                 }}
-                placeholder="פרג"
+                placeholder="ברקוד"
                 ref={productSearchRef}
               />
               <button type="button" aria-label="Search">
@@ -906,7 +906,7 @@ export default function App() {
                                 >
                                   ✕
                                 </button>
-                                {[100, 150, 200, 250, 300, 350, 400].map((qty) => (
+                                {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000].map((qty) => (
                                   <button
                                     key={qty}
                                     type="button"
@@ -942,7 +942,7 @@ export default function App() {
                 type="button"
                 className="order-create-button"
                 onClick={handleCreateOrder}
-                disabled={!customerName.trim() || orderItems.length === 0 || createLoading}
+                disabled={orderItems.length === 0 || createLoading}
               >
                 {createLoading ? 'יוצר הזמנה...' : '✓ צור הזמנה / Создать'}
               </button>
@@ -984,7 +984,7 @@ export default function App() {
                     />
                   </div>
                   <div className="product-detail-presets">
-                    {[100, 150, 200, 250, 300, 350, 400].map((qty) => (
+                    {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000].map((qty) => (
                       <button key={qty} type="button" className="order-qty-option" onClick={() => setPendingQuantity(qty)}>
                         {qty}
                       </button>
