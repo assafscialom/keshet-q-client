@@ -1548,6 +1548,10 @@ input {
   font-weight: 600;
 }
 
+.cashier-search-text {
+  border-color: #888;
+}
+
 .basket-hint {
   background: #e7f1ff;
   color: #1f4ca0;

@@ -62,6 +62,8 @@ export default function App() {
   const [orderItemsErrorById, setOrderItemsErrorById] = useState({});
   const [productQuery, setProductQuery] = useState('');
   const [productResults, setProductResults] = useState([]);
+  const [barcodeInput, setBarcodeInput] = useState('');
+  const [textInput, setTextInput] = useState('');
   const [productLoading, setProductLoading] = useState(false);
   const [productError, setProductError] = useState('');
   const [orderItems, setOrderItems] = useState([]);
@@ -108,6 +110,7 @@ export default function App() {
   const [branchAddress, setBranchAddress] = useState('');
   const homePathRef = useRef(window.location.pathname);
   const productSearchRef = useRef(null);
+  const barcodeRef = useRef(null);
 
   const branchId = useMemo(() => findBranchId(route), [route]);
   const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
@@ -449,21 +452,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
-    let barcodeBuffer = '';
-    let barcodeTimer = null;
-    const handleBarcode = (e) => {
-      if (e.key === 'Enter') {
-        if (barcodeBuffer.length > 2) setProductQuery(barcodeBuffer);
-        barcodeBuffer = '';
-        clearTimeout(barcodeTimer);
-      } else if (e.key.length === 1) {
-        barcodeBuffer += e.key;
-        clearTimeout(barcodeTimer);
-        barcodeTimer = setTimeout(() => { barcodeBuffer = ''; }, 150);
-      }
-    };
-    document.addEventListener('keydown', handleBarcode);
-    return () => { document.removeEventListener('keydown', handleBarcode); clearTimeout(barcodeTimer); };
+    barcodeRef.current?.focus();
   }, [route]);
 
   useEffect(() => {
@@ -761,15 +750,27 @@ export default function App() {
               onChange={(event) => setCustomerName(event.target.value)}
             />
             <div className="cashier-search">
-              <button
-                type="button"
-                className="barcode-button"
-                onClick={() => productSearchRef.current?.focus()}
-                aria-label="Barcode scan"
-              />
               <input
-                value={productQuery}
-                onChange={(event) => setProductQuery(event.target.value)}
+                value={barcodeInput}
+                onChange={(e) => setBarcodeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && barcodeInput.trim()) {
+                    setProductQuery(barcodeInput.trim());
+                    setBarcodeInput('');
+                  }
+                }}
+                placeholder="סריקת ברקוד"
+                ref={barcodeRef}
+                autoComplete="off"
+              />
+            </div>
+            <div className="cashier-search cashier-search-text">
+              <input
+                value={textInput}
+                onChange={(e) => {
+                  setTextInput(e.target.value);
+                  setProductQuery(e.target.value);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' && productResults.length === 1) {
                     setPendingProduct(productResults[0]);
@@ -777,18 +778,18 @@ export default function App() {
                     setPendingCutTypeId('');
                     setPendingQuantity(1);
                     setProductQuery('');
+                    setTextInput('');
                     setProductResults([]);
                   }
                 }}
-                placeholder="ברקוד"
+                placeholder="חיפוש לפי שם"
                 ref={productSearchRef}
+                autoComplete="off"
               />
               <button type="button" aria-label="Search">
                 🔍
               </button>
             </div>
-            <div className="barcode-label">סריקת ברקוד</div>
-            <div className="cashier-hint">נא לרשום שם מוצר לחיפוש</div>
             {lastAddedProduct && (
               <div className="basket-hint">
                 נוסף לסל: {lastAddedProduct.name} #{lastAddedProduct.sku}
@@ -806,6 +807,7 @@ export default function App() {
                       setPendingCutTypeId('');
                       setPendingQuantity(1);
                       setProductQuery('');
+                      setTextInput('');
                       setProductResults([]);
                     }}
                   >
@@ -1025,7 +1027,9 @@ export default function App() {
                     });
                     setPendingProduct(null);
                     setProductQuery('');
+                    setTextInput('');
                     setProductResults([]);
+                    barcodeRef.current?.focus();
                   }}
                 >
                   + הוסף להזמנה
@@ -1533,6 +1537,7 @@ export default function App() {
             <button type="button" className="cashier-primary cashier-primary-sticky" onClick={() => {
               setLastAddedProduct(null);
               setProductQuery('');
+              setTextInput('');
               navigate('/cashier-new');
             }}>
               צור הזמנה חדשה / Создать заказ
