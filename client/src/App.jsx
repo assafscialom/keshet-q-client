@@ -64,6 +64,13 @@ export default function App() {
   const [productResults, setProductResults] = useState([]);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [textInput, setTextInput] = useState('');
+  const [cashierShiftName, setCashierShiftName] = useState(() => localStorage.getItem('cashierShiftName') || '');
+  const [showShiftModal, setShowShiftModal] = useState(false);
+  const [shiftNameInput, setShiftNameInput] = useState('');
+  const [showEndShiftConfirm, setShowEndShiftConfirm] = useState(false);
+  const [sorterShiftName, setSorterShiftName] = useState(() => localStorage.getItem('sorterShiftName') || '');
+  const [showSorterShiftModal, setShowSorterShiftModal] = useState(false);
+  const [sorterShiftNameInput, setSorterShiftNameInput] = useState('');
   const [productLoading, setProductLoading] = useState(false);
   const [productError, setProductError] = useState('');
   const [orderItems, setOrderItems] = useState([]);
@@ -86,6 +93,8 @@ export default function App() {
   const [pendingNote, setPendingNote] = useState('');
   const [pendingCutTypeId, setPendingCutTypeId] = useState('');
   const [pendingQuantity, setPendingQuantity] = useState(1);
+  const [pendingUnit, setPendingUnit] = useState("גר'");
+  const [sorterCheckedItems, setSorterCheckedItems] = useState(new Set());
   const [sorterOrders, setSorterOrders] = useState([]);
   const [sorterLoading, setSorterLoading] = useState(false);
   const [sorterError, setSorterError] = useState('');
@@ -111,6 +120,7 @@ export default function App() {
   const homePathRef = useRef(window.location.pathname);
   const productSearchRef = useRef(null);
   const barcodeRef = useRef(null);
+  const barcodeTriggered = useRef(false);
 
   const branchId = useMemo(() => findBranchId(route), [route]);
   const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
@@ -318,6 +328,14 @@ export default function App() {
 
   useEffect(() => {
     if (!isSorterRoute(route)) return;
+    if (!sorterShiftName) {
+      setSorterShiftNameInput('');
+      setShowSorterShiftModal(true);
+    }
+  }, [route, sorterShiftName]);
+
+  useEffect(() => {
+    if (!isSorterRoute(route)) return;
     if (!cashierDepartmentId) {
       setSorterOrders([]);
       setSorterSelectedOrderId(null);
@@ -335,7 +353,13 @@ export default function App() {
   }, [cashierDepartmentId, route]);
 
   const handleSorterOrderClick = async (orderId) => {
+    if (sorterSelectedOrderId === orderId) {
+      setSorterSelectedOrderId(null);
+      setSorterItems([]);
+      return;
+    }
     setSorterSelectedOrderId(orderId);
+    setSorterCheckedItems(new Set());
     setSorterItems([]);
     setSorterItemsLoading(true);
     setSorterItemsError('');
@@ -432,7 +456,20 @@ export default function App() {
           )}`,
         );
         if (cancelled) return;
-        setProductResults(response?.data?.data ?? []);
+        const results = response?.data?.data ?? [];
+        if (barcodeTriggered.current && results.length === 1) {
+          barcodeTriggered.current = false;
+          setProductResults([]);
+          setProductQuery('');
+          setPendingProduct(results[0]);
+          setPendingNote('');
+          setPendingCutTypeId('');
+          setPendingQuantity(1);
+          setPendingUnit("גר'");
+        } else {
+          barcodeTriggered.current = false;
+          setProductResults(results);
+        }
       } catch (err) {
         if (cancelled) return;
         console.error('Failed to search products', err);
@@ -452,8 +489,13 @@ export default function App() {
 
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
-    barcodeRef.current?.focus();
-  }, [route]);
+    if (!cashierShiftName) {
+      setShiftNameInput('');
+      setShowShiftModal(true);
+    } else {
+      barcodeRef.current?.focus();
+    }
+  }, [route, cashierShiftName]);
 
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
@@ -737,6 +779,16 @@ export default function App() {
             ↩
           </button>
           <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
+          <div className="shift-info">
+            <span className="shift-name-label">{cashierShiftName}</span>
+            <button
+              type="button"
+              className="end-shift-button"
+              onClick={() => setShowEndShiftConfirm(true)}
+            >
+              סגירת משמרת
+            </button>
+          </div>
         </header>
         <div className="cashier-shell">
           <aside className="cashier-side">
@@ -755,6 +807,7 @@ export default function App() {
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && barcodeInput.trim()) {
+                    barcodeTriggered.current = true;
                     setProductQuery(barcodeInput.trim());
                     setBarcodeInput('');
                   }
@@ -976,6 +1029,18 @@ export default function App() {
               <div className="product-detail-body">
                 <label className="product-detail-label">
                   כמות
+                  <div className="unit-toggle">
+                    {["גר'", "יח'"].map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        className={`unit-toggle-btn${pendingUnit === u ? ' active' : ''}`}
+                        onClick={() => { setPendingUnit(u); setPendingQuantity(u === "יח'" ? 1 : 100); }}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
                   <div className="order-qty-wrapper">
                     <input
                       className="order-qty-input"
@@ -986,7 +1051,10 @@ export default function App() {
                     />
                   </div>
                   <div className="product-detail-presets">
-                    {[100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000].map((qty) => (
+                    {(pendingUnit === "יח'"
+                      ? [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20]
+                      : [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]
+                    ).map((qty) => (
                       <button key={qty} type="button" className="order-qty-option" onClick={() => setPendingQuantity(qty)}>
                         {qty}
                       </button>
@@ -1022,6 +1090,7 @@ export default function App() {
                     handleAddProduct({
                       ...pendingProduct,
                       quantity: pendingQuantity || 1,
+                      metric_type: pendingUnit,
                       note: pendingNote,
                       cut_type_id: pendingCutTypeId || null,
                     });
@@ -1157,6 +1226,77 @@ export default function App() {
           </div>,
           document.body
         )}
+
+        {showShiftModal && (
+          <div className="modal-overlay shift-modal-overlay">
+            <div className="modal-box shift-modal-box" role="dialog" aria-modal="true">
+              <div className="shift-modal-logo">
+                <img src="/keshet.png" alt="Keshet Taamim" />
+              </div>
+              <h2 className="shift-modal-title">כניסה למשמרת</h2>
+              <p className="shift-modal-subtitle">הזן את שמך כדי להתחיל</p>
+              <input
+                className="shift-modal-input"
+                placeholder="שם מלא"
+                value={shiftNameInput}
+                onChange={(e) => setShiftNameInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && shiftNameInput.trim()) {
+                    const name = shiftNameInput.trim();
+                    localStorage.setItem('cashierShiftName', name);
+                    setCashierShiftName(name);
+                    setShowShiftModal(false);
+                    setTimeout(() => barcodeRef.current?.focus(), 100);
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="shift-modal-confirm"
+                disabled={!shiftNameInput.trim()}
+                onClick={() => {
+                  const name = shiftNameInput.trim();
+                  localStorage.setItem('cashierShiftName', name);
+                  setCashierShiftName(name);
+                  setShowShiftModal(false);
+                  setTimeout(() => barcodeRef.current?.focus(), 100);
+                }}
+              >
+                התחל משמרת
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showEndShiftConfirm && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-box shift-confirm-box">
+              <h2 className="shift-confirm-title">האם אתה בתוך פעולת יציאת משמרת?</h2>
+              <div className="shift-confirm-actions">
+                <button
+                  type="button"
+                  className="shift-confirm-yes"
+                  onClick={() => {
+                    localStorage.removeItem('cashierShiftName');
+                    setCashierShiftName('');
+                    setShowEndShiftConfirm(false);
+                    navigateHome();
+                  }}
+                >
+                  כן, צא ממשמרת
+                </button>
+                <button
+                  type="button"
+                  className="shift-confirm-no"
+                  onClick={() => setShowEndShiftConfirm(false)}
+                >
+                  לא, בטל
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1170,91 +1310,111 @@ export default function App() {
           </button>
           <h1 className="cashier-title">סדר פריטים</h1>
         </header>
-        <div className="cashier-shell">
-          <section className="cashier-main sorter-main">
-            {sorterSelectedOrderId && (
-              <div className="sorter-order-header">
-                הזמנה #{sorterOrders.find((o) => o.id === sorterSelectedOrderId)?.order_number ?? sorterSelectedOrderId}
-              </div>
-            )}
-            <div className="order-table sorter-table">
-              <div className="order-table-header">
-                <div>№</div>
-                <div>מקליט</div>
-                <div>שם</div>
-                <div>הערה</div>
-                <div>כמות</div>
-                <div>אופן חיתוך</div>
-              </div>
-              <div className="order-table-body">
-                {sorterItemsLoading && <div className="helper-text">טוען פריטים...</div>}
-                {sorterItemsError && <div className="helper-text error-text">{sorterItemsError}</div>}
-                {!sorterItemsLoading && !sorterItemsError && sorterItems.length === 0 && (
-                  <div className="helper-text">אין פריטים להצגה</div>
-                )}
-                {!sorterItemsLoading &&
-                  !sorterItemsError &&
-                  sorterItems.map((item, index) => (
-                    <div key={item.id || index} className="order-table-row">
-                      <div data-label="№">{index + 1}</div>
-                      <div data-label="מקליט">{item.product_name?.sku || '-'}</div>
-                      <div data-label="שם">{item.product_name?.name || '-'}</div>
-                      <div data-label="הערה">{item.comment || '-'}</div>
-                      <div data-label="כמות">{item.quantity_in_order ?? '-'}</div>
-                      <div data-label="אופן חיתוך">
-                        {item.cut_type?.name || item.cut_type_id || '-'}
-                      </div>
+        <div className="sorter-accordion-shell">
+          <div className="cashier-logo sorter-logo">
+            <img src="/keshet.png" alt="Keshet Taamim" />
+          </div>
+          {sorterLoading && <div className="helper-text">טוען הזמנות...</div>}
+          {sorterError && <div className="helper-text error-text">{sorterError}</div>}
+          {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
+          {!sorterLoading && !sorterError && (
+            <div className="sorter-accordion">
+              {sorterOrders.map((order) => {
+                const isOpen = sorterSelectedOrderId === order.id;
+                return (
+                  <div key={order.id} className={`sorter-accordion-item${isOpen ? ' open' : ''}`}>
+                    <div className="sorter-accordion-header">
+                      <button
+                        type="button"
+                        className="sorter-card-check"
+                        onClick={() => handleSorterCollected(order.id)}
+                        disabled={sorterUpdateLoading}
+                        aria-label="נאסף"
+                      >
+                        {sorterUpdateLoading && sorterSelectedOrderId === order.id ? (
+                          <span className="sorter-spinner" />
+                        ) : (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        className="sorter-accordion-trigger"
+                        onClick={() => handleSorterOrderClick(order.id)}
+                      >
+                        <span className="sorter-order-number">#{order.order_number ?? order.id}</span>
+                        {order.customer_name && (
+                          <span className="sorter-order-customer">{order.customer_name}</span>
+                        )}
+                      </button>
+                      <span className={`sorter-accordion-chevron${isOpen ? ' open' : ''}`}>▾</span>
                     </div>
-                  ))}
-              </div>
-            </div>
-            {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
-          </section>
-          <aside className="cashier-side sorter-side">
-            <div className="cashier-logo">
-              <img src="/keshet.png" alt="Keshet Taamim" />
-            </div>
-            <div className="sorter-pill">סדר פריטים</div>
-            {sorterLoading && <div className="helper-text">טוען הזמנות...</div>}
-            {sorterError && <div className="helper-text error-text">{sorterError}</div>}
-            {!sorterLoading && !sorterError && (
-              <div className="sorter-list">
-                {sorterOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className={`sorter-card${sorterSelectedOrderId === order.id ? ' selected' : ''}`}
-                  >
-                    <button
-                      type="button"
-                      className="sorter-card-info"
-                      onClick={() => handleSorterOrderClick(order.id)}
-                    >
-                      <span className="sorter-order-number">#{order.order_number ?? order.id}</span>
-                      {order.customer_name && (
-                        <span className="sorter-order-customer">{order.customer_name}</span>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      className="sorter-card-check"
-                      onClick={() => handleSorterCollected(order.id)}
-                      disabled={sorterUpdateLoading}
-                      aria-label="נאסף"
-                    >
-                      {sorterUpdateLoading && sorterSelectedOrderId === order.id ? (
-                        <span className="sorter-spinner" />
-                      ) : (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      )}
-                    </button>
+                    {isOpen && (
+                      <div className="sorter-accordion-body">
+                        {sorterItemsLoading && <div className="helper-text">טוען פריטים...</div>}
+                        {sorterItemsError && <div className="helper-text error-text">{sorterItemsError}</div>}
+                        {!sorterItemsLoading && !sorterItemsError && sorterItems.length === 0 && (
+                          <div className="helper-text">אין פריטים להצגה</div>
+                        )}
+                        {!sorterItemsLoading && !sorterItemsError && sorterItems.map((item, index) => (
+                          <div key={item.id || index} className="sorter-accordion-row">
+                            <span className="sorter-row-num">{index + 1}</span>
+                            <span className="sorter-row-name">{item.product_name?.name || '-'}</span>
+                            <span className="sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
+                            {item.cut_type?.name && <span className="sorter-row-cut">{item.cut_type.name}</span>}
+                            {item.comment && <span className="sorter-row-note">{item.comment}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-          </aside>
+                );
+              })}
+            </div>
+          )}
         </div>
+
+        {showSorterShiftModal && (
+          <div className="modal-overlay shift-modal-overlay">
+            <div className="modal-box shift-modal-box" role="dialog" aria-modal="true">
+              <div className="shift-modal-logo">
+                <img src="/keshet.png" alt="Keshet Taamim" />
+              </div>
+              <h2 className="shift-modal-title">כניסת אורז</h2>
+              <p className="shift-modal-subtitle">הזן את שמך כדי להתחיל</p>
+              <input
+                className="shift-modal-input"
+                placeholder="שם מלא"
+                value={sorterShiftNameInput}
+                onChange={(e) => setSorterShiftNameInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && sorterShiftNameInput.trim()) {
+                    const name = sorterShiftNameInput.trim();
+                    localStorage.setItem('sorterShiftName', name);
+                    setSorterShiftName(name);
+                    setShowSorterShiftModal(false);
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="shift-modal-confirm"
+                disabled={!sorterShiftNameInput.trim()}
+                onClick={() => {
+                  const name = sorterShiftNameInput.trim();
+                  localStorage.setItem('sorterShiftName', name);
+                  setSorterShiftName(name);
+                  setShowSorterShiftModal(false);
+                }}
+              >
+                התחל משמרת
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

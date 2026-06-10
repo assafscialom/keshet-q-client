@@ -471,10 +471,11 @@ input {
 }
 
 .board-tv-order-num {
-  font-size: 20px;
+  font-size: 32px;
   font-weight: 800;
   color: #fff;
   direction: ltr;
+  line-height: 1;
 }
 
 .board-tv-card-ready .board-tv-order-label {
@@ -734,9 +735,155 @@ input {
 
 .cashier-header {
   display: grid;
-  grid-template-columns: 48px 1fr 48px;
+  grid-template-columns: 48px 1fr auto;
   align-items: center;
+  gap: 8px;
   margin-bottom: 18px;
+}
+
+.shift-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.shift-name-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2b49a4;
+  white-space: nowrap;
+}
+
+.end-shift-button {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.end-shift-button:hover {
+  background: #b71c1c;
+}
+
+/* Shift name modal */
+.shift-modal-overlay {
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 100;
+}
+
+.shift-modal-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 36px 32px;
+  max-width: 360px;
+  width: 90%;
+}
+
+.shift-modal-logo img {
+  height: 56px;
+}
+
+.shift-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.shift-modal-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.shift-modal-input {
+  width: 100%;
+  border: 1px solid #2b49a4;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 16px;
+  text-align: right;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.shift-modal-input:focus {
+  border-color: #1a34a0;
+  box-shadow: 0 0 0 3px rgba(43, 73, 164, 0.15);
+}
+
+.shift-modal-confirm {
+  width: 100%;
+  background: #2b49a4;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shift-modal-confirm:disabled {
+  background: #b0bce8;
+  cursor: not-allowed;
+}
+
+/* End shift confirmation */
+.shift-confirm-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 28px;
+  max-width: 340px;
+  width: 90%;
+}
+
+.shift-confirm-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.shift-confirm-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.shift-confirm-yes {
+  flex: 1;
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shift-confirm-no {
+  flex: 1;
+  background: #eee;
+  color: #333;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .back-button {
@@ -1060,9 +1207,10 @@ input {
   border: 1px solid #cfcfcf;
   background: #f6f6f6;
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 16px;
   color: #444;
 }
 
@@ -1072,9 +1220,10 @@ input {
   border: none;
   background: #f3f3f3;
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   resize: vertical;
   font-family: inherit;
+  font-size: 16px;
 }
 
 .order-cut-type-select {
@@ -1082,8 +1231,9 @@ input {
   border: none;
   background: #f3f3f3;
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   text-align: right;
+  font-size: 16px;
 }
 
 .order-remove-button {
@@ -1138,6 +1288,7 @@ input {
   border-radius: 8px;
   padding: 10px 12px;
   text-align: right;
+  font-size: 17px;
 }
 
 .modal-overlay {
@@ -1148,6 +1299,12 @@ input {
   place-items: center;
   padding: 20px;
   z-index: 50;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
 }
 
 .modal-card {
@@ -1220,8 +1377,32 @@ input {
   flex-direction: column;
   gap: 6px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 17px;
   text-align: right;
+}
+
+.unit-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.unit-toggle-btn {
+  flex: 1;
+  border: 1.5px solid #cfcfcf;
+  background: #f6f6f6;
+  border-radius: 8px;
+  padding: 7px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+}
+
+.unit-toggle-btn.active {
+  border-color: #2b49a4;
+  background: #2b49a4;
+  color: #fff;
 }
 
 .product-detail-presets {
@@ -1260,7 +1441,7 @@ input {
 
 .receipt-label-tag {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 17px;
   color: #000;
 }
 
@@ -1306,7 +1487,7 @@ input {
 }
 
 .receipt-subtitle {
-  font-size: 16px;
+  font-size: 19px;
   color: #333;
   margin-bottom: 12px;
   text-align: center;
@@ -1331,7 +1512,7 @@ input {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 15px;
+  font-size: 18px;
   margin-bottom: 3px;
 }
 
@@ -1418,16 +1599,17 @@ input {
     padding-bottom: 4mm;
   }
 
-  #receipt-print-only .receipt-number { direction: ltr; font-size: 36pt; font-weight: 900; text-align: center; }
-  #receipt-print-only .receipt-number-xl { direction: ltr; font-size: 80pt; font-weight: 900; text-align: center; }
+  #receipt-print-only .receipt-number { direction: ltr; font-size: 42pt; font-weight: 900; text-align: center; }
+  #receipt-print-only .receipt-number-xl { direction: ltr; font-size: 90pt; font-weight: 900; text-align: center; }
   #receipt-print-only .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4mm; }
   #receipt-print-only .receipt-logo img { max-width: 90px; height: auto; }
-  #receipt-print-only .receipt-field { display: flex; justify-content: space-between; margin-bottom: 2px; }
+  #receipt-print-only .receipt-field { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 13pt; }
   #receipt-print-only .receipt-field-label { font-weight: 700; }
-  #receipt-print-only .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #aaa; padding: 3mm 0; font-weight: 700; }
+  #receipt-print-only .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #aaa; padding: 3mm 0; font-weight: 700; font-size: 13pt; }
   #receipt-print-only .receipt-row { border-top: 1px solid #aaa; padding: 3mm 0; }
-  #receipt-print-only .receipt-subtitle { text-align: center; margin: 2mm 0; }
-  #receipt-print-only .receipt-page-footer { display: flex; justify-content: space-between; font-size: 8px; color: #666; margin-top: 3mm; border-top: 1px solid #ddd; padding-top: 2mm; }
+  #receipt-print-only .receipt-subtitle { text-align: center; margin: 2mm 0; font-size: 13pt; }
+  #receipt-print-only .receipt-label-tag { font-size: 13pt; font-weight: 700; }
+  #receipt-print-only .receipt-page-footer { display: flex; justify-content: space-between; font-size: 9pt; color: #666; margin-top: 3mm; border-top: 1px solid #ddd; padding-top: 2mm; }
   #receipt-print-only .receipt-logo-large img { max-width: 140px; height: auto; display: block; margin: 0 auto 4mm; }
 }
 
@@ -1523,7 +1705,7 @@ input {
   border: none;
   outline: none;
   flex: 1;
-  font-size: 15px;
+  font-size: 17px;
   color: #4a4a4a;
   text-align: right;
 }
@@ -1621,12 +1803,13 @@ input {
 }
 
 .search-result-sku {
-  font-size: 14px;
+  font-size: 15px;
   color: #5c5c5c;
 }
 
 .search-result-name {
   font-weight: 600;
+  font-size: 17px;
   color: #303030;
 }
 
@@ -1649,40 +1832,133 @@ input {
   font-weight: 600;
 }
 
-.sorter-list {
+.sorter-accordion-shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sorter-logo {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.sorter-accordion {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.sorter-card {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
+.sorter-accordion-item {
   background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px 12px;
-  width: 100%;
+  border: 1.5px solid #dde3f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s;
 }
 
-.sorter-card.selected {
+.sorter-accordion-item.open {
   border-color: #1e6bff;
-  background: #f0f5ff;
+  box-shadow: 0 4px 16px rgba(30, 107, 255, 0.10);
 }
 
-.sorter-card-info {
+.sorter-accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  direction: rtl;
+}
+
+.sorter-accordion-trigger {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
   background: none;
   border: none;
   cursor: pointer;
   text-align: right;
-  color: #333;
+  color: #222;
   padding: 0;
+  font-family: inherit;
+}
+
+.sorter-accordion-chevron {
+  font-size: 20px;
+  color: #aaa;
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+.sorter-accordion-chevron.open {
+  transform: rotate(180deg);
+  color: #1e6bff;
+}
+
+.sorter-accordion-body {
+  border-top: 1px solid #eef0f6;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  direction: rtl;
+}
+
+.sorter-accordion-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+
+.sorter-accordion-row:last-child {
+  border-bottom: none;
+}
+
+.sorter-row-num {
+  color: #aaa;
+  font-size: 13px;
+  min-width: 18px;
+}
+
+.sorter-row-name {
+  flex: 1;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.sorter-row-qty {
+  font-weight: 700;
+  color: #1e6bff;
+}
+
+.sorter-row-cut {
+  background: #f0f4ff;
+  color: #1e6bff;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sorter-row-note {
+  color: #888;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.sorter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .sorter-card-check {
