@@ -1911,16 +1911,52 @@ input {
 
 .sorter-accordion-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   font-size: 15px;
   padding: 6px 0;
   border-bottom: 1px solid #f0f0f0;
   flex-wrap: wrap;
+  transition: opacity 0.2s;
 }
 
 .sorter-accordion-row:last-child {
   border-bottom: none;
+}
+
+.sorter-accordion-row.item-checked {
+  opacity: 0.45;
+}
+
+.sorter-accordion-row.item-checked .sorter-row-name {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.sorter-item-check {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  background: #f8f8f8;
+  color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sorter-item-check svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sorter-item-check.checked {
+  background: #1e6bff;
+  border-color: #1e6bff;
+  color: #fff;
 }
 
 .sorter-row-num {

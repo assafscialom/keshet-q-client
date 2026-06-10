@@ -1358,15 +1358,33 @@ export default function App() {
                         {!sorterItemsLoading && !sorterItemsError && sorterItems.length === 0 && (
                           <div className="helper-text">אין פריטים להצגה</div>
                         )}
-                        {!sorterItemsLoading && !sorterItemsError && sorterItems.map((item, index) => (
-                          <div key={item.id || index} className="sorter-accordion-row">
-                            <span className="sorter-row-num">{index + 1}</span>
-                            <span className="sorter-row-name">{item.product_name?.name || '-'}</span>
-                            <span className="sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
-                            {item.cut_type?.name && <span className="sorter-row-cut">{item.cut_type.name}</span>}
-                            {item.comment && <span className="sorter-row-note">{item.comment}</span>}
-                          </div>
-                        ))}
+                        {!sorterItemsLoading && !sorterItemsError && sorterItems.map((item, index) => {
+                          const itemKey = item.id ?? index;
+                          const checked = sorterCheckedItems.has(itemKey);
+                          return (
+                            <div key={itemKey} className={`sorter-accordion-row${checked ? ' item-checked' : ''}`}>
+                              <button
+                                type="button"
+                                className={`sorter-item-check${checked ? ' checked' : ''}`}
+                                onClick={() => setSorterCheckedItems((prev) => {
+                                  const next = new Set(prev);
+                                  checked ? next.delete(itemKey) : next.add(itemKey);
+                                  return next;
+                                })}
+                                aria-label="נארז"
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              </button>
+                              <span className="sorter-row-num">{index + 1}</span>
+                              <span className="sorter-row-name">{item.product_name?.name || '-'}</span>
+                              <span className="sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
+                              {item.cut_type?.name && <span className="sorter-row-cut">{item.cut_type.name}</span>}
+                              {item.comment && <span className="sorter-row-note">{item.comment}</span>}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
