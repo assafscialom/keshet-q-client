@@ -1463,7 +1463,7 @@ export default function App() {
           <div className="board-tv-columns">
             <div className="board-tv-col">
               <div className="board-tv-col-header">
-                <span className="board-tv-col-title">בתור / Очередь</span>
+                <span className="board-tv-col-title">בהכנה / Очередь</span>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   {boardOrders.progress.length > 5 && (
                     <div className="board-tv-dots">
@@ -1485,7 +1485,7 @@ export default function App() {
                         <div className={`board-tv-num-badge${globalIndex === 0 ? ' next' : ''}`}>{globalIndex + 1}</div>
                         <div className="board-tv-card-body">
                           <div className="board-tv-card-name">{order.customer_name || '-'}</div>
-                          {globalIndex === 0 && <div className="board-tv-next-label">הבא בתור</div>}
+                          {globalIndex === 0 && <div className="board-tv-next-label">הבא בהכנה</div>}
                         </div>
                         <div className="board-tv-order-badge">
                           <span className="board-tv-order-label">הזמנה</span>

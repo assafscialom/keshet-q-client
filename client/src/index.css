@@ -232,7 +232,7 @@ input {
   background-attachment: fixed;
   display: flex;
   flex-direction: column;
-  padding: 24px 32px;
+  padding: 24px 48px;
   gap: 24px;
   direction: rtl;
   font-family: 'Heebo', 'Rubik', system-ui, sans-serif;
