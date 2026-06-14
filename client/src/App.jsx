@@ -121,6 +121,7 @@ export default function App() {
   const productSearchRef = useRef(null);
   const barcodeRef = useRef(null);
   const barcodeTriggered = useRef(false);
+  const isReprintRef = useRef(false);
 
   const branchId = useMemo(() => findBranchId(route), [route]);
   const boardBranchId = useMemo(() => findBoardBranchId(route), [route]);
@@ -727,6 +728,24 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleReprintOrder = (order) => {
+    isReprintRef.current = true;
+    const items = orderItemsById[order.id] || [];
+    setReceiptNumber(order.order_number ?? order.id);
+    setReceiptCustomerName(order.customer_name || '');
+    setReceiptDepartmentName(order.department_name || '');
+    setReceiptItems(items.map((item) => ({
+      product_id:   item.id,
+      product_sku:  item.product_name?.sku || '',
+      product_name: item.product_name?.name || item.product_name || '',
+      quantity:     item.quantity_in_order ?? 1,
+      metric_type:  item.metric_type || '',
+      cut_type_name: item.cut_type?.name || '',
+      note:         item.comment || '',
+    })));
+    setShowReceipt(true);
+  };
+
   const handleReceiptPrint = () => {
     const content = document.getElementById('receipt-print-area')?.innerHTML ?? '';
     const css = `
@@ -763,7 +782,11 @@ export default function App() {
       setTimeout(() => { try { win.close(); } catch {} }, 3000);
     };
     setTimeout(() => { if (win && !win.closed) win.print(); }, 800);
-    setTimeout(() => { setShowReceipt(false); navigate('/cashier-new'); }, 3500);
+    setTimeout(() => {
+      setShowReceipt(false);
+      if (!isReprintRef.current) navigate('/cashier-new');
+      isReprintRef.current = false;
+    }, 3500);
   };
 
   if (isCashierNewRoute(route)) {
@@ -1660,10 +1683,11 @@ export default function App() {
                             </div>
                             <button
                               type="button"
-                              className="order-detail-close"
-                              onClick={() => setExpandedOrderId(null)}
+                              className="order-detail-reprint"
+                              onClick={() => handleReprintOrder(order)}
+                              disabled={orderItemsLoadingById[order.id] || !(orderItemsById[order.id]?.length)}
                             >
-                              סגירה / Закрыть
+                              🖨 הדפסה חוזרת
                             </button>
                           </div>
                           <div className="order-detail-list">
