@@ -729,21 +729,89 @@ export default function App() {
   };
 
   const handleReprintOrder = (order) => {
-    isReprintRef.current = true;
-    const items = orderItemsById[order.id] || [];
-    setReceiptNumber(order.order_number ?? order.id);
-    setReceiptCustomerName(order.customer_name || '');
-    setReceiptDepartmentName(order.department_name || '');
-    setReceiptItems(items.map((item) => ({
-      product_id:   item.id,
-      product_sku:  item.product_name?.sku || '',
-      product_name: item.product_name?.name || item.product_name || '',
-      quantity:     item.quantity_in_order ?? 1,
-      metric_type:  item.metric_type || '',
-      cut_type_name: item.cut_type?.name || '',
-      note:         item.comment || '',
-    })));
-    setShowReceipt(true);
+    const rawItems = orderItemsById[order.id] || [];
+    const orderNum  = order.order_number ?? order.id;
+    const customer  = order.customer_name || '';
+    const dept      = order.department_name || '';
+    const dateStr   = new Date().toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }).replace(',', '');
+    const logoSrc   = `${window.location.origin}/keshet.png`;
+
+    const itemsHtml = rawItems.map((item, i) => {
+      const name    = item.product_name?.name || item.product_name || '-';
+      const sku     = item.product_name?.sku || '-';
+      const qty     = item.quantity_in_order ?? 1;
+      const metric  = item.metric_type ? ' ' + item.metric_type : '';
+      const cut     = item.cut_type?.name || '';
+      const note    = item.comment || '';
+      return `<div class="receipt-row">
+        <div class="receipt-field"><span class="receipt-field-label">מק"ט</span><span>${sku}</span></div>
+        <div class="receipt-field"><span class="receipt-field-label">שם</span><span>${name}</span></div>
+        <div class="receipt-field"><span class="receipt-field-label">כמות</span><strong>${qty}${metric}</strong></div>
+        ${cut  ? `<div class="receipt-field"><span class="receipt-field-label">חיתוך </span><span>${cut}</span></div>` : ''}
+        ${note ? `<div class="receipt-field"><span class="receipt-field-label">הערה</span><span>${note}</span></div>` : ''}
+      </div>`;
+    }).join('');
+
+    const buildPage = (label) => `
+      <div class="receipt-page">
+        <div class="receipt-page-top">
+          <div class="receipt-label-tag">${label}</div>
+          <div class="receipt-logo"><img src="${logoSrc}" alt="קשת טעמים"/></div>
+        </div>
+        <div class="receipt-number">№${orderNum}</div>
+        ${customer ? `<div class="receipt-customer-row"><span class="receipt-field-label">שם לקוח</span><span>${customer}</span></div>` : ''}
+        ${dept ? `<div style="text-align:center;margin:4px 0 8px;font-size:13px;">${dept}</div>` : ''}
+        <div class="receipt-items">${itemsHtml}</div>
+        <div class="receipt-page-footer">
+          <span>${dateStr}</span>
+          <span class="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
+        </div>
+      </div>`;
+
+    const customerPage = `
+      <div class="receipt-page receipt-page-customer">
+        <div class="receipt-logo-large"><img src="${logoSrc}" alt="קשת טעמים"/></div>
+        <div class="receipt-number-xl">${orderNum}</div>
+        ${dept ? `<div style="text-align:center;margin:4px 0 8px;font-size:13px;">${dept}</div>` : ''}
+        ${customer ? `<div class="receipt-customer-row"><span class="receipt-field-label">שם לקוח</span><span>${customer}</span></div>` : ''}
+        <div class="receipt-page-footer">
+          <span>${dateStr}</span>
+          <span class="receipt-disclaimer">תיתכן סטייה קלה בין הכמות המוזמנת לכמות המסופקת</span>
+        </div>
+      </div>`;
+
+    const content = buildPage('מקור') + buildPage('העתק ללקוח') + customerPage;
+
+    const css = `
+      @page { margin: 5mm; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: Arial, sans-serif; direction: rtl; font-size: 13px; }
+      .receipt-page { page-break-after: always; break-after: page; padding-bottom: 40px; border-bottom: 2px dotted grey; }
+      .receipt-page:last-child { page-break-after: avoid; break-after: avoid; border-bottom: none; padding-bottom: 4mm; }
+      .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+      .receipt-logo img { max-width: 90px; height: auto; }
+      .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
+      .receipt-label-tag { font-weight: 700; font-size: 14px; }
+      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
+      .receipt-number-xl { font-size: 80pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 14px; gap: 16px; }
+      .receipt-customer-row span:last-child { text-align: right; flex: 1; }
+      .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
+      .receipt-items { width: 100%; }
+      .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
+      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 13px; }
+      .receipt-field-label { font-weight: 700; white-space: nowrap; }
+      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 10px; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
+      .receipt-disclaimer { font-weight: 700; text-align: right; }
+    `;
+
+    const win = window.open('', '_blank');
+    if (!win) { window.print(); return; }
+    win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"/><style>${css}</style></head><body>${content}</body></html>`);
+    win.document.close();
+    win.focus();
+    win.onload = () => { win.print(); setTimeout(() => { try { win.close(); } catch {} }, 3000); };
+    setTimeout(() => { if (win && !win.closed) win.print(); }, 800);
   };
 
   const handleReceiptPrint = () => {
