@@ -490,11 +490,14 @@ export default function App() {
 
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
+    barcodeRef.current?.focus();
+  }, [route]);
+
+  useEffect(() => {
+    if (!isCashierRoute(route) || isCashierNewRoute(route)) return;
     if (!cashierShiftName) {
       setShiftNameInput('');
       setShowShiftModal(true);
-    } else {
-      barcodeRef.current?.focus();
     }
   }, [route, cashierShiftName]);
 
@@ -860,18 +863,22 @@ export default function App() {
   if (isCashierNewRoute(route)) {
     return (
       <div className="cashier-page">
-        <header className="cashier-header">
-          <button
-            type="button"
-            className="back-button"
-            onClick={navigateHome}
-            aria-label="Back"
-          >
-            ↩
-          </button>
-          <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
-          <div className="shift-info">
-            <span className="shift-name-label">{cashierShiftName}</span>
+        <header className="cashier-header cashier-header-new">
+          <div className="cashier-header-row1">
+            <button
+              type="button"
+              className="back-button"
+              onClick={() => navigate('/cashier')}
+              aria-label="Back"
+            >
+              ↩
+            </button>
+            <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
+          </div>
+          <div className="cashier-header-row2">
+            {cashierShiftName && (
+              <span className="shift-name-label">👤 {cashierShiftName}</span>
+            )}
             <button
               type="button"
               className="end-shift-button"
@@ -1318,76 +1325,6 @@ export default function App() {
           document.body
         )}
 
-        {showShiftModal && (
-          <div className="modal-overlay shift-modal-overlay">
-            <div className="modal-box shift-modal-box" role="dialog" aria-modal="true">
-              <div className="shift-modal-logo">
-                <img src="/keshet.png" alt="Keshet Taamim" />
-              </div>
-              <h2 className="shift-modal-title">כניסה למשמרת</h2>
-              <p className="shift-modal-subtitle">הזן את שמך כדי להתחיל</p>
-              <input
-                className="shift-modal-input"
-                placeholder="שם מלא"
-                value={shiftNameInput}
-                onChange={(e) => setShiftNameInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && shiftNameInput.trim()) {
-                    const name = shiftNameInput.trim();
-                    localStorage.setItem('cashierShiftName', name);
-                    setCashierShiftName(name);
-                    setShowShiftModal(false);
-                    setTimeout(() => barcodeRef.current?.focus(), 100);
-                  }
-                }}
-                autoFocus
-              />
-              <button
-                type="button"
-                className="shift-modal-confirm"
-                disabled={!shiftNameInput.trim()}
-                onClick={() => {
-                  const name = shiftNameInput.trim();
-                  localStorage.setItem('cashierShiftName', name);
-                  setCashierShiftName(name);
-                  setShowShiftModal(false);
-                  setTimeout(() => barcodeRef.current?.focus(), 100);
-                }}
-              >
-                התחל משמרת
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showEndShiftConfirm && (
-          <div className="modal-overlay" role="dialog" aria-modal="true">
-            <div className="modal-box shift-confirm-box">
-              <h2 className="shift-confirm-title">האם אתה בתוך פעולת יציאת משמרת?</h2>
-              <div className="shift-confirm-actions">
-                <button
-                  type="button"
-                  className="shift-confirm-yes"
-                  onClick={() => {
-                    localStorage.removeItem('cashierShiftName');
-                    setCashierShiftName('');
-                    setShowEndShiftConfirm(false);
-                    navigateHome();
-                  }}
-                >
-                  כן, צא ממשמרת
-                </button>
-                <button
-                  type="button"
-                  className="shift-confirm-no"
-                  onClick={() => setShowEndShiftConfirm(false)}
-                >
-                  לא, בטל
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -1825,6 +1762,46 @@ export default function App() {
             <div className="cashier-hint">חיפוש הזמנה</div>
           </aside>
         </div>
+
+        {showShiftModal && (
+          <div className="modal-overlay shift-modal-overlay">
+            <div className="modal-box shift-modal-box" role="dialog" aria-modal="true">
+              <div className="shift-modal-logo">
+                <img src="/keshet.png" alt="Keshet Taamim" />
+              </div>
+              <h2 className="shift-modal-title">כניסה למשמרת</h2>
+              <p className="shift-modal-subtitle">הזן את שמך כדי להתחיל</p>
+              <input
+                className="shift-modal-input"
+                placeholder="שם מלא"
+                value={shiftNameInput}
+                onChange={(e) => setShiftNameInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && shiftNameInput.trim()) {
+                    const name = shiftNameInput.trim();
+                    localStorage.setItem('cashierShiftName', name);
+                    setCashierShiftName(name);
+                    setShowShiftModal(false);
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="shift-modal-confirm"
+                disabled={!shiftNameInput.trim()}
+                onClick={() => {
+                  const name = shiftNameInput.trim();
+                  localStorage.setItem('cashierShiftName', name);
+                  setCashierShiftName(name);
+                  setShowShiftModal(false);
+                }}
+              >
+                התחל משמרת
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
