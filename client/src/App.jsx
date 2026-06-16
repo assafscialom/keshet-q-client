@@ -378,6 +378,19 @@ export default function App() {
 
   const handleSorterCollected = async (orderId) => {
     if (!orderId) return;
+
+    if (sorterSelectedOrderId !== orderId) {
+      setSorterUpdateError('יש לפתוח את ההזמנה ולסמן את כל הפריטים לפני הסגירה');
+      return;
+    }
+
+    const totalItems = sorterItems.length;
+    const checkedCount = sorterCheckedItems.size;
+    if (totalItems === 0 || checkedCount < totalItems) {
+      setSorterUpdateError(`נאספו ${checkedCount} מתוך ${totalItems} פריטים — יש לסמן את כולם`);
+      return;
+    }
+
     setSorterUpdateLoading(true);
     setSorterUpdateError('');
 
@@ -795,14 +808,14 @@ export default function App() {
       .receipt-logo img { max-width: 90px; height: auto; }
       .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
       .receipt-label-tag { font-weight: 700; font-size: 14px; }
-      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
-      .receipt-number-xl { font-size: 80pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
-      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 14px; gap: 16px; }
+      .receipt-number { font-size: 48pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
+      .receipt-number-xl { font-size: 100pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 15px; gap: 16px; }
       .receipt-customer-row span:last-child { text-align: right; flex: 1; }
       .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
       .receipt-items { width: 100%; }
       .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
-      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 13px; }
+      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 15px; }
       .receipt-field-label { font-weight: 700; white-space: nowrap; }
       .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 10px; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
       .receipt-disclaimer { font-weight: 700; text-align: right; }
@@ -828,14 +841,14 @@ export default function App() {
       .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
       .receipt-logo img { max-width: 90px; height: auto; }
       .receipt-label-tag { font-weight: 700; font-size: 14px; }
-      .receipt-number { font-size: 36pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
-      .receipt-number-xl { font-size: 80pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
+      .receipt-number { font-size: 48pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
+      .receipt-number-xl { font-size: 100pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
       .receipt-subtitle { text-align: center; font-size: 13px; margin: 4px 0 8px; }
-      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 14px; gap: 16px; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 15px; gap: 16px; }
       .receipt-customer-row span:last-child { text-align: right; flex: 1; }
       .receipt-items { width: 100%; }
       .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
-      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 13px; }
+      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 15px; }
       .receipt-field-label { font-weight: 700; white-space: nowrap; }
       .receipt-field span:not(.receipt-field-label), .receipt-field strong { text-align: right; }
       .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 10px; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
@@ -1436,6 +1449,7 @@ export default function App() {
                               </button>
                               <span className="sorter-row-num">{index + 1}</span>
                               <span className="sorter-row-name">{item.product_name?.name || '-'}</span>
+                              {item.product_name?.sku && <span className="sorter-row-sku">#{item.product_name.sku}</span>}
                               <span className="sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
                               {item.cut_type?.name && <span className="sorter-row-cut">{item.cut_type.name}</span>}
                               {item.comment && <span className="sorter-row-note">{item.comment}</span>}
