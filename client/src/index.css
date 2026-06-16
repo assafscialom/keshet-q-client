@@ -792,6 +792,17 @@ input {
   background: #b71c1c;
 }
 
+.home-shift-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin: 0 16px 12px;
+}
+
 /* Shift name modal */
 .shift-modal-overlay {
   background: rgba(0, 0, 0, 0.65);

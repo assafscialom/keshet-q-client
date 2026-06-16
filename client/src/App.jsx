@@ -445,6 +445,37 @@ export default function App() {
     }
   };
 
+  const handleBarcodeScan = async (barcode) => {
+    const trimmed = barcode.trim();
+    if (!trimmed || !cashierBranchId || !cashierDepartmentId) return;
+    setProductLoading(true);
+    setProductError('');
+    try {
+      const response = await apiClient.get(
+        `/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(trimmed)}`,
+      );
+      const results = response?.data?.data ?? [];
+      if (results.length === 1) {
+        setProductResults([]);
+        setProductQuery('');
+        setTextInput('');
+        setPendingProduct(results[0]);
+        setPendingNote('');
+        setPendingCutTypeId('');
+        setPendingQuantity(1);
+        setPendingUnit("גר'");
+      } else {
+        setProductQuery(trimmed);
+        setProductResults(results);
+      }
+    } catch (err) {
+      console.error('Failed to search products', err);
+      setProductError('Failed to search products. Please try again.');
+    } finally {
+      setProductLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
     if (!cashierBranchId || !cashierDepartmentId) {
@@ -471,19 +502,7 @@ export default function App() {
         );
         if (cancelled) return;
         const results = response?.data?.data ?? [];
-        if (barcodeTriggered.current && results.length === 1) {
-          barcodeTriggered.current = false;
-          setProductResults([]);
-          setProductQuery('');
-          setPendingProduct(results[0]);
-          setPendingNote('');
-          setPendingCutTypeId('');
-          setPendingQuantity(1);
-          setPendingUnit("גר'");
-        } else {
-          barcodeTriggered.current = false;
-          setProductResults(results);
-        }
+        setProductResults(results);
       } catch (err) {
         if (cancelled) return;
         console.error('Failed to search products', err);
@@ -511,6 +530,13 @@ export default function App() {
     if (!cashierShiftName) {
       setShiftNameInput('');
       setShowShiftModal(true);
+    }
+  }, [route, cashierShiftName]);
+
+  useEffect(() => {
+    if (!isCashierNewRoute(route)) return;
+    if (!cashierShiftName) {
+      navigate('/cashier');
     }
   }, [route, cashierShiftName]);
 
@@ -888,18 +914,11 @@ export default function App() {
             </button>
             <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
           </div>
-          <div className="cashier-header-row2">
-            {cashierShiftName && (
+          {cashierShiftName && (
+            <div className="cashier-header-row2">
               <span className="shift-name-label">👤 {cashierShiftName}</span>
-            )}
-            <button
-              type="button"
-              className="end-shift-button"
-              onClick={() => setShowEndShiftConfirm(true)}
-            >
-              סגירת משמרת
-            </button>
-          </div>
+            </div>
+          )}
         </header>
         <div className="cashier-shell">
           <aside className="cashier-side">
@@ -918,9 +937,9 @@ export default function App() {
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && barcodeInput.trim()) {
-                    barcodeTriggered.current = true;
-                    setProductQuery(barcodeInput.trim());
+                    const val = barcodeInput.trim();
                     setBarcodeInput('');
+                    handleBarcodeScan(val);
                   }
                 }}
                 placeholder="סריקת ברקוד"
@@ -1970,6 +1989,45 @@ export default function App() {
           </button>
         ))}
       </div>
+      {cashierShiftName && (
+        <div className="home-shift-bar">
+          <span className="shift-name-label">👤 {cashierShiftName}</span>
+          <button
+            type="button"
+            className="end-shift-button"
+            onClick={() => setShowEndShiftConfirm(true)}
+          >
+            סגירת משמרת
+          </button>
+        </div>
+      )}
+      {showEndShiftConfirm && (
+        <div className="shift-modal-overlay">
+          <div className="shift-confirm-box">
+            <p className="shift-confirm-text">האם אתה בטוח שברצונך לסגור את המשמרת?</p>
+            <div className="shift-confirm-actions">
+              <button
+                type="button"
+                className="shift-confirm-yes"
+                onClick={() => {
+                  setCashierShiftName('');
+                  localStorage.removeItem('cashierShiftName');
+                  setShowEndShiftConfirm(false);
+                }}
+              >
+                כן, סגור משמרת
+              </button>
+              <button
+                type="button"
+                className="shift-confirm-no"
+                onClick={() => setShowEndShiftConfirm(false)}
+              >
+                לא, בטל
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {(ordersLoading || ordersError) && (
         <div className={`helper-text${ordersError ? ' error-text' : ''}`}>
           {ordersLoading ? 'טוען היסטוריית הזמנות...' : ordersError}
