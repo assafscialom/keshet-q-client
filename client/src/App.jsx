@@ -1668,16 +1668,30 @@ export default function App() {
     const hasOrders = cashierOrders.length > 0;
     return (
       <div className="cashier-page">
-        <header className="cashier-header">
-          <button
-            type="button"
-            className="back-button"
-            onClick={navigateHome}
-            aria-label="Back"
-          >
-            ↩
-          </button>
-          <h1 className="cashier-title">היסטוריה / История</h1>
+        <header className="cashier-header cashier-header-new">
+          <div className="cashier-header-row1">
+            <button
+              type="button"
+              className="back-button"
+              onClick={navigateHome}
+              aria-label="Back"
+            >
+              ↩
+            </button>
+            <h1 className="cashier-title">היסטוריה / История</h1>
+          </div>
+          {cashierShiftName && (
+            <div className="cashier-header-row2">
+              <span className="shift-name-label">👤 {cashierShiftName}</span>
+              <button
+                type="button"
+                className="end-shift-button"
+                onClick={() => setShowEndShiftConfirm(true)}
+              >
+                סגירת משמרת
+              </button>
+            </div>
+          )}
         </header>
         <div className="cashier-shell">
           <section className="cashier-main">
@@ -1828,6 +1842,35 @@ export default function App() {
               >
                 התחל משמרת
               </button>
+            </div>
+          </div>
+        )}
+
+        {showEndShiftConfirm && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-box shift-confirm-box">
+              <h2 className="shift-confirm-title">האם אתה בתוך פעולת יציאת משמרת?</h2>
+              <div className="shift-confirm-actions">
+                <button
+                  type="button"
+                  className="shift-confirm-yes"
+                  onClick={() => {
+                    localStorage.removeItem('cashierShiftName');
+                    setCashierShiftName('');
+                    setShowEndShiftConfirm(false);
+                    navigateHome();
+                  }}
+                >
+                  כן, צא ממשמרת
+                </button>
+                <button
+                  type="button"
+                  className="shift-confirm-no"
+                  onClick={() => setShowEndShiftConfirm(false)}
+                >
+                  לא, בטל
+                </button>
+              </div>
             </div>
           </div>
         )}
