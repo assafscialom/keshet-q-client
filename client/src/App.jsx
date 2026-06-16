@@ -1325,6 +1325,35 @@ export default function App() {
           document.body
         )}
 
+        {showEndShiftConfirm && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-box shift-confirm-box">
+              <h2 className="shift-confirm-title">האם אתה בתוך פעולת יציאת משמרת?</h2>
+              <div className="shift-confirm-actions">
+                <button
+                  type="button"
+                  className="shift-confirm-yes"
+                  onClick={() => {
+                    localStorage.removeItem('cashierShiftName');
+                    setCashierShiftName('');
+                    setShowEndShiftConfirm(false);
+                    navigate('/cashier');
+                  }}
+                >
+                  כן, צא ממשמרת
+                </button>
+                <button
+                  type="button"
+                  className="shift-confirm-no"
+                  onClick={() => setShowEndShiftConfirm(false)}
+                >
+                  לא, בטל
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }
