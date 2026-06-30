@@ -329,11 +329,11 @@ export default function App() {
 
   useEffect(() => {
     if (!isSorterRoute(route)) return;
-    if (!sorterShiftName) {
-      setSorterShiftNameInput('');
-      setShowSorterShiftModal(true);
-    }
-  }, [route, sorterShiftName]);
+    setSorterShiftName('');
+    localStorage.removeItem('sorterShiftName');
+    setSorterShiftNameInput('');
+    setShowSorterShiftModal(true);
+  }, [route]);
 
   useEffect(() => {
     if (!isSorterRoute(route)) return;
@@ -827,23 +827,23 @@ export default function App() {
     const css = `
       @page { margin: 5mm; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: Arial, sans-serif; direction: rtl; font-size: 13px; }
+      body { font-family: Arial, sans-serif; direction: rtl; font-size: 18px; }
       .receipt-page { page-break-after: always; break-after: page; padding-bottom: 40px; border-bottom: 2px dotted grey; }
       .receipt-page:last-child { page-break-after: avoid; break-after: avoid; border-bottom: none; padding-bottom: 4mm; }
       .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
       .receipt-logo img { max-width: 90px; height: auto; }
       .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
-      .receipt-label-tag { font-weight: 700; font-size: 14px; }
-      .receipt-number { font-size: 48pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
-      .receipt-number-xl { font-size: 100pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
-      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 15px; gap: 16px; }
+      .receipt-label-tag { font-weight: 700; font-size: 22pt; }
+      .receipt-number { font-size: 66pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
+      .receipt-number-xl { font-size: 140pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 22pt; gap: 16px; }
       .receipt-customer-row span:last-child { text-align: right; flex: 1; }
       .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
       .receipt-items { width: 100%; }
       .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
-      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 15px; }
+      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 22pt; }
       .receipt-field-label { font-weight: 700; white-space: nowrap; }
-      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 10px; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
+      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 14pt; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
       .receipt-disclaimer { font-weight: 700; text-align: right; }
     `;
 
@@ -861,23 +861,23 @@ export default function App() {
     const css = `
       @page { margin: 5mm; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: Arial, sans-serif; direction: rtl; font-size: 13px; }
+      body { font-family: Arial, sans-serif; direction: rtl; font-size: 18px; }
       .receipt-page { page-break-after: always; break-after: page; padding-bottom: 40px; border-bottom: 2px dotted grey; }
       .receipt-page:last-child { page-break-after: avoid; break-after: avoid; border-bottom: none; padding-bottom: 4mm; }
       .receipt-page-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
       .receipt-logo img { max-width: 90px; height: auto; }
-      .receipt-label-tag { font-weight: 700; font-size: 14px; }
-      .receipt-number { font-size: 48pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
-      .receipt-number-xl { font-size: 100pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
-      .receipt-subtitle { text-align: center; font-size: 13px; margin: 4px 0 8px; }
-      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 15px; gap: 16px; }
+      .receipt-label-tag { font-weight: 700; font-size: 22pt; }
+      .receipt-number { font-size: 66pt; font-weight: 900; text-align: center; direction: ltr; margin: 4px 0; }
+      .receipt-number-xl { font-size: 140pt; font-weight: 900; text-align: center; direction: ltr; margin: 8px 0; }
+      .receipt-subtitle { text-align: center; font-size: 22pt; margin: 4px 0 8px; }
+      .receipt-customer-row { display: flex; justify-content: space-between; border-top: 1px solid #888; padding: 6px 0; font-weight: 700; font-size: 22pt; gap: 16px; }
       .receipt-customer-row span:last-child { text-align: right; flex: 1; }
       .receipt-items { width: 100%; }
       .receipt-row { border-top: 1px solid #888; padding: 6px 0; }
-      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 15px; }
+      .receipt-field { display: flex; gap: 8px; align-items: baseline; margin-bottom: 2px; font-size: 22pt; }
       .receipt-field-label { font-weight: 700; white-space: nowrap; }
       .receipt-field span:not(.receipt-field-label), .receipt-field strong { text-align: right; }
-      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 10px; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
+      .receipt-page-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; font-size: 14pt; color: #333; border-top: 1px solid #ddd; padding-top: 4px; }
       .receipt-disclaimer { font-weight: 700; text-align: right; }
       .receipt-logo-large img { max-width: 140px; display: block; margin: 10px auto; }
       .receipt-page-customer .receipt-customer-row { justify-content: center; gap: 20px; }
@@ -1466,12 +1466,34 @@ export default function App() {
                                   <polyline points="20 6 9 17 4 12" />
                                 </svg>
                               </button>
-                              <span className="sorter-row-num">{index + 1}</span>
-                              <span className="sorter-row-name">{item.product_name?.name || '-'}</span>
-                              {item.product_name?.sku && <span className="sorter-row-sku">#{item.product_name.sku}</span>}
-                              <span className="sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
-                              {item.cut_type?.name && <span className="sorter-row-cut">{item.cut_type.name}</span>}
-                              {item.comment && <span className="sorter-row-note">{item.comment}</span>}
+                              <div className="sorter-row-details">
+                                <div className="sorter-row-field">
+                                  <span className="sorter-row-label">שם:</span>
+                                  <span className="sorter-row-value">{item.product_name?.name || '-'}</span>
+                                </div>
+                                {item.product_name?.sku && (
+                                  <div className="sorter-row-field">
+                                    <span className="sorter-row-label">ברקוד:</span>
+                                    <span className="sorter-row-value">{item.product_name.sku}</span>
+                                  </div>
+                                )}
+                                <div className="sorter-row-field">
+                                  <span className="sorter-row-label">כמות:</span>
+                                  <span className="sorter-row-value sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
+                                </div>
+                                {item.cut_type?.name && (
+                                  <div className="sorter-row-field">
+                                    <span className="sorter-row-label">סוג חיתוך:</span>
+                                    <span className="sorter-row-value">{item.cut_type.name}</span>
+                                  </div>
+                                )}
+                                {item.comment && (
+                                  <div className="sorter-row-field sorter-row-note-field">
+                                    <span className="sorter-row-label">הערה:</span>
+                                    <span className="sorter-row-value sorter-row-note">{item.comment}</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           );
                         })}
@@ -1913,6 +1935,47 @@ export default function App() {
 
   return (
     <div className="page">
+      {cashierShiftName && (
+        <div className="cashier-header cashier-header-new home-top-header">
+          <div className="cashier-header-row1">
+            <span className="shift-name-label">👤 {cashierShiftName}</span>
+            <button
+              type="button"
+              className="end-shift-button"
+              onClick={() => setShowEndShiftConfirm(true)}
+            >
+              סגירת משמרת
+            </button>
+          </div>
+        </div>
+      )}
+      {showEndShiftConfirm && (
+        <div className="shift-modal-overlay">
+          <div className="shift-confirm-box">
+            <p className="shift-confirm-text">האם אתה בתוך פעולת יציאת משמרת?</p>
+            <div className="shift-confirm-actions">
+              <button
+                type="button"
+                className="shift-confirm-yes"
+                onClick={() => {
+                  setCashierShiftName('');
+                  localStorage.removeItem('cashierShiftName');
+                  setShowEndShiftConfirm(false);
+                }}
+              >
+                כן, צא ממשמרת
+              </button>
+              <button
+                type="button"
+                className="shift-confirm-no"
+                onClick={() => setShowEndShiftConfirm(false)}
+              >
+                לא, בטל
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <header className="hero-card">
         <div className="hero-logo">
           <img src="/keshet.png" alt="Keshet Taamim" className="logo-img" />
@@ -1989,45 +2052,6 @@ export default function App() {
           </button>
         ))}
       </div>
-      {cashierShiftName && (
-        <div className="home-shift-bar">
-          <span className="shift-name-label">👤 {cashierShiftName}</span>
-          <button
-            type="button"
-            className="end-shift-button"
-            onClick={() => setShowEndShiftConfirm(true)}
-          >
-            סגירת משמרת
-          </button>
-        </div>
-      )}
-      {showEndShiftConfirm && (
-        <div className="shift-modal-overlay">
-          <div className="shift-confirm-box">
-            <p className="shift-confirm-text">האם אתה בטוח שברצונך לסגור את המשמרת?</p>
-            <div className="shift-confirm-actions">
-              <button
-                type="button"
-                className="shift-confirm-yes"
-                onClick={() => {
-                  setCashierShiftName('');
-                  localStorage.removeItem('cashierShiftName');
-                  setShowEndShiftConfirm(false);
-                }}
-              >
-                כן, סגור משמרת
-              </button>
-              <button
-                type="button"
-                className="shift-confirm-no"
-                onClick={() => setShowEndShiftConfirm(false)}
-              >
-                לא, בטל
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {(ordersLoading || ordersError) && (
         <div className={`helper-text${ordersError ? ' error-text' : ''}`}>
           {ordersLoading ? 'טוען היסטוריית הזמנות...' : ordersError}
