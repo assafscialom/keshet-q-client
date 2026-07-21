@@ -936,10 +936,12 @@ export default function App() {
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && barcodeInput.trim()) {
-                    const val = barcodeInput.trim();
-                    setBarcodeInput('');
-                    handleBarcodeScan(val);
+                  if (e.key === 'Enter') {
+                    const val = (e.target.value || barcodeInput).trim();
+                    if (val) {
+                      setBarcodeInput('');
+                      handleBarcodeScan(val);
+                    }
                   }
                 }}
                 placeholder="סריקת ברקוד"
