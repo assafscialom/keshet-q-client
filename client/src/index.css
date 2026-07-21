@@ -341,8 +341,8 @@ input {
 .board-tv-badge-green {
   background: oklch(0.74 0.18 150);
   color: oklch(0.15 0.04 260);
-  font-size: 36px;
-  padding: 6px 24px;
+  font-size: 60px;
+  padding: 6px 28px;
 }
 
 .board-tv-badge-gray {
