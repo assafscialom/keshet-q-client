@@ -279,7 +279,7 @@ input {
 }
 
 .board-tv-tagline {
-  font-size: 15px;
+  font-size: 30px;
   color: oklch(0.92 0.03 250);
   margin-top: 6px;
 }
