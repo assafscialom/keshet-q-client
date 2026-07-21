@@ -346,6 +346,8 @@ input {
 .board-tv-badge-gray {
   background: oklch(0.5 0.17 265);
   color: oklch(0.92 0.03 250);
+  font-size: 60px;
+  padding: 6px 28px;
 }
 
 .board-tv-cards {

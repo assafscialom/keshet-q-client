@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import apiClient from './api/client';
 import './index.css';
@@ -445,7 +445,7 @@ export default function App() {
     }
   };
 
-  const handleBarcodeScan = async (barcode) => {
+  const handleBarcodeScan = useCallback(async (barcode) => {
     const trimmed = barcode.trim();
     if (!trimmed || !cashierBranchId || !cashierDepartmentId) return;
     setProductLoading(true);
@@ -474,7 +474,7 @@ export default function App() {
     } finally {
       setProductLoading(false);
     }
-  };
+  }, [cashierBranchId, cashierDepartmentId]);
 
   useEffect(() => {
     if (!isCashierNewRoute(route)) return;
@@ -524,6 +524,36 @@ export default function App() {
     if (!isCashierNewRoute(route)) return;
     barcodeRef.current?.focus();
   }, [route]);
+
+  useEffect(() => {
+    if (!isCashierNewRoute(route)) return;
+    let buffer = '';
+    let lastKeyTime = 0;
+    const BARCODE_SPEED_MS = 80;
+
+    const onKey = (e) => {
+      if (pendingProduct) return;
+      const now = Date.now();
+      if (e.key === 'Enter') {
+        if (buffer.length >= 3) {
+          const val = buffer.trim();
+          buffer = '';
+          if (val) handleBarcodeScan(val);
+        } else {
+          buffer = '';
+        }
+        return;
+      }
+      if (e.key.length === 1) {
+        if (now - lastKeyTime > BARCODE_SPEED_MS * 3) buffer = '';
+        buffer += e.key;
+        lastKeyTime = now;
+      }
+    };
+
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [route, pendingProduct, handleBarcodeScan]);
 
   useEffect(() => {
     if (!isCashierRoute(route) || isCashierNewRoute(route)) return;
