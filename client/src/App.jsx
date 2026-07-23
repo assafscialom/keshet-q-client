@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import apiClient from './api/client';
+import translations from './i18n';
 import './index.css';
-
-const shortcuts = [
-  { id: 'cashier', title: 'כניסת קופאי / Касир', icon: '🧾' },
-  { id: 'sorter', title: 'כניסת אורז / Сортировщик', icon: '📦' },
-];
 
 const findBranchId = (pathname) => {
   const match = pathname.match(/branch\/(\d+)/i);
@@ -117,7 +113,15 @@ export default function App() {
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'he');
   const homePathRef = useRef(window.location.pathname);
+
+  const t = (key) => translations[language]?.[key] ?? translations['he'][key] ?? key;
+
+  const shortcuts = [
+    { id: 'cashier', title: t('shortcut_cashier'), icon: '🧾' },
+    { id: 'sorter', title: t('shortcut_sorter'), icon: '📦' },
+  ];
   const productSearchRef = useRef(null);
   const barcodeRef = useRef(null);
   const barcodeTriggered = useRef(false);
@@ -134,6 +138,11 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
+    localStorage.setItem('language', language);
+  }, [language]);
 
   useEffect(() => {
     const id = setInterval(() => setClockTime(new Date()), 1000);
@@ -380,14 +389,14 @@ export default function App() {
     if (!orderId) return;
 
     if (sorterSelectedOrderId !== orderId) {
-      setSorterUpdateError('יש לפתוח את ההזמנה ולסמן את כל הפריטים לפני הסגירה');
+      setSorterUpdateError(t('sorter_must_open'));
       return;
     }
 
     const totalItems = sorterItems.length;
     const checkedCount = sorterCheckedItems.size;
     if (totalItems === 0 || checkedCount < totalItems) {
-      setSorterUpdateError(`נאספו ${checkedCount} מתוך ${totalItems} פריטים — יש לסמן את כולם`);
+      setSorterUpdateError(`${t('sorter_collected_of')} ${checkedCount}/${totalItems} — ${t('sorter_mark_all')}`);
       return;
     }
 
@@ -946,7 +955,7 @@ export default function App() {
             >
               ↩
             </button>
-            <h1 className="cashier-title">הזמנה חדשה / Новый заказ</h1>
+            <h1 className="cashier-title">{t('new_order')}</h1>
           </div>
           {cashierShiftName && (
             <div className="cashier-header-row2">
@@ -961,7 +970,7 @@ export default function App() {
             </div>
             <input
               className="order-customer-input"
-              placeholder="שם פרטי ושם משפחה"
+              placeholder={t('customer_name_placeholder')}
               value={customerName}
               onChange={(event) => setCustomerName(event.target.value)}
             />
@@ -978,7 +987,7 @@ export default function App() {
                     }
                   }
                 }}
-                placeholder="סריקת ברקוד"
+                placeholder={t('barcode_scan')}
                 ref={barcodeRef}
                 autoComplete="off"
               />
@@ -1001,7 +1010,7 @@ export default function App() {
                     setProductResults([]);
                   }
                 }}
-                placeholder="חיפוש לפי שם"
+                placeholder={t('search_by_name')}
                 ref={productSearchRef}
                 autoComplete="off"
               />
@@ -1011,7 +1020,7 @@ export default function App() {
             </div>
             {lastAddedProduct && (
               <div className="basket-hint">
-                נוסף לסל: {lastAddedProduct.name} #{lastAddedProduct.sku}
+                {t('added_to_basket')}: {lastAddedProduct.name} #{lastAddedProduct.sku}
               </div>
             )}
             <div className="search-results">
@@ -1039,51 +1048,51 @@ export default function App() {
                 </div>
               ))}
               {!productLoading && !productError && productResults.length === 0 && (
-                <div className="helper-text">אין מוצרים להצגה</div>
+                <div className="helper-text">{t('no_products')}</div>
               )}
             </div>
             <button type="button" className="cashier-secondary" onClick={() => navigate('/cashier')}>
-              🕘 היסטוריה / История
+              🕘 {t('history')}
             </button>
           </aside>
           <section className="cashier-main cashier-main-flat">
             <div className="order-table">
               <div className="order-table-header">
-                <div>№</div>
-                <div>מקליט</div>
-                <div>שם</div>
-                <div>הערה</div>
-                <div>אופן חיתוך</div>
-                <div>כמות</div>
-                <div>מדדים</div>
+                <div>{t('col_num')}</div>
+                <div>{t('col_sku')}</div>
+                <div>{t('col_name')}</div>
+                <div>{t('col_note')}</div>
+                <div>{t('col_cut_type')}</div>
+                <div>{t('col_quantity')}</div>
+                <div>{t('col_metrics')}</div>
                 <div />
               </div>
               <div className="order-table-body">
                 {!cashierBranchId || !cashierDepartmentId ? (
                   <div className="helper-text error-text">
-                    נדרש לבחור סניף ומחלקה לפני חיפוש מוצרים.
+                    {t('no_branch_dept')}
                   </div>
                 ) : (
                   <>
                     {orderItems.length === 0 && (
-                      <div className="helper-text">לא נבחרו מוצרים עדיין</div>
+                      <div className="helper-text">{t('no_items_selected')}</div>
                     )}
                     {orderItems.map((product, index) => (
                       <div key={`${product.product_id}-${index}`} className="order-table-row">
-                        <div data-label="№">{index + 1}</div>
-                        <div data-label="מקליט">{product.product_sku || '-'}</div>
-                        <div data-label="שם">{product.product_name}</div>
-                        <div data-label="הערה">
+                        <div data-label={t('col_num')}>{index + 1}</div>
+                        <div data-label={t('col_sku')}>{product.product_sku || '-'}</div>
+                        <div data-label={t('col_name')}>{product.product_name}</div>
+                        <div data-label={t('col_note')}>
                           <textarea
                             className="order-note-input"
                             value={product.note || ''}
                             onChange={(event) =>
                               handleNoteChange(product.product_id, event.target.value)
                             }
-                            placeholder="הערה"
+                            placeholder={t('note')}
                           />
                         </div>
-                        <div data-label="אופן חיתוך">
+                        <div data-label={t('col_cut_type')}>
                           <select
                             className="order-cut-type-select"
                             value={product.cut_type_id || ''}
@@ -1091,7 +1100,7 @@ export default function App() {
                               handleCutTypeChange(product.product_id, event.target.value)
                             }
                           >
-                            <option value="">ללא</option>
+                            <option value="">{t('none')}</option>
                             {cutTypeOptions.map((cutType) => (
                               <option key={cutType.id} value={cutType.id}>
                                 {cutType.name}
@@ -1104,7 +1113,7 @@ export default function App() {
                             </div>
                           )}
                         </div>
-                        <div data-label="כמות">
+                        <div data-label={t('col_quantity')}>
                           <div className="order-qty-wrapper">
                             <input
                               className="order-qty-input"
@@ -1141,8 +1150,8 @@ export default function App() {
                             )}
                           </div>
                         </div>
-                        <div data-label="מדדים">{product.metric_type || '-'}</div>
-                        <div data-label="פעולות">
+                        <div data-label={t('col_metrics')}>{product.metric_type || '-'}</div>
+                        <div data-label={t('col_actions')}>
                           <button
                             type="button"
                             className="order-remove-button"
@@ -1165,10 +1174,10 @@ export default function App() {
                 onClick={handleCreateOrder}
                 disabled={orderItems.length === 0 || createLoading}
               >
-                {createLoading ? 'יוצר הזמנה...' : '✓ צור הזמנה / Создать'}
+                {createLoading ? t('creating_order') : t('create_order')}
               </button>
               <button type="button" className="order-cancel-button">
-                ✕ בטל / Отменить
+                {t('cancel_btn')}
               </button>
             </div>
             {createError && <div className="helper-text error-text">{createError}</div>}
@@ -1194,7 +1203,7 @@ export default function App() {
               </div>
               <div className="product-detail-body">
                 <label className="product-detail-label">
-                  כמות
+                  {t('quantity')}
                   <div className="unit-toggle">
                     {["גר'", "יח'"].map((u) => (
                       <button
@@ -1228,25 +1237,25 @@ export default function App() {
                   </div>
                 </label>
                 <label className="product-detail-label">
-                  אופן חיתוך
+                  {t('cut_type')}
                   <select
                     className="order-cut-type-select"
                     value={pendingCutTypeId}
                     onChange={(e) => setPendingCutTypeId(e.target.value)}
                   >
-                    <option value="">ללא</option>
+                    <option value="">{t('none')}</option>
                     {cutTypeOptions.map((ct) => (
                       <option key={ct.id} value={ct.id}>{ct.name}</option>
                     ))}
                   </select>
                 </label>
                 <label className="product-detail-label">
-                  הערה
+                  {t('note')}
                   <textarea
                     className="order-note-input"
                     value={pendingNote}
                     onChange={(e) => setPendingNote(e.target.value)}
-                    placeholder="הערה"
+                    placeholder={t('note')}
                   />
                 </label>
                 <button
@@ -1267,7 +1276,7 @@ export default function App() {
                     barcodeRef.current?.focus();
                   }}
                 >
-                  + הוסף להזמנה
+                  {t('add_to_order')}
                 </button>
               </div>
             </div>
@@ -1396,7 +1405,7 @@ export default function App() {
         {showEndShiftConfirm && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
             <div className="modal-box shift-confirm-box">
-              <h2 className="shift-confirm-title">האם אתה בתוך פעולת יציאת משמרת?</h2>
+              <h2 className="shift-confirm-title">{t('end_shift_confirm')}</h2>
               <div className="shift-confirm-actions">
                 <button
                   type="button"
@@ -1408,14 +1417,14 @@ export default function App() {
                     navigate('/cashier');
                   }}
                 >
-                  כן, צא ממשמרת
+                  {t('yes_exit_shift')}
                 </button>
                 <button
                   type="button"
                   className="shift-confirm-no"
                   onClick={() => setShowEndShiftConfirm(false)}
                 >
-                  לא, בטל
+                  {t('no_cancel')}
                 </button>
               </div>
             </div>
@@ -1433,13 +1442,13 @@ export default function App() {
           <button type="button" className="back-button" onClick={navigateHome} aria-label="Back">
             ↩
           </button>
-          <h1 className="cashier-title">סדר פריטים</h1>
+          <h1 className="cashier-title">{t('sort_items')}</h1>
         </header>
         <div className="sorter-accordion-shell">
           <div className="cashier-logo sorter-logo">
             <img src="/keshet.png" alt="Keshet Taamim" />
           </div>
-          {sorterLoading && <div className="helper-text">טוען הזמנות...</div>}
+          {sorterLoading && <div className="helper-text">{t('loading_orders')}</div>}
           {sorterError && <div className="helper-text error-text">{sorterError}</div>}
           {sorterUpdateError && <div className="helper-text error-text">{sorterUpdateError}</div>}
           {!sorterLoading && !sorterError && (
@@ -1454,7 +1463,7 @@ export default function App() {
                         className="sorter-card-check"
                         onClick={() => handleSorterCollected(order.id)}
                         disabled={sorterUpdateLoading}
-                        aria-label="נאסף"
+                        aria-label={t('collected_aria')}
                       >
                         {sorterUpdateLoading && sorterSelectedOrderId === order.id ? (
                           <span className="sorter-spinner" />
@@ -1478,10 +1487,10 @@ export default function App() {
                     </div>
                     {isOpen && (
                       <div className="sorter-accordion-body">
-                        {sorterItemsLoading && <div className="helper-text">טוען פריטים...</div>}
+                        {sorterItemsLoading && <div className="helper-text">{t('loading_items')}</div>}
                         {sorterItemsError && <div className="helper-text error-text">{sorterItemsError}</div>}
                         {!sorterItemsLoading && !sorterItemsError && sorterItems.length === 0 && (
-                          <div className="helper-text">אין פריטים להצגה</div>
+                          <div className="helper-text">{t('no_items')}</div>
                         )}
                         {!sorterItemsLoading && !sorterItemsError && sorterItems.map((item, index) => {
                           const itemKey = item.id ?? index;
@@ -1496,7 +1505,7 @@ export default function App() {
                                   checked ? next.delete(itemKey) : next.add(itemKey);
                                   return next;
                                 })}
-                                aria-label="נארז"
+                                aria-label={t('packed_aria')}
                               >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12" />
@@ -1504,28 +1513,28 @@ export default function App() {
                               </button>
                               <div className="sorter-row-details">
                                 <div className="sorter-row-field">
-                                  <span className="sorter-row-label">שם:</span>
+                                  <span className="sorter-row-label">{t('name_label')}</span>
                                   <span className="sorter-row-value">{item.product_name?.name || '-'}</span>
                                 </div>
                                 {item.product_name?.sku && (
                                   <div className="sorter-row-field">
-                                    <span className="sorter-row-label">ברקוד:</span>
+                                    <span className="sorter-row-label">{t('barcode_label')}</span>
                                     <span className="sorter-row-value">{item.product_name.sku}</span>
                                   </div>
                                 )}
                                 <div className="sorter-row-field">
-                                  <span className="sorter-row-label">כמות:</span>
+                                  <span className="sorter-row-label">{t('quantity_label')}</span>
                                   <span className="sorter-row-value sorter-row-qty">{item.quantity_in_order ?? '-'}{item.metric_type ? ' ' + item.metric_type : ''}</span>
                                 </div>
                                 {item.cut_type?.name && (
                                   <div className="sorter-row-field">
-                                    <span className="sorter-row-label">סוג חיתוך:</span>
+                                    <span className="sorter-row-label">{t('cut_type_label')}</span>
                                     <span className="sorter-row-value">{item.cut_type.name}</span>
                                   </div>
                                 )}
                                 {item.comment && (
                                   <div className="sorter-row-field sorter-row-note-field">
-                                    <span className="sorter-row-label">הערה:</span>
+                                    <span className="sorter-row-label">{t('note_label')}</span>
                                     <span className="sorter-row-value sorter-row-note">{item.comment}</span>
                                   </div>
                                 )}
@@ -1548,11 +1557,11 @@ export default function App() {
               <div className="shift-modal-logo">
                 <img src="/keshet.png" alt="Keshet Taamim" />
               </div>
-              <h2 className="shift-modal-title">כניסת אורז</h2>
-              <p className="shift-modal-subtitle">הזן את שמך כדי להתחיל</p>
+              <h2 className="shift-modal-title">{t('sorter_shift_modal_title')}</h2>
+              <p className="shift-modal-subtitle">{t('enter_name_prompt')}</p>
               <input
                 className="shift-modal-input"
-                placeholder="שם מלא"
+                placeholder={t('full_name')}
                 value={sorterShiftNameInput}
                 onChange={(e) => setSorterShiftNameInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -1576,7 +1585,7 @@ export default function App() {
                   setShowSorterShiftModal(false);
                 }}
               >
-                התחל משמרת
+                {t('start_shift')}
               </button>
             </div>
           </div>
@@ -1601,7 +1610,7 @@ export default function App() {
             </div>
             <div className="board-tv-brand">
               <div className="board-tv-dept">{selectedNames.join(' / ')}</div>
-              <div className="board-tv-tagline">ברוכים הבאים — קחו מספר והמתינו לקריאה</div>
+              <div className="board-tv-tagline">{t('board_tagline')}</div>
             </div>
             <div className="board-tv-clock">
               <div className="board-tv-time">{timeStr}</div>
@@ -1611,7 +1620,7 @@ export default function App() {
           <div className="board-tv-columns">
             <div className="board-tv-col">
               <div className="board-tv-col-header">
-                <span className="board-tv-col-title">בהכנה / Очередь</span>
+                <span className="board-tv-col-title">{t('in_progress_col')}</span>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   {boardOrders.progress.length > 5 && (
                     <div className="board-tv-dots">
@@ -1620,7 +1629,7 @@ export default function App() {
                       ))}
                     </div>
                   )}
-                  <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} ממתינים</span>
+                  <span className="board-tv-badge board-tv-badge-gray">{boardOrders.progress.length} {t('waiting')}</span>
                 </div>
               </div>
               <div className="board-tv-cards" key={boardProgressPage}>
@@ -1633,10 +1642,10 @@ export default function App() {
                         <div className={`board-tv-num-badge${globalIndex === 0 ? ' next' : ''}`}>{globalIndex + 1}</div>
                         <div className="board-tv-card-body">
                           <div className="board-tv-card-name">{order.customer_name || '-'}</div>
-                          {globalIndex === 0 && <div className="board-tv-next-label">הבא בהכנה</div>}
+                          {globalIndex === 0 && <div className="board-tv-next-label">{t('next_in_progress')}</div>}
                         </div>
                         <div className="board-tv-order-badge">
-                          <span className="board-tv-order-label">הזמנה</span>
+                          <span className="board-tv-order-label">{t('order_label')}</span>
                           <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
                         </div>
                       </div>
@@ -1646,7 +1655,7 @@ export default function App() {
             </div>
             <div className="board-tv-col">
               <div className="board-tv-col-header">
-                <span className="board-tv-col-title">מוכנות / Готово</span>
+                <span className="board-tv-col-title">{t('done_col')}</span>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   {boardOrders.done.length > boardPageSize && (
                     <div className="board-tv-dots">
@@ -1655,7 +1664,7 @@ export default function App() {
                       ))}
                     </div>
                   )}
-                  <span className="board-tv-badge board-tv-badge-green">{boardOrders.done.length} מוכנות</span>
+                  <span className="board-tv-badge board-tv-badge-green">{boardOrders.done.length} {t('ready_count')}</span>
                 </div>
               </div>
               <div className="board-tv-cards" key={boardDonePage}>
@@ -1667,7 +1676,7 @@ export default function App() {
                         <div className="board-tv-card-name">{order.customer_name || '-'}</div>
                       </div>
                       <div className="board-tv-order-badge">
-                        <span className="board-tv-order-label">הזמנה</span>
+                        <span className="board-tv-order-label">{t('order_label')}</span>
                         <span className="board-tv-order-num">#{order.order_number ?? order.id}</span>
                       </div>
                     </div>
@@ -1679,9 +1688,9 @@ export default function App() {
           {showBoardSettings && (
             <div className="board-tv-settings-overlay" onClick={() => setShowBoardSettings(false)}>
               <div className="board-tv-settings-card" onClick={e => e.stopPropagation()}>
-                <div className="board-tv-settings-title">הגדרות תצוגה</div>
+                <div className="board-tv-settings-title">{t('display_settings')}</div>
                 <label className="board-tv-settings-label">
-                  מספר הזמנות לפני סלייד
+                  {t('orders_per_slide')}
                   <input
                     type="number"
                     min={1}
@@ -1695,7 +1704,7 @@ export default function App() {
                     }}
                   />
                 </label>
-                <button className="board-tv-settings-close" onClick={() => setShowBoardSettings(false)}>שמור וסגור</button>
+                <button className="board-tv-settings-close" onClick={() => setShowBoardSettings(false)}>{t('save_and_close')}</button>
               </div>
             </div>
           )}
@@ -1709,15 +1718,15 @@ export default function App() {
           <div className="board-logo">
             <img src="/keshet.png" alt="Keshet Taamim" />
           </div>
-          <h1 className="board-title">מחלקה</h1>
+          <h1 className="board-title">{t('department')}</h1>
         </header>
         <div className="board-shell">
           <section className="board-card">
             <div className="board-search">
-              <input placeholder="חיפוש" />
+              <input placeholder={t('search')} />
             </div>
             <div className="board-list">
-              {boardLoading && <div className="helper-text">טוען מחלקות...</div>}
+              {boardLoading && <div className="helper-text">{t('loading_departments')}</div>}
               {boardError && <div className="helper-text error-text">{boardError}</div>}
               {!boardLoading &&
                 !boardError &&
@@ -1748,7 +1757,7 @@ export default function App() {
             onClick={() => handleBoardShowOrders()}
             disabled={!boardDepartmentIds.length || boardLoading}
           >
-            צג הזמנות
+            {t('show_orders')}
           </button>
         </div>
       </div>
@@ -1769,7 +1778,7 @@ export default function App() {
             >
               ↩
             </button>
-            <h1 className="cashier-title">היסטוריה / История</h1>
+            <h1 className="cashier-title">{t('history')}</h1>
           </div>
           {cashierShiftName && (
             <div className="cashier-header-row2">
@@ -1779,7 +1788,7 @@ export default function App() {
                 className="end-shift-button"
                 onClick={() => setShowEndShiftConfirm(true)}
               >
-                סגירת משמרת
+                {t('end_shift')}
               </button>
             </div>
           )}
@@ -1787,7 +1796,7 @@ export default function App() {
         <div className="cashier-shell">
           <section className="cashier-main">
             <div className="cashier-main-content">
-              {cashierLoading && <div className="helper-text">טוען הזמנות...</div>}
+              {cashierLoading && <div className="helper-text">{t('loading_orders')}</div>}
               {cashierError && <div className="helper-text error-text">{cashierError}</div>}
               {!cashierLoading && !cashierError && hasOrders && (
                 <div className="order-list">
@@ -1812,7 +1821,7 @@ export default function App() {
                         <div className="order-detail">
                           <div className="order-detail-header">
                             <div className="order-detail-title">
-                              הזמנה #{order.order_number ?? order.id}
+                              {t('order_label')} #{order.order_number ?? order.id}
                               {order.customer_name && (
                                 <span className="order-detail-customer">
                                   {' '}
@@ -1826,12 +1835,12 @@ export default function App() {
                               onClick={() => handleReprintOrder(order)}
                               disabled={orderItemsLoadingById[order.id] || !(orderItemsById[order.id]?.length)}
                             >
-                              🖨 הדפסה חוזרת
+                              {t('reprint')}
                             </button>
                           </div>
                           <div className="order-detail-list">
                             {orderItemsLoadingById[order.id] && (
-                              <div className="helper-text">טוען פריטים...</div>
+                              <div className="helper-text">{t('loading_items')}</div>
                             )}
                             {orderItemsErrorById[order.id] && (
                               <div className="helper-text error-text">
@@ -1841,7 +1850,7 @@ export default function App() {
                             {!orderItemsLoadingById[order.id] &&
                               !orderItemsErrorById[order.id] &&
                               (orderItemsById[order.id] || []).length === 0 && (
-                                <div className="helper-text">אין פריטים להצגה</div>
+                                <div className="helper-text">{t('no_items')}</div>
                               )}
                             {!orderItemsLoadingById[order.id] &&
                               !orderItemsErrorById[order.id] &&
@@ -1854,7 +1863,7 @@ export default function App() {
                                       {item.product_name?.sku}
                                     </div>
                                     <div className="order-item-note">
-                                      {item.comment || 'אין תגובה'}
+                                      {item.comment || t('no_comment')}
                                     </div>
                                   </div>
                                 </div>
@@ -1867,7 +1876,7 @@ export default function App() {
                 </div>
               )}
               {!cashierLoading && !cashierError && !hasOrders && (
-                <div className="helper-text">אין הזמנות להצגה</div>
+                <div className="helper-text">{t('no_orders')}</div>
               )}
             </div>
           </section>
@@ -1881,11 +1890,11 @@ export default function App() {
               setTextInput('');
               navigate('/cashier-new');
             }}>
-              צור הזמנה חדשה / Создать заказ
+              {t('create_new_order')}
             </button>
             <div className="cashier-search">
               <input
-                placeholder="נא להכניס מספר הזמנה לחיפוש"
+                placeholder={t('search_order_placeholder')}
                 value={cashierSearch}
                 onChange={(event) => setCashierSearch(event.target.value)}
               />
@@ -1893,7 +1902,7 @@ export default function App() {
                 🔍
               </button>
             </div>
-            <div className="cashier-hint">חיפוש הזמנה</div>
+            <div className="cashier-hint">{t('search_order')}</div>
           </aside>
         </div>
 
@@ -1903,11 +1912,11 @@ export default function App() {
               <div className="shift-modal-logo">
                 <img src="/keshet.png" alt="Keshet Taamim" />
               </div>
-              <h2 className="shift-modal-title">כניסה למשמרת</h2>
-              <p className="shift-modal-subtitle">הזן את שמך כדי להתחיל</p>
+              <h2 className="shift-modal-title">{t('cashier_shift_modal_title')}</h2>
+              <p className="shift-modal-subtitle">{t('enter_name_prompt')}</p>
               <input
                 className="shift-modal-input"
-                placeholder="שם מלא"
+                placeholder={t('full_name')}
                 value={shiftNameInput}
                 onChange={(e) => setShiftNameInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -1931,7 +1940,7 @@ export default function App() {
                   setShowShiftModal(false);
                 }}
               >
-                התחל משמרת
+                {t('start_shift')}
               </button>
             </div>
           </div>
@@ -1940,7 +1949,7 @@ export default function App() {
         {showEndShiftConfirm && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
             <div className="modal-box shift-confirm-box">
-              <h2 className="shift-confirm-title">האם אתה בתוך פעולת יציאת משמרת?</h2>
+              <h2 className="shift-confirm-title">{t('end_shift_confirm')}</h2>
               <div className="shift-confirm-actions">
                 <button
                   type="button"
@@ -1952,14 +1961,14 @@ export default function App() {
                     navigateHome();
                   }}
                 >
-                  כן, צא ממשמרת
+                  {t('yes_exit_shift')}
                 </button>
                 <button
                   type="button"
                   className="shift-confirm-no"
                   onClick={() => setShowEndShiftConfirm(false)}
                 >
-                  לא, בטל
+                  {t('no_cancel')}
                 </button>
               </div>
             </div>
@@ -1980,7 +1989,7 @@ export default function App() {
               className="end-shift-button"
               onClick={() => setShowEndShiftConfirm(true)}
             >
-              סגירת משמרת
+              {t('end_shift')}
             </button>
           </div>
         </div>
@@ -1988,7 +1997,7 @@ export default function App() {
       {showEndShiftConfirm && (
         <div className="shift-modal-overlay">
           <div className="shift-confirm-box">
-            <p className="shift-confirm-text">האם אתה בתוך פעולת יציאת משמרת?</p>
+            <p className="shift-confirm-text">{t('end_shift_confirm')}</p>
             <div className="shift-confirm-actions">
               <button
                 type="button"
@@ -1999,14 +2008,14 @@ export default function App() {
                   setShowEndShiftConfirm(false);
                 }}
               >
-                כן, צא ממשמרת
+                {t('yes_exit_shift')}
               </button>
               <button
                 type="button"
                 className="shift-confirm-no"
                 onClick={() => setShowEndShiftConfirm(false)}
               >
-                לא, בטל
+                {t('no_cancel')}
               </button>
             </div>
           </div>
@@ -2017,7 +2026,7 @@ export default function App() {
           <img src="/keshet.png" alt="Keshet Taamim" className="logo-img" />
         </div>
         <div className="hero-content">
-          <h1 className="hero-title">מחלקה</h1>
+          <h1 className="hero-title">{t('department')}</h1>
           {(branchName || branchAddress) && (
             <div className="branch-meta">
               {branchName && <div className="branch-name">{branchName}</div>}
@@ -2028,11 +2037,11 @@ export default function App() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="חיפוש"
+              placeholder={t('search')}
               className="search-input"
             />
           </div>
-          {loading && <div className="helper-text">טוען מחלקות...</div>}
+          {loading && <div className="helper-text">{t('loading_departments')}</div>}
           {error && <div className="helper-text error-text">{error}</div>}
           <section className="list-card">
             <div className="list-header" />
@@ -2060,7 +2069,7 @@ export default function App() {
                 !loading &&
                 !error && (
                   <li className="department-row">
-                    <span>אין מחלקות להצגה</span>
+                    <span>{t('no_departments')}</span>
                   </li>
                 )
               )}
@@ -2088,9 +2097,16 @@ export default function App() {
           </button>
         ))}
       </div>
+      <div className="lang-bar">
+        {[{code:'he',label:'עב',flag:'🇮🇱'},{code:'en',label:'EN',flag:'🇬🇧'},{code:'th',label:'ไทย',flag:'🇹🇭'}].map(l => (
+          <button key={l.code} className={`lang-btn${language===l.code?' active':''}`} onClick={() => { setLanguage(l.code); localStorage.setItem('language',l.code); }}>
+            {l.flag} {l.label}
+          </button>
+        ))}
+      </div>
       {(ordersLoading || ordersError) && (
         <div className={`helper-text${ordersError ? ' error-text' : ''}`}>
-          {ordersLoading ? 'טוען היסטוריית הזמנות...' : ordersError}
+          {ordersLoading ? t('loading_order_history') : ordersError}
         </div>
       )}
     </div>
