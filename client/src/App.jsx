@@ -1980,10 +1980,19 @@ export default function App() {
 
   return (
     <div className="page">
-      {cashierShiftName && (
-        <div className="cashier-header cashier-header-new home-top-header">
-          <div className="cashier-header-row1">
+      <div className="cashier-header cashier-header-new home-top-header">
+        <div className="cashier-header-row1">
+          {cashierShiftName && (
             <span className="shift-name-label">👤 {cashierShiftName}</span>
+          )}
+          <div className="home-header-lang">
+            {[{code:'he',label:'עב',flag:'🇮🇱'},{code:'en',label:'EN',flag:'🇬🇧'},{code:'th',label:'ไทย',flag:'🇹🇭'}].map(l => (
+              <button key={l.code} className={`lang-btn${language===l.code?' active':''}`} onClick={() => { setLanguage(l.code); localStorage.setItem('language',l.code); }}>
+                {l.flag} {l.label}
+              </button>
+            ))}
+          </div>
+          {cashierShiftName && (
             <button
               type="button"
               className="end-shift-button"
@@ -1991,9 +2000,9 @@ export default function App() {
             >
               {t('end_shift')}
             </button>
-          </div>
+          )}
         </div>
-      )}
+      </div>
       {showEndShiftConfirm && (
         <div className="shift-modal-overlay">
           <div className="shift-confirm-box">
@@ -2094,13 +2103,6 @@ export default function App() {
                 {item.icon}
               </span>
             </div>
-          </button>
-        ))}
-      </div>
-      <div className="lang-bar">
-        {[{code:'he',label:'עב',flag:'🇮🇱'},{code:'en',label:'EN',flag:'🇬🇧'},{code:'th',label:'ไทย',flag:'🇹🇭'}].map(l => (
-          <button key={l.code} className={`lang-btn${language===l.code?' active':''}`} onClick={() => { setLanguage(l.code); localStorage.setItem('language',l.code); }}>
-            {l.flag} {l.label}
           </button>
         ))}
       </div>
