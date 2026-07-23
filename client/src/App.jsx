@@ -455,11 +455,15 @@ export default function App() {
         `/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(trimmed)}`,
       );
       const results = response?.data?.data ?? [];
-      if (results.length === 1) {
+      const exactMatch = results.find(
+        (p) => String(p.product_sku).trim() === trimmed || String(p.product_name?.sku).trim() === trimmed
+      );
+      const match = exactMatch ?? (results.length === 1 ? results[0] : null);
+      if (match) {
         setProductResults([]);
         setProductQuery('');
         setTextInput('');
-        setPendingProduct(results[0]);
+        setPendingProduct(match);
         setPendingNote('');
         setPendingCutTypeId('');
         setPendingQuantity(1);
