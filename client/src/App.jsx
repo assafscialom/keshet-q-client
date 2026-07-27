@@ -2251,15 +2251,6 @@ export default function App() {
           </button>
         ))}
       </div>
-      <div className="pm-home-link-row">
-        <button
-          type="button"
-          className="pm-home-link-btn"
-          onClick={() => navigate('/product-manager')}
-        >
-          🖼️ ניהול תמונות מוצרים
-        </button>
-      </div>
       {(ordersLoading || ordersError) && (
         <div className={`helper-text${ordersError ? ' error-text' : ''}`}>
           {ordersLoading ? t('loading_order_history') : ordersError}

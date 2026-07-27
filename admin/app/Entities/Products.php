@@ -19,7 +19,8 @@ class Products extends Model
         "quantity",
         "department_id",
         "branch_id",
-        "metric_id"
+        "metric_id",
+        "image"
     ];
 
     public function cutTypes()
