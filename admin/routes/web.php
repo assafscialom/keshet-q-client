@@ -20,6 +20,14 @@ Route::group(['prefix' => env('VOYAGER_PREFIX', '')], function () {
     Voyager::routes();
 });
 //export
+Route::group(['prefix' => env('VOYAGER_PREFIX', ''), 'middleware' => ['web', 'admin.user']], function () {
+    Route::get('product-manager', 'ProductManagerController@index')->name('product-manager.index');
+    Route::get('product-manager/search', 'ProductManagerController@search')->name('product-manager.search');
+    Route::patch('product-manager/{id}', 'ProductManagerController@update')->name('product-manager.update');
+    Route::post('product-manager/{id}/image', 'ProductManagerController@uploadImage')->name('product-manager.upload-image');
+    Route::delete('product-manager/{id}/image', 'ProductManagerController@deleteImage')->name('product-manager.delete-image');
+});
+
 Route::group(['prefix' => env('VOYAGER_PREFIX', ''), 'as' => 'voyager.', 'middleware' => 'admin.user'], function()
 {
     Route::get('export','ExportController@form')->name('export.form');
