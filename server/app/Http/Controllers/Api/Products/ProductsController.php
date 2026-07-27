@@ -74,6 +74,7 @@ class ProductsController extends Controller
                 'products.department_id',
                 'products.quantity',
                 'products.branch_id as branch_id',
+                'products.image',
                 'branches.name as branch_name',
                 'branches.address',
                 'departments.name as department_name',
