@@ -94,6 +94,47 @@ class ProductsController extends Controller
         return $this->collection($data, new ProductsTransformer);
     }
 
+    public function createProduct(Request $request)
+    {
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'sku'           => 'required|string|max:100',
+            'branch_id'     => 'required|integer',
+            'department_id' => 'required|integer',
+            'description'   => 'nullable|string',
+        ]);
+
+        $product = $this->model->create([
+            'name'          => $request->input('name'),
+            'sku'           => $request->input('sku'),
+            'branch_id'     => $request->input('branch_id'),
+            'department_id' => $request->input('department_id'),
+            'description'   => $request->input('description', ''),
+        ]);
+
+        $product->product_id   = $product->id;
+        $product->product_name = $product->name;
+
+        return $this->item($product, new ProductsTransformer);
+    }
+
+    public function updateProduct(Request $request, $product_id)
+    {
+        $request->validate([
+            'name'        => 'sometimes|string|max:255',
+            'sku'         => 'sometimes|string|max:100',
+            'description' => 'nullable|string',
+        ]);
+
+        $product = $this->model->findOrFail($product_id);
+        $product->update($request->only(['name', 'sku', 'description']));
+
+        $product->product_id   = $product->id;
+        $product->product_name = $product->name;
+
+        return $this->item($product, new ProductsTransformer);
+    }
+
     public function manage(Request $request)
     {
         $str = $request->get('search', '');

@@ -119,6 +119,18 @@ export default function App() {
   const [pmLoading, setPmLoading] = useState(false);
   const [pmError, setPmError] = useState('');
   const [pmUploadingId, setPmUploadingId] = useState(null);
+  const [pmEditId, setPmEditId] = useState(null);
+  const [pmEditName, setPmEditName] = useState('');
+  const [pmEditSku, setPmEditSku] = useState('');
+  const [pmEditSaving, setPmEditSaving] = useState(false);
+  const [pmShowCreate, setPmShowCreate] = useState(false);
+  const [pmCreateName, setPmCreateName] = useState('');
+  const [pmCreateSku, setPmCreateSku] = useState('');
+  const [pmCreateBranchId, setPmCreateBranchId] = useState('');
+  const [pmCreateDeptId, setPmCreateDeptId] = useState('');
+  const [pmCreateSaving, setPmCreateSaving] = useState(false);
+  const [pmBranches, setPmBranches] = useState([]);
+  const [pmDepts, setPmDepts] = useState([]);
   const [branchAddress, setBranchAddress] = useState('');
   const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'he');
   const homePathRef = useRef(window.location.pathname);
@@ -1619,6 +1631,7 @@ export default function App() {
       if (!searchStr.trim()) return;
       setPmLoading(true);
       setPmError('');
+      setPmEditId(null);
       try {
         const res = await apiClient.get(`/products/manage?search=${encodeURIComponent(searchStr.trim())}`);
         setPmProducts(res?.data?.data ?? []);
@@ -1663,14 +1676,113 @@ export default function App() {
       }
     };
 
+    const startEdit = (p) => {
+      setPmEditId(p.product_id);
+      setPmEditName(p.product_name || '');
+      setPmEditSku(p.product_sku || '');
+    };
+
+    const handlePmSave = async (productId) => {
+      setPmEditSaving(true);
+      setPmError('');
+      try {
+        await apiClient.patch(`/products/manage/${productId}`, { name: pmEditName, sku: pmEditSku });
+        setPmProducts((prev) =>
+          prev.map((p) =>
+            p.product_id === productId ? { ...p, product_name: pmEditName, product_sku: pmEditSku } : p
+          )
+        );
+        setPmEditId(null);
+      } catch (err) {
+        setPmError('שגיאה בשמירה');
+      } finally {
+        setPmEditSaving(false);
+      }
+    };
+
+    const loadPmBranches = async () => {
+      if (pmBranches.length > 0) return;
+      try {
+        const res = await apiClient.get('/branches');
+        setPmBranches(res?.data?.data ?? []);
+      } catch (err) {}
+    };
+
+    const handlePmBranchChange = async (branchId) => {
+      setPmCreateBranchId(branchId);
+      setPmCreateDeptId('');
+      if (!branchId) { setPmDepts([]); return; }
+      try {
+        const res = await apiClient.get(`/departments/${branchId}`);
+        setPmDepts(res?.data?.data ?? []);
+      } catch (err) { setPmDepts([]); }
+    };
+
+    const handlePmCreate = async () => {
+      if (!pmCreateName.trim() || !pmCreateSku.trim() || !pmCreateBranchId || !pmCreateDeptId) {
+        setPmError('יש למלא שם, ברקוד, סניף ומחלקה');
+        return;
+      }
+      setPmCreateSaving(true);
+      setPmError('');
+      try {
+        const res = await apiClient.post('/products/manage', {
+          name: pmCreateName.trim(),
+          sku: pmCreateSku.trim(),
+          branch_id: pmCreateBranchId,
+          department_id: pmCreateDeptId,
+        });
+        const newProduct = res?.data?.data ?? res?.data;
+        setPmProducts((prev) => [newProduct, ...prev]);
+        setPmShowCreate(false);
+        setPmCreateName(''); setPmCreateSku(''); setPmCreateBranchId(''); setPmCreateDeptId('');
+      } catch (err) {
+        setPmError('שגיאה ביצירת מוצר');
+      } finally {
+        setPmCreateSaving(false);
+      }
+    };
+
     return (
       <div className="page" dir="rtl">
         <div className="cashier-header cashier-header-new">
           <div className="cashier-header-row1">
             <button type="button" className="back-button" onClick={navigateHome} aria-label="Back">←</button>
             <span className="cashier-header-title">ניהול מוצרים</span>
+            <button
+              type="button"
+              className="pm-add-btn"
+              onClick={() => { setPmShowCreate(true); loadPmBranches(); }}
+            >
+              + מוצר חדש
+            </button>
           </div>
         </div>
+
+        {pmShowCreate && (
+          <div className="pm-create-card">
+            <div className="pm-create-title">מוצר חדש</div>
+            <div className="pm-create-fields">
+              <input className="pm-edit-input" placeholder="שם מוצר *" value={pmCreateName} onChange={(e) => setPmCreateName(e.target.value)} />
+              <input className="pm-edit-input" placeholder="ברקוד *" value={pmCreateSku} onChange={(e) => setPmCreateSku(e.target.value)} />
+              <select className="pm-edit-input" value={pmCreateBranchId} onChange={(e) => handlePmBranchChange(e.target.value)}>
+                <option value="">בחר סניף *</option>
+                {pmBranches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+              <select className="pm-edit-input" value={pmCreateDeptId} onChange={(e) => setPmCreateDeptId(e.target.value)} disabled={!pmCreateBranchId}>
+                <option value="">בחר מחלקה *</option>
+                {pmDepts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+            <div className="pm-create-actions">
+              <button type="button" className="pm-search-btn" onClick={handlePmCreate} disabled={pmCreateSaving}>
+                {pmCreateSaving ? '...' : 'צור מוצר'}
+              </button>
+              <button type="button" className="pm-cancel-btn" onClick={() => setPmShowCreate(false)}>ביטול</button>
+            </div>
+          </div>
+        )}
+
         <div className="pm-search-row">
           <input
             className="search-input pm-search-input"
@@ -1680,16 +1792,13 @@ export default function App() {
             onKeyDown={(e) => e.key === 'Enter' && handlePmSearch(pmSearch)}
             autoFocus
           />
-          <button
-            type="button"
-            className="pm-search-btn"
-            onClick={() => handlePmSearch(pmSearch)}
-            disabled={pmLoading}
-          >
+          <button type="button" className="pm-search-btn" onClick={() => handlePmSearch(pmSearch)} disabled={pmLoading}>
             {pmLoading ? '...' : 'חפש'}
           </button>
         </div>
+
         {pmError && <div className="helper-text error-text">{pmError}</div>}
+
         <div className="pm-product-list">
           {pmProducts.map((p) => (
             <div key={p.product_id} className="pm-product-card">
@@ -1698,32 +1807,32 @@ export default function App() {
                   ? <img src={p.product_image} alt={p.product_name} className="pm-product-img" />
                   : <div className="pm-product-img-placeholder">🖼️</div>
                 }
-              </div>
-              <div className="pm-product-info">
-                <div className="pm-product-name">{p.product_name}</div>
-                <div className="pm-product-sku">#{p.product_sku}</div>
-                {p.department_name && <div className="pm-product-dept">{p.department_name} · {p.branch_name}</div>}
-              </div>
-              <div className="pm-product-actions">
-                <label className={`pm-upload-btn${pmUploadingId === p.product_id ? ' disabled' : ''}`}>
-                  {pmUploadingId === p.product_id ? '...' : p.product_image ? 'החלף תמונה' : 'העלה תמונה'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    disabled={pmUploadingId === p.product_id}
-                    onChange={(e) => handlePmUpload(p.product_id, e.target.files[0])}
-                  />
+                <label className="pm-img-overlay">
+                  {pmUploadingId === p.product_id ? '...' : '📷'}
+                  <input type="file" accept="image/*" style={{ display: 'none' }} disabled={pmUploadingId === p.product_id} onChange={(e) => handlePmUpload(p.product_id, e.target.files[0])} />
                 </label>
-                {p.product_image && (
-                  <button
-                    type="button"
-                    className="pm-delete-img-btn"
-                    disabled={pmUploadingId === p.product_id}
-                    onClick={() => handlePmDeleteImage(p.product_id)}
-                  >
-                    מחק תמונה
-                  </button>
+              </div>
+
+              <div className="pm-product-body">
+                {pmEditId === p.product_id ? (
+                  <div className="pm-edit-form">
+                    <input className="pm-edit-input" value={pmEditName} onChange={(e) => setPmEditName(e.target.value)} placeholder="שם מוצר" />
+                    <input className="pm-edit-input" value={pmEditSku} onChange={(e) => setPmEditSku(e.target.value)} placeholder="ברקוד" />
+                    <div className="pm-edit-actions">
+                      <button type="button" className="pm-save-btn" onClick={() => handlePmSave(p.product_id)} disabled={pmEditSaving}>{pmEditSaving ? '...' : 'שמור'}</button>
+                      <button type="button" className="pm-cancel-btn" onClick={() => setPmEditId(null)}>ביטול</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pm-product-info" onClick={() => startEdit(p)}>
+                    <div className="pm-product-name">{p.product_name}</div>
+                    <div className="pm-product-sku">#{p.product_sku}</div>
+                    {p.department_name && <div className="pm-product-dept">{p.department_name} · {p.branch_name}</div>}
+                    <div className="pm-edit-hint">לחץ לעריכה</div>
+                  </div>
+                )}
+                {p.product_image && pmEditId !== p.product_id && (
+                  <button type="button" className="pm-delete-img-btn" disabled={pmUploadingId === p.product_id} onClick={() => handlePmDeleteImage(p.product_id)}>מחק תמונה</button>
                 )}
               </div>
             </div>

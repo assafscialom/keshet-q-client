@@ -2645,3 +2645,111 @@ input {
 .pm-home-link-btn:hover {
   background: #f0f0f0;
 }
+
+.pm-add-btn {
+  margin-inline-start: auto;
+  padding: 8px 16px;
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.pm-product-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pm-product-card {
+  align-items: flex-start;
+}
+.pm-img-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  text-align: center;
+  font-size: 18px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.pm-product-img-wrap {
+  position: relative;
+}
+.pm-edit-hint {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+.pm-product-info {
+  cursor: pointer;
+}
+.pm-product-info:hover .pm-product-name {
+  color: #1e3f8f;
+}
+.pm-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pm-edit-input {
+  padding: 8px 10px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  width: 100%;
+}
+.pm-edit-input:focus {
+  outline: none;
+  border-color: #1e3f8f;
+}
+.pm-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+.pm-save-btn {
+  padding: 7px 16px;
+  background: #1e3f8f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.pm-cancel-btn {
+  padding: 7px 16px;
+  background: #f0f0f0;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.pm-create-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.pm-create-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.pm-create-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pm-create-actions {
+  display: flex;
+  gap: 10px;
+}
