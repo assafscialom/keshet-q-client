@@ -64,6 +64,18 @@ class DataTypesTableSeeder extends Seeder
             'generate_permissions'  => 1,
             'description'           => '',
         ])->save();
+
+        $dataType = $this->dataType('slug', 'products');
+        $dataType->fill([
+            'name'                  => 'products',
+            'display_name_singular' => 'מוצר',
+            'display_name_plural'   => 'מוצרים',
+            'icon'                  => 'voyager-bag',
+            'model_name'            => 'App\\Entities\\Products',
+            'controller'            => '',
+            'generate_permissions'  => 1,
+            'description'           => '',
+        ])->save();
     }
 
     /**

@@ -88,6 +88,7 @@ export default function App() {
   const lastTapRef = useRef(0);
   const [pendingNote, setPendingNote] = useState('');
   const [pendingCutTypeId, setPendingCutTypeId] = useState('');
+  const [showProductImage, setShowProductImage] = useState(false);
   const [pendingQuantity, setPendingQuantity] = useState(1);
   const [pendingUnit, setPendingUnit] = useState("גר'");
   const [sorterCheckedItems, setSorterCheckedItems] = useState(new Set());
@@ -477,6 +478,7 @@ export default function App() {
         setPendingCutTypeId('');
         setPendingQuantity(1);
         setPendingUnit("גר'");
+        setShowProductImage(false);
       } else {
         setProductQuery(trimmed);
         setProductResults(results);
@@ -1198,9 +1200,21 @@ export default function App() {
                 <button type="button" className="modal-close" onClick={() => setPendingProduct(null)}>✕</button>
                 <div className="product-detail-title">
                   <span className="search-result-sku">#{pendingProduct.product_sku}</span>
-                  <span className="search-result-name">{pendingProduct.product_name}</span>
+                  <button
+                    type="button"
+                    className={`product-name-btn${pendingProduct.product_image ? ' has-image' : ''}`}
+                    onClick={() => pendingProduct.product_image && setShowProductImage(v => !v)}
+                  >
+                    {pendingProduct.product_name}
+                    {pendingProduct.product_image && <span className="product-img-icon">{showProductImage ? '🔼' : '🖼️'}</span>}
+                  </button>
                 </div>
               </div>
+              {showProductImage && pendingProduct.product_image && (
+                <div className="product-image-preview">
+                  <img src={pendingProduct.product_image} alt={pendingProduct.product_name} className="product-image-img" />
+                </div>
+              )}
               <div className="product-detail-body">
                 <label className="product-detail-label">
                   {t('quantity')}

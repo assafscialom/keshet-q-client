@@ -17,11 +17,17 @@ class ProductsTransformer extends TransformerAbstract
      */
     public function transform(Products $model)
     {
+        $image = $model->image;
+        if ($image && !str_starts_with($image, 'http')) {
+            $image = rtrim(env('APP_URL'), '/') . '/storage/' . ltrim($image, '/');
+        }
+
         return [
             'product_id' => $model->product_id,
             'product_sku' => $model->sku,
             'product_name' => $model->product_name,
             'product_description' => $model->description,
+            'product_image' => $image,
             'product_quantity' => $model->quantity,
             'branch_id' => $model->branch_id,
             'branch_name' => $model->branch_name,

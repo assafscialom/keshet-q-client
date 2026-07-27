@@ -15,6 +15,7 @@ class DataRowsTableSeeder extends Seeder
         $menuDataType = DataType::where('slug', 'menus')->firstOrFail();
         $roleDataType = DataType::where('slug', 'roles')->firstOrFail();
         $cutTypeDataType = DataType::where('slug', 'cut-types')->first();
+        $productsDataType = DataType::where('slug', 'products')->first();
 
         $dataRow = $this->dataRow($userDataType, 'id');
         if (!$dataRow->exists) {
@@ -425,6 +426,37 @@ class DataRowsTableSeeder extends Seeder
                     'add'          => 0,
                     'delete'       => 0,
                     'order'        => 5,
+                ])->save();
+            }
+        }
+    }
+
+        if ($productsDataType) {
+            $rows = [
+                ['field' => 'id',            'type' => 'number', 'display_name' => 'ID',          'browse' => 0, 'read' => 0, 'edit' => 0, 'add' => 0, 'delete' => 0, 'order' => 1],
+                ['field' => 'sku',           'type' => 'text',   'display_name' => 'ברקוד',        'browse' => 1, 'read' => 1, 'edit' => 1, 'add' => 1, 'delete' => 1, 'order' => 2],
+                ['field' => 'name',          'type' => 'text',   'display_name' => 'שם מוצר',      'browse' => 1, 'read' => 1, 'edit' => 1, 'add' => 1, 'delete' => 1, 'order' => 3],
+                ['field' => 'image',         'type' => 'image',  'display_name' => 'תמונה',        'browse' => 1, 'read' => 1, 'edit' => 1, 'add' => 1, 'delete' => 1, 'order' => 4, 'details' => json_encode(['resize' => ['width' => '1000', 'height' => null], 'quality' => 90, 'upsize' => false, 'thumbnails' => [['name' => 'medium', 'scale' => '50%'], ['name' => 'small', 'scale' => '25%']]])],
+                ['field' => 'description',   'type' => 'text',   'display_name' => 'תיאור',        'browse' => 0, 'read' => 1, 'edit' => 1, 'add' => 1, 'delete' => 0, 'order' => 5],
+                ['field' => 'department_id', 'type' => 'number', 'display_name' => 'מחלקה',        'browse' => 1, 'read' => 1, 'edit' => 1, 'add' => 1, 'delete' => 1, 'order' => 6],
+                ['field' => 'branch_id',     'type' => 'number', 'display_name' => 'סניף',         'browse' => 1, 'read' => 1, 'edit' => 1, 'add' => 1, 'delete' => 1, 'order' => 7],
+                ['field' => 'created_at',    'type' => 'timestamp', 'display_name' => 'נוצר',      'browse' => 0, 'read' => 0, 'edit' => 0, 'add' => 0, 'delete' => 0, 'order' => 8],
+                ['field' => 'updated_at',    'type' => 'timestamp', 'display_name' => 'עודכן',     'browse' => 0, 'read' => 0, 'edit' => 0, 'add' => 0, 'delete' => 0, 'order' => 9],
+            ];
+
+            foreach ($rows as $r) {
+                $dataRow = $this->dataRow($productsDataType, $r['field']);
+                $dataRow->fill([
+                    'type'         => $r['type'],
+                    'display_name' => $r['display_name'],
+                    'required'     => 0,
+                    'browse'       => $r['browse'],
+                    'read'         => $r['read'],
+                    'edit'         => $r['edit'],
+                    'add'          => $r['add'],
+                    'delete'       => $r['delete'],
+                    'details'      => $r['details'] ?? null,
+                    'order'        => $r['order'],
                 ])->save();
             }
         }

@@ -113,4 +113,36 @@ class ProductsController extends Controller
 
         return response()->json($product->cutTypes);
     }
+
+    public function uploadImage(Request $request, $product_id)
+    {
+        $request->validate([
+            'image' => 'required|image|max:4096',
+        ]);
+
+        $product = $this->model->findOrFail($product_id);
+
+        if ($product->image) {
+            \Storage::disk('public')->delete($product->image);
+        }
+
+        $path = $request->file('image')->store('products', 'public');
+        $product->update(['image' => $path]);
+
+        $url = rtrim(env('APP_URL'), '/') . '/storage/' . $path;
+
+        return response()->json(['product_image' => $url]);
+    }
+
+    public function deleteImage($product_id)
+    {
+        $product = $this->model->findOrFail($product_id);
+
+        if ($product->image) {
+            \Storage::disk('public')->delete($product->image);
+            $product->update(['image' => null]);
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

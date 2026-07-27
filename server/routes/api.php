@@ -52,6 +52,8 @@ $api->version('v1', function($api){
             $api->get('search/{branch_id}/{department_id}', 'Api\Products\ProductsController@search');
             $api->get('{product_id}/cut-types', 'Api\Products\ProductsController@cutTypes');
             $api->post('{product_id}/cut-types', 'Api\Products\ProductsController@syncCutTypes');
+            $api->post('{product_id}/image', 'Api\Products\ProductsController@uploadImage');
+            $api->delete('{product_id}/image', 'Api\Products\ProductsController@deleteImage');
         });
 
         $api->post('print/{branch_id}', 'Api\Print\PrintController@queue');

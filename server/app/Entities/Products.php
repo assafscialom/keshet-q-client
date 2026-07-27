@@ -16,6 +16,7 @@ class Products extends Model
         "sku",
         "name",
         "description",
+        "image",
         "quantity",
         "department_id",
         "branch_id",
