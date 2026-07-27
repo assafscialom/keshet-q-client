@@ -1206,7 +1206,7 @@ export default function App() {
                     onClick={() => pendingProduct.product_image && setShowProductImage(v => !v)}
                   >
                     {pendingProduct.product_name}
-                    {pendingProduct.product_image && <span className="product-img-icon">{showProductImage ? '🔼' : '🖼️'}</span>}
+                    {pendingProduct.product_image && <span className="product-img-icon">{showProductImage ? '▲ סגור' : '📷 תמונה'}</span>}
                   </button>
                 </div>
               </div>
