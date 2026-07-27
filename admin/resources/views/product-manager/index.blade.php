@@ -8,11 +8,11 @@
 
     <div class="row" style="margin-bottom:20px;">
         <div class="col-md-8">
-            <div class="input-group">
-                <input id="pm-search" type="text" class="form-control" placeholder="חפש לפי שם מוצר או ברקוד..." style="font-size:16px;height:44px;">
+            <div class="input-group" style="direction:rtl;">
                 <span class="input-group-btn">
                     <button id="pm-search-btn" class="btn btn-primary" style="height:44px;font-size:16px;">חפש</button>
                 </span>
+                <input id="pm-search" type="text" class="form-control" placeholder="חפש לפי שם מוצר או ברקוד..." style="font-size:16px;height:44px;text-align:right;">
             </div>
         </div>
     </div>
