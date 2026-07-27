@@ -139,7 +139,21 @@ class ProductsController extends Controller
     {
         $str = $request->get('search', '');
 
-        $query = $this->model->select([
+        if (empty($str)) {
+            return $this->collection(collect([]), new ProductsTransformer);
+        }
+
+        // Get one representative product_id per unique SKU
+        $uniqueIds = $this->model->selectRaw('MIN(id) as id')
+            ->where(function ($q) use ($str) {
+                $q->where('sku', 'like', "%{$str}%")
+                  ->orWhere('name', 'like', "%{$str}%");
+            })
+            ->groupBy('sku')
+            ->limit(50)
+            ->pluck('id');
+
+        $products = $this->model->select([
             'products.id as product_id',
             'products.sku',
             'products.name as product_name',
@@ -153,16 +167,10 @@ class ProductsController extends Controller
             'departments.name as department_name',
         ])
         ->leftJoin('branches', 'branches.id', '=', 'products.branch_id')
-        ->leftJoin('departments', 'departments.id', '=', 'products.department_id');
-
-        if (!empty($str)) {
-            $query->where(function ($q) use ($str) {
-                $q->where('products.sku', 'like', "%{$str}%")
-                  ->orWhere('products.name', 'like', "%{$str}%");
-            });
-        }
-
-        $products = $query->orderBy('products.name')->limit(50)->get();
+        ->leftJoin('departments', 'departments.id', '=', 'products.department_id')
+        ->whereIn('products.id', $uniqueIds)
+        ->orderBy('products.name')
+        ->get();
 
         return $this->collection($products, new ProductsTransformer);
     }
@@ -200,7 +208,9 @@ class ProductsController extends Controller
         }
 
         $path = $request->file('image')->store('products', 'public');
-        $product->update(['image' => $path]);
+
+        // Update image for all products with same SKU across all branches
+        $this->model->where('sku', $product->sku)->update(['image' => $path]);
 
         $url = rtrim(env('APP_URL'), '/') . '/storage/' . $path;
 
@@ -213,7 +223,8 @@ class ProductsController extends Controller
 
         if ($product->image) {
             \Storage::disk('public')->delete($product->image);
-            $product->update(['image' => null]);
+            // Clear image for all products with same SKU across all branches
+            $this->model->where('sku', $product->sku)->update(['image' => null]);
         }
 
         return response()->json(['success' => true]);

@@ -114,6 +114,9 @@ export default function App() {
   const [showBoardSettings, setShowBoardSettings] = useState(false);
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
+  const [pmAuthed, setPmAuthed] = useState(() => sessionStorage.getItem('pmAuthed') === '1');
+  const [pmPinInput, setPmPinInput] = useState('');
+  const [pmPinError, setPmPinError] = useState(false);
   const [pmSearch, setPmSearch] = useState('');
   const [pmProducts, setPmProducts] = useState([]);
   const [pmLoading, setPmLoading] = useState(false);
@@ -1627,6 +1630,59 @@ export default function App() {
   }
 
   if (isProductManagerRoute(route)) {
+    const PM_PIN = '1234';
+
+    if (!pmAuthed) {
+      return (
+        <div className="page pm-pin-page" dir="rtl">
+          <div className="pm-pin-box">
+            <div className="pm-pin-title">ניהול מוצרים</div>
+            <div className="pm-pin-subtitle">הכנס קוד מנהל</div>
+            <input
+              className={`pm-pin-input${pmPinError ? ' pm-pin-error' : ''}`}
+              type="password"
+              inputMode="numeric"
+              maxLength={8}
+              value={pmPinInput}
+              autoFocus
+              onChange={(e) => { setPmPinInput(e.target.value); setPmPinError(false); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (pmPinInput === PM_PIN) {
+                    sessionStorage.setItem('pmAuthed', '1');
+                    setPmAuthed(true);
+                    setPmPinInput('');
+                  } else {
+                    setPmPinError(true);
+                    setPmPinInput('');
+                  }
+                }
+              }}
+              placeholder="••••"
+            />
+            {pmPinError && <div className="pm-pin-err-msg">קוד שגוי</div>}
+            <button
+              type="button"
+              className="pm-search-btn"
+              onClick={() => {
+                if (pmPinInput === PM_PIN) {
+                  sessionStorage.setItem('pmAuthed', '1');
+                  setPmAuthed(true);
+                  setPmPinInput('');
+                } else {
+                  setPmPinError(true);
+                  setPmPinInput('');
+                }
+              }}
+            >
+              כניסה
+            </button>
+            <button type="button" className="pm-cancel-btn" style={{marginTop: 8}} onClick={navigateHome}>חזרה</button>
+          </div>
+        </div>
+      );
+    }
+
     const handlePmSearch = async (searchStr) => {
       if (!searchStr.trim()) return;
       setPmLoading(true);
