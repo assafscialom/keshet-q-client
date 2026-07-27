@@ -2512,3 +2512,136 @@ input {
     font-size: 16px;
   }
 }
+
+/* Product Manager */
+.pm-search-row {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+}
+.pm-search-input {
+  flex: 1;
+}
+.pm-search-btn {
+  padding: 10px 20px;
+  background: #1e3f8f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pm-search-btn:disabled {
+  opacity: 0.6;
+}
+.pm-product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.pm-product-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  padding: 12px 14px;
+}
+.pm-product-img-wrap {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pm-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pm-product-img-placeholder {
+  font-size: 32px;
+  color: #bbb;
+}
+.pm-product-info {
+  flex: 1;
+  min-width: 0;
+}
+.pm-product-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+}
+.pm-product-sku {
+  font-size: 13px;
+  color: #888;
+  margin-top: 2px;
+}
+.pm-product-dept {
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 2px;
+}
+.pm-product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.pm-upload-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #1e3f8f;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+.pm-upload-btn.disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.pm-delete-img-btn {
+  padding: 7px 14px;
+  background: #fff;
+  color: #c0392b;
+  border: 1.5px solid #c0392b;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.pm-delete-img-btn:disabled {
+  opacity: 0.5;
+}
+.pm-hint {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 15px;
+  color: #aaa;
+}
+.pm-home-link-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+.pm-home-link-btn {
+  background: none;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+}
+.pm-home-link-btn:hover {
+  background: #f0f0f0;
+}

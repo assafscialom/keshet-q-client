@@ -48,6 +48,7 @@ $api->version('v1', function($api){
         });
 
         $api->group(['prefix' => 'products'], function ($api) {
+            $api->get('manage', 'Api\Products\ProductsController@manage');
             $api->get('/{branch_id}/{department_id}', 'Api\Products\ProductsController@show');
             $api->get('search/{branch_id}/{department_id}', 'Api\Products\ProductsController@search');
             $api->get('{product_id}/cut-types', 'Api\Products\ProductsController@cutTypes');

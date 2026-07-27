@@ -13,6 +13,7 @@ const isCashierRoute = (pathname) => pathname.startsWith('/cashier');
 const isCashierNewRoute = (pathname) => pathname.startsWith('/cashier-new');
 const isSorterRoute = (pathname) => pathname.startsWith('/sorter');
 const isBoardRoute = (pathname) => pathname.startsWith('/board/branch/');
+const isProductManagerRoute = (pathname) => pathname.startsWith('/product-manager');
 const isBoardOrdersRoute = (pathname) =>
   pathname.includes('/board/branch/') && pathname.includes('/departments/');
 
@@ -113,6 +114,11 @@ export default function App() {
   const [showBoardSettings, setShowBoardSettings] = useState(false);
   const [route, setRoute] = useState(window.location.pathname);
   const [branchName, setBranchName] = useState('');
+  const [pmSearch, setPmSearch] = useState('');
+  const [pmProducts, setPmProducts] = useState([]);
+  const [pmLoading, setPmLoading] = useState(false);
+  const [pmError, setPmError] = useState('');
+  const [pmUploadingId, setPmUploadingId] = useState(null);
   const [branchAddress, setBranchAddress] = useState('');
   const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'he');
   const homePathRef = useRef(window.location.pathname);
@@ -1608,6 +1614,131 @@ export default function App() {
     );
   }
 
+  if (isProductManagerRoute(route)) {
+    const handlePmSearch = async (searchStr) => {
+      if (!searchStr.trim()) return;
+      setPmLoading(true);
+      setPmError('');
+      try {
+        const res = await apiClient.get(`/products/manage?search=${encodeURIComponent(searchStr.trim())}`);
+        setPmProducts(res?.data?.data ?? []);
+      } catch (err) {
+        setPmError('שגיאה בטעינת מוצרים');
+      } finally {
+        setPmLoading(false);
+      }
+    };
+
+    const handlePmUpload = async (productId, file) => {
+      if (!file) return;
+      setPmUploadingId(productId);
+      const formData = new FormData();
+      formData.append('image', file);
+      try {
+        const res = await apiClient.post(`/products/${productId}/image`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const newUrl = res?.data?.product_image ?? null;
+        setPmProducts((prev) =>
+          prev.map((p) => (p.product_id === productId ? { ...p, product_image: newUrl } : p))
+        );
+      } catch (err) {
+        setPmError('שגיאה בהעלאת תמונה');
+      } finally {
+        setPmUploadingId(null);
+      }
+    };
+
+    const handlePmDeleteImage = async (productId) => {
+      setPmUploadingId(productId);
+      try {
+        await apiClient.delete(`/products/${productId}/image`);
+        setPmProducts((prev) =>
+          prev.map((p) => (p.product_id === productId ? { ...p, product_image: null } : p))
+        );
+      } catch (err) {
+        setPmError('שגיאה במחיקת תמונה');
+      } finally {
+        setPmUploadingId(null);
+      }
+    };
+
+    return (
+      <div className="page" dir="rtl">
+        <div className="cashier-header cashier-header-new">
+          <div className="cashier-header-row1">
+            <button type="button" className="back-button" onClick={navigateHome} aria-label="Back">←</button>
+            <span className="cashier-header-title">ניהול מוצרים</span>
+          </div>
+        </div>
+        <div className="pm-search-row">
+          <input
+            className="search-input pm-search-input"
+            placeholder="חפש לפי שם מוצר או ברקוד..."
+            value={pmSearch}
+            onChange={(e) => setPmSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handlePmSearch(pmSearch)}
+            autoFocus
+          />
+          <button
+            type="button"
+            className="pm-search-btn"
+            onClick={() => handlePmSearch(pmSearch)}
+            disabled={pmLoading}
+          >
+            {pmLoading ? '...' : 'חפש'}
+          </button>
+        </div>
+        {pmError && <div className="helper-text error-text">{pmError}</div>}
+        <div className="pm-product-list">
+          {pmProducts.map((p) => (
+            <div key={p.product_id} className="pm-product-card">
+              <div className="pm-product-img-wrap">
+                {p.product_image
+                  ? <img src={p.product_image} alt={p.product_name} className="pm-product-img" />
+                  : <div className="pm-product-img-placeholder">🖼️</div>
+                }
+              </div>
+              <div className="pm-product-info">
+                <div className="pm-product-name">{p.product_name}</div>
+                <div className="pm-product-sku">#{p.product_sku}</div>
+                {p.department_name && <div className="pm-product-dept">{p.department_name} · {p.branch_name}</div>}
+              </div>
+              <div className="pm-product-actions">
+                <label className={`pm-upload-btn${pmUploadingId === p.product_id ? ' disabled' : ''}`}>
+                  {pmUploadingId === p.product_id ? '...' : p.product_image ? 'החלף תמונה' : 'העלה תמונה'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    disabled={pmUploadingId === p.product_id}
+                    onChange={(e) => handlePmUpload(p.product_id, e.target.files[0])}
+                  />
+                </label>
+                {p.product_image && (
+                  <button
+                    type="button"
+                    className="pm-delete-img-btn"
+                    disabled={pmUploadingId === p.product_id}
+                    onClick={() => handlePmDeleteImage(p.product_id)}
+                  >
+                    מחק תמונה
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+          {!pmLoading && pmProducts.length === 0 && pmSearch.trim() && (
+            <div className="helper-text">לא נמצאו מוצרים עבור "{pmSearch}"</div>
+          )}
+          {!pmLoading && pmProducts.length === 0 && !pmSearch.trim() && (
+            <div className="helper-text pm-hint">הקלד שם מוצר או ברקוד ולחץ חפש</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (isBoardRoute(route)) {
     const showOrdersOnly = isBoardOrdersRoute(route);
     const selectedNames = boardDepartments
@@ -2119,6 +2250,15 @@ export default function App() {
             </div>
           </button>
         ))}
+      </div>
+      <div className="pm-home-link-row">
+        <button
+          type="button"
+          className="pm-home-link-btn"
+          onClick={() => navigate('/product-manager')}
+        >
+          🖼️ ניהול תמונות מוצרים
+        </button>
       </div>
       {(ordersLoading || ordersError) && (
         <div className={`helper-text${ordersError ? ' error-text' : ''}`}>

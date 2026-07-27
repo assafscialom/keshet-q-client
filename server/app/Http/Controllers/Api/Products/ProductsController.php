@@ -94,6 +94,38 @@ class ProductsController extends Controller
         return $this->collection($data, new ProductsTransformer);
     }
 
+    public function manage(Request $request)
+    {
+        $str = $request->get('search', '');
+
+        $query = $this->model->select([
+            'products.id as product_id',
+            'products.sku',
+            'products.name as product_name',
+            'products.description',
+            'products.image',
+            'products.quantity',
+            'products.branch_id',
+            'products.department_id',
+            'branches.name as branch_name',
+            'branches.address',
+            'departments.name as department_name',
+        ])
+        ->leftJoin('branches', 'branches.id', '=', 'products.branch_id')
+        ->leftJoin('departments', 'departments.id', '=', 'products.department_id');
+
+        if (!empty($str)) {
+            $query->where(function ($q) use ($str) {
+                $q->where('products.sku', 'like', "%{$str}%")
+                  ->orWhere('products.name', 'like', "%{$str}%");
+            });
+        }
+
+        $products = $query->orderBy('products.name')->limit(50)->get();
+
+        return $this->collection($products, new ProductsTransformer);
+    }
+
     public function cutTypes($product_id)
     {
         $product = $this->model->with('cutTypes')->findOrFail($product_id);
