@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import apiClient from './api/client';
 import translations from './i18n';
 import thaiProducts from './thaiProducts';
+import { getDepartmentThaiName } from './thaiDepartments';
 import './index.css';
 
 const findBranchId = (pathname) => {
@@ -126,6 +127,7 @@ export default function App() {
     }
     return product?.product_name || '';
   };
+  const getDeptName = (name) => language === 'th' ? getDepartmentThaiName(name) : name;
 
   const shortcuts = [
     { id: 'cashier', title: t('shortcut_cashier'), icon: '🧾' },
@@ -1334,7 +1336,7 @@ export default function App() {
                       <span className="receipt-field-label">שם לקוח</span>
                       <span>{receiptCustomerName}</span>
                     </div>
-                    <div className="receipt-subtitle">{receiptDepartmentName}</div>
+                    <div className="receipt-subtitle">{getDeptName(receiptDepartmentName)}</div>
                     <div className="receipt-items">
                       {receiptItems.map((item) => (
                         <div key={item.product_id} className="receipt-row">
@@ -1621,7 +1623,7 @@ export default function App() {
     const showOrdersOnly = isBoardOrdersRoute(route);
     const selectedNames = boardDepartments
       .filter((dept) => boardDepartmentIds.includes(Number(dept.id)))
-      .map((dept) => dept.name);
+      .map((dept) => getDeptName(dept.name));
     if (showOrdersOnly) {
       const timeStr = clockTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
       const dateStr = clockTime.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -1768,7 +1770,7 @@ export default function App() {
                         })
                       }
                     >
-                      {dept.name}
+                      {getDeptName(dept.name)}
                     </button>
                   );
                 })}
@@ -2094,7 +2096,7 @@ export default function App() {
                     tabIndex={0}
                     aria-pressed={selectedDepartmentId === item.id}
                   >
-                    <span>{item.name}</span>
+                    <span>{getDeptName(item.name)}</span>
                   </li>
                 ))
               ) : (
