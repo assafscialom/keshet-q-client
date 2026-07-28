@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import apiClient from './api/client';
 import translations from './i18n';
+import thaiProducts from './thaiProducts';
 import './index.css';
 
 const findBranchId = (pathname) => {
@@ -118,6 +119,13 @@ export default function App() {
   const homePathRef = useRef(window.location.pathname);
 
   const t = (key) => translations[language]?.[key] ?? translations['he'][key] ?? key;
+  const getProductDisplayName = (product) => {
+    if (language === 'th') {
+      const sku = String(product?.product_sku ?? product?.sku ?? '').trim();
+      return thaiProducts[sku] || product?.product_name || '';
+    }
+    return product?.product_name || '';
+  };
 
   const shortcuts = [
     { id: 'cashier', title: t('shortcut_cashier'), icon: '🧾' },
@@ -1045,7 +1053,7 @@ export default function App() {
                   </button>
                   <div className="search-result-info">
                     <div className="search-result-sku">#{product.product_sku}</div>
-                    <div className="search-result-name">{product.product_name}</div>
+                    <div className="search-result-name">{getProductDisplayName(product)}</div>
                   </div>
                 </div>
               ))}
@@ -1083,7 +1091,7 @@ export default function App() {
                       <div key={`${product.product_id}-${index}`} className="order-table-row">
                         <div data-label={t('col_num')}>{index + 1}</div>
                         <div data-label={t('col_sku')}>{product.product_sku || '-'}</div>
-                        <div data-label={t('col_name')}>{product.product_name}</div>
+                        <div data-label={t('col_name')}>{getProductDisplayName(product)}</div>
                         <div data-label={t('col_note')}>
                           <textarea
                             className="order-note-input"
@@ -1205,7 +1213,7 @@ export default function App() {
                     className={`product-name-btn${pendingProduct.product_image ? ' has-image' : ''}`}
                     onClick={() => pendingProduct.product_image && setShowProductImage(v => !v)}
                   >
-                    {pendingProduct.product_name}
+                    {getProductDisplayName(pendingProduct)}
                     {pendingProduct.product_image && <span className="product-img-icon">{showProductImage ? '▲ סגור' : '📷 תמונה'}</span>}
                   </button>
                 </div>
@@ -1331,7 +1339,7 @@ export default function App() {
                       {receiptItems.map((item) => (
                         <div key={item.product_id} className="receipt-row">
                           <div className="receipt-field"><span className="receipt-field-label">מק"ט</span><span>{item.product_sku || '-'}</span></div>
-                          <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{item.product_name}</span></div>
+                          <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{getProductDisplayName(item)}</span></div>
                           <div className="receipt-field"><span className="receipt-field-label">כמות</span><strong>{item.quantity || 1}{item.metric_type ? ' ' + item.metric_type : ''}</strong></div>
                           {item.cut_type_name ? <div className="receipt-field"><span className="receipt-field-label">חיתוך </span><span>{item.cut_type_name}</span></div> : null}
                           {item.note ? <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note}</span></div> : null}
