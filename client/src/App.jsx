@@ -514,19 +514,51 @@ export default function App() {
       return;
     }
 
+    const hasThai = /[฀-๿]/.test(trimmed);
+
     let cancelled = false;
     const timeout = window.setTimeout(async () => {
       setProductLoading(true);
       setProductError('');
 
       try {
-        const response = await apiClient.get(
-          `/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(
-            trimmed,
-          )}`,
-        );
+        let results;
+
+        if (hasThai) {
+          // Thai text: search locally in thaiProducts lookup, then fetch by SKU
+          const matchingSKUs = Object.entries(thaiProducts)
+            .filter(([, name]) => name.includes(trimmed))
+            .map(([sku]) => sku)
+            .slice(0, 15);
+
+          if (!matchingSKUs.length) {
+            setProductResults([]);
+            return;
+          }
+
+          const responses = await Promise.all(
+            matchingSKUs.map((sku) =>
+              apiClient
+                .get(`/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(sku)}`)
+                .then((r) => r?.data?.data ?? [])
+                .catch(() => []),
+            ),
+          );
+
+          const seen = new Set();
+          results = responses.flat().filter((p) => {
+            if (seen.has(p.product_id)) return false;
+            seen.add(p.product_id);
+            return true;
+          });
+        } else {
+          const response = await apiClient.get(
+            `/products/search/${cashierBranchId}/${cashierDepartmentId}?search=${encodeURIComponent(trimmed)}`,
+          );
+          results = response?.data?.data ?? [];
+        }
+
         if (cancelled) return;
-        const results = response?.data?.data ?? [];
         setProductResults(results);
       } catch (err) {
         if (cancelled) return;
