@@ -872,9 +872,11 @@ export default function App() {
       const metric  = item.metric_type ? ' ' + item.metric_type : '';
       const cut     = item.cut_type?.name || '';
       const note    = item.comment || '';
+      const thaiName = thaiProducts[String(sku)] || '';
       return `<div class="receipt-row">
         <div class="receipt-field"><span class="receipt-field-label">מק"ט</span><span>${sku}</span></div>
         <div class="receipt-field"><span class="receipt-field-label">שם</span><span>${name}</span></div>
+        ${thaiName ? `<div class="receipt-field"><span class="receipt-field-label">ภาษาไทย</span><span>${thaiName}</span></div>` : ''}
         <div class="receipt-field"><span class="receipt-field-label">כמות</span><strong>${qty}${metric}</strong></div>
         ${cut  ? `<div class="receipt-field"><span class="receipt-field-label">חיתוך </span><span>${cut}</span></div>` : ''}
         ${note ? `<div class="receipt-field"><span class="receipt-field-label">הערה</span><span>${note}</span></div>` : ''}
@@ -1373,7 +1375,8 @@ export default function App() {
                       {receiptItems.map((item) => (
                         <div key={item.product_id} className="receipt-row">
                           <div className="receipt-field"><span className="receipt-field-label">מק"ט</span><span>{item.product_sku || '-'}</span></div>
-                          <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{getProductDisplayName(item)}</span></div>
+                          <div className="receipt-field"><span className="receipt-field-label">שם</span><span>{item.product_name}</span></div>
+                          {thaiProducts[String(item.product_sku || '')] && <div className="receipt-field"><span className="receipt-field-label">ภาษาไทย</span><span>{thaiProducts[String(item.product_sku || '')]}</span></div>}
                           <div className="receipt-field"><span className="receipt-field-label">כמות</span><strong>{item.quantity || 1}{item.metric_type ? ' ' + item.metric_type : ''}</strong></div>
                           {item.cut_type_name ? <div className="receipt-field"><span className="receipt-field-label">חיתוך </span><span>{item.cut_type_name}</span></div> : null}
                           {item.note ? <div className="receipt-field"><span className="receipt-field-label">הערה</span><span>{item.note}</span></div> : null}
