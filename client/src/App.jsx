@@ -1689,7 +1689,7 @@ export default function App() {
       const ann = ANNOUNCEMENT[announcementLang];
 
       return (
-        <div className="board-tv" style={{ position: 'relative' }}>
+        <div className="board-tv">
           <header className="board-tv-header">
             <div className="board-tv-logo">
               <img src="/keshet.png" alt="Keshet Taamim" />
