@@ -1662,8 +1662,34 @@ export default function App() {
     if (showOrdersOnly) {
       const timeStr = clockTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
       const dateStr = clockTime.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      const sec = clockTime.getSeconds();
+      const showAnnouncement = sec < 10;
+      const announcementLang = sec < 5 ? 'he' : 'ru';
+      const ANNOUNCEMENT = {
+        he: {
+          label: 'עברית',
+          greeting: 'לקוחות יקרים,',
+          body: `מתוך רצון לשיפור השירות וזמני ההמתנה במחלקה, אנו מפעילים בימים אלו מערכת ניהול תורים חדשה.
+המערכת בשלבי הטמעה והרצה ואנו מחויבים לבצע למידה מהירה והתאמות נדרשות שיובילו לזמני המתנה קצרים ושירות מיטבי.
+אנא מכם גלו הבנה והתאזרו בסבלנות כלפי צוות העובדים.
+נשמח מאוד לקבל את מלא שיתוף הפעולה.`,
+          dir: 'rtl',
+        },
+        ru: {
+          label: 'Русский',
+          greeting: 'Дорогие покупатели,',
+          body: `В целях улучшения обслуживания и сокращения времени ожидания в отделе, мы внедряем новую систему управления очередью.
+Система находится на стадии внедрения, и мы стремимся обеспечить быстрое обучение и необходимые корректировки для сокращения времени ожидания.
+Просим вас проявить понимание и терпение по отношению к нашим сотрудникам.
+Будем очень рады вашему полному сотрудничеству.`,
+          dir: 'ltr',
+        },
+      };
+      const ann = ANNOUNCEMENT[announcementLang];
+
       return (
-        <div className="board-tv">
+        <div className="board-tv" style={{ position: 'relative' }}>
           <header className="board-tv-header">
             <div className="board-tv-logo">
               <img src="/keshet.png" alt="Keshet Taamim" />
@@ -1744,6 +1770,22 @@ export default function App() {
               </div>
             </div>
           </div>
+          {showAnnouncement && (
+            <div className="board-tv-announcement">
+              <div className="board-tv-announcement-box" dir={ann.dir}>
+                <span className="board-tv-announcement-icon">📢</span>
+                <div className="board-tv-announcement-lang">{ann.label}</div>
+                <div className="board-tv-announcement-text">
+                  <strong>{ann.greeting}</strong>
+                  {ann.body}
+                </div>
+                <div className="board-tv-announcement-dots">
+                  <div className={`board-tv-announcement-dot${announcementLang === 'he' ? ' active' : ''}`} />
+                  <div className={`board-tv-announcement-dot${announcementLang === 'ru' ? ' active' : ''}`} />
+                </div>
+              </div>
+            </div>
+          )}
           <button className="board-tv-settings-btn" onClick={() => setShowBoardSettings(true)}>⚙️</button>
           {showBoardSettings && (
             <div className="board-tv-settings-overlay" onClick={() => setShowBoardSettings(false)}>

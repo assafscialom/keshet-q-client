@@ -2812,3 +2812,70 @@ input {
   25% { transform: translateX(-6px); }
   75% { transform: translateX(6px); }
 }
+
+/* ─── Board TV: System Announcement Overlay ─── */
+.board-tv-announcement {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 20, 60, 0.88);
+  animation: announcement-in 0.5s ease;
+}
+@keyframes announcement-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.board-tv-announcement-box {
+  max-width: 880px;
+  width: 90%;
+  background: linear-gradient(135deg, #0d1f5c 0%, #1a3a8f 100%);
+  border: 3px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 48px 56px;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  color: #fff;
+}
+.board-tv-announcement-icon {
+  font-size: 42px;
+  margin-bottom: 18px;
+  display: block;
+}
+.board-tv-announcement-lang {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 12px;
+}
+.board-tv-announcement-text {
+  font-size: 22px;
+  line-height: 1.8;
+  white-space: pre-line;
+  font-weight: 400;
+}
+.board-tv-announcement-text strong {
+  display: block;
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.board-tv-announcement-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 28px;
+}
+.board-tv-announcement-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: background 0.3s;
+}
+.board-tv-announcement-dot.active {
+  background: #fff;
+}
