@@ -1773,6 +1773,7 @@ export default function App() {
           {showAnnouncement && (
             <div className="board-tv-announcement">
               <div className="board-tv-announcement-box" dir={ann.dir}>
+                <img src="/keshet.png" alt="Keshet Taamim" className="board-tv-announcement-logo" />
                 <span className="board-tv-announcement-icon">📢</span>
                 <div className="board-tv-announcement-lang">{ann.label}</div>
                 <div className="board-tv-announcement-text">

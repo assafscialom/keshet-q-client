@@ -2844,9 +2844,16 @@ input {
   justify-content: center;
   overflow: hidden;
 }
+.board-tv-announcement-logo {
+  height: 7vh;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+}
 .board-tv-announcement-icon {
-  font-size: 64px;
-  margin-bottom: 24px;
+  font-size: 48px;
+  margin-bottom: 16px;
   display: block;
 }
 .board-tv-announcement-lang {
